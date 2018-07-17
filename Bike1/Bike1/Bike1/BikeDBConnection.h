@@ -13,6 +13,6 @@ class BikeDBConnection
 public:
 	BikeDBConnection();
 	~BikeDBConnection();
-	void createConnection();
+	SQLHANDLE createConnection();
 };
 

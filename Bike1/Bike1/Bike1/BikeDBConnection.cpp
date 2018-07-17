@@ -11,7 +11,7 @@ BikeDBConnection::~BikeDBConnection()
 {
 }
 
-void BikeDBConnection::createConnection()
+SQLHANDLE BikeDBConnection::createConnection()
 {
 	#define SQL_RESULT_LEN 240
 	#define SQL_RETURN_CODE_LEN 1000
@@ -64,9 +64,11 @@ void BikeDBConnection::createConnection()
 			break;
 		}
 		//if there is a problem connecting then exit application
-		/*if (SQL_SUCCESS != SQLAllocHandle(SQL_HANDLE_STMT, sqlConnHandle, &sqlStmtHandle))
+		if (SQL_SUCCESS != SQLAllocHandle(SQL_HANDLE_STMT, sqlConnHandle, &sqlStmtHandle))
 			goto COMPLETED;
-		//output
+		else
+			return sqlStmtHandle;
+		/*//output
 		cout << "\n";
 		cout << "Executing T-SQL query...";
 		cout << "\n";
