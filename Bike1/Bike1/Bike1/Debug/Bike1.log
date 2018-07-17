@@ -50,25 +50,4 @@ c:\program files (x86)\windows kits\8.1\include\um\sqlext.h(2228): error C2086: 
   c:\program files (x86)\windows kits\8.1\include\um\sqlext.h(2173): note: vedere la dichiarazione di 'VOID'
 c:\program files (x86)\windows kits\8.1\include\um\sqlucode.h(336): error C2061: errore di sintassi: identificatore 'SQLHWND'
 c:\program files (x86)\windows kits\8.1\include\um\sqlucode.h(761): error C2061: errore di sintassi: identificatore 'SQLHWND'
-g:\desktop\università\1 anno - magistrale\transactional systems and data warehouse\sto-bocca-sacci\bike1\bike1\bike1\mps.cpp(48): warning C4302: 'cast di tipo': troncamento da 'const wchar_t *' a 'SQLWCHAR'
-g:\desktop\università\1 anno - magistrale\transactional systems and data warehouse\sto-bocca-sacci\bike1\bike1\bike1\mps.cpp(82): warning C4302: 'cast di tipo': troncamento da 'const char *' a 'SQLWCHAR'
-g:\desktop\università\1 anno - magistrale\transactional systems and data warehouse\sto-bocca-sacci\bike1\bike1\bike1\mps.cpp(103): warning C4302: 'cast di tipo': troncamento da 'const char *' a 'SQLWCHAR'
-g:\desktop\università\1 anno - magistrale\transactional systems and data warehouse\sto-bocca-sacci\bike1\bike1\bike1\mps.cpp(85): error C4996: 'SQLBindParam': ODBC API: SQLBindParam is deprecated. Please use SQLBindParameter instead.
-  c:\program files (x86)\windows kits\8.1\include\um\sql.h(625): note: vedere la dichiarazione di 'SQLBindParam'
-g:\desktop\università\1 anno - magistrale\transactional systems and data warehouse\sto-bocca-sacci\bike1\bike1\bike1\mps.cpp(86): error C4996: 'SQLBindParam': ODBC API: SQLBindParam is deprecated. Please use SQLBindParameter instead.
-  c:\program files (x86)\windows kits\8.1\include\um\sql.h(625): note: vedere la dichiarazione di 'SQLBindParam'
-g:\desktop\università\1 anno - magistrale\transactional systems and data warehouse\sto-bocca-sacci\bike1\bike1\bike1\mps.cpp(87): error C4996: 'SQLBindParam': ODBC API: SQLBindParam is deprecated. Please use SQLBindParameter instead.
-  c:\program files (x86)\windows kits\8.1\include\um\sql.h(625): note: vedere la dichiarazione di 'SQLBindParam'
-g:\desktop\università\1 anno - magistrale\transactional systems and data warehouse\sto-bocca-sacci\bike1\bike1\bike1\mps.cpp(88): error C4996: 'SQLBindParam': ODBC API: SQLBindParam is deprecated. Please use SQLBindParameter instead.
-  c:\program files (x86)\windows kits\8.1\include\um\sql.h(625): note: vedere la dichiarazione di 'SQLBindParam'
-g:\desktop\università\1 anno - magistrale\transactional systems and data warehouse\sto-bocca-sacci\bike1\bike1\bike1\mps.cpp(89): error C4996: 'SQLBindParam': ODBC API: SQLBindParam is deprecated. Please use SQLBindParameter instead.
-  c:\program files (x86)\windows kits\8.1\include\um\sql.h(625): note: vedere la dichiarazione di 'SQLBindParam'
-g:\desktop\università\1 anno - magistrale\transactional systems and data warehouse\sto-bocca-sacci\bike1\bike1\bike1\mps.cpp(90): error C4996: 'SQLBindParam': ODBC API: SQLBindParam is deprecated. Please use SQLBindParameter instead.
-  c:\program files (x86)\windows kits\8.1\include\um\sql.h(625): note: vedere la dichiarazione di 'SQLBindParam'
-g:\desktop\università\1 anno - magistrale\transactional systems and data warehouse\sto-bocca-sacci\bike1\bike1\bike1\mps.cpp(91): error C4996: 'SQLBindParam': ODBC API: SQLBindParam is deprecated. Please use SQLBindParameter instead.
-  c:\program files (x86)\windows kits\8.1\include\um\sql.h(625): note: vedere la dichiarazione di 'SQLBindParam'
-g:\desktop\università\1 anno - magistrale\transactional systems and data warehouse\sto-bocca-sacci\bike1\bike1\bike1\mps.cpp(92): error C4996: 'SQLBindParam': ODBC API: SQLBindParam is deprecated. Please use SQLBindParameter instead.
-  c:\program files (x86)\windows kits\8.1\include\um\sql.h(625): note: vedere la dichiarazione di 'SQLBindParam'
-g:\desktop\università\1 anno - magistrale\transactional systems and data warehouse\sto-bocca-sacci\bike1\bike1\bike1\mps.cpp(93): error C4996: 'SQLBindParam': ODBC API: SQLBindParam is deprecated. Please use SQLBindParameter instead.
-  c:\program files (x86)\windows kits\8.1\include\um\sql.h(625): note: vedere la dichiarazione di 'SQLBindParam'
   Generazione del codice in corso...

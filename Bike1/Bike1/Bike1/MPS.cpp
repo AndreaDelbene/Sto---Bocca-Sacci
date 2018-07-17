@@ -45,8 +45,9 @@ void MPS::getMPS(SQLHANDLE sqlStmtHandle)
 		//determing the next time the thread will get executed
 		nextStartTime = currentStartTime + intervalPeriodMillis;
 		// Preparing the query to execute
-		SQLWCHAR query = (SQLWCHAR)L"SELECT * FROM stodb.dbo.mps WHERE running == 0";
-		SQLPrepare(sqlStmtHandle, &query, SQL_NTS);
+		//SQLWCHAR query = (SQLWCHAR)"SELECT * FROM stodb.dbo.mps WHERE running == 0";
+		cout << "dioprocodo";
+		SQLPrepare(sqlStmtHandle, (SQLWCHAR*) "SELECT * FROM stodb.dbo.mps WHERE running == 0", SQL_NTS);
 		// And executing the query itself
 		if (SQL_SUCCESS != SQLExecute(sqlStmtHandle))
 		{
@@ -79,9 +80,9 @@ void MPS::getMPS(SQLHANDLE sqlStmtHandle)
 					
 					SQLFreeStmt(sqlStmtHandle, SQL_RESET_PARAMS);
 
-					SQLWCHAR query = (SQLWCHAR)"INSERT INTO stodb.dbo.statoordini (idLotto,startPianificata,startEffettiva,dueDatePianificata,dueDateEffettiva,quantitaDesiderata,quantitaProdotta,tipoTelaio,stato,descrizione) VALUES(?,?,?,?,?,?,?,?,?,?)";
+					//SQLWCHAR query = (SQLWCHAR*)"INSERT INTO stodb.dbo.statoordini (idLotto,startPianificata,startEffettiva,dueDatePianificata,dueDateEffettiva,quantitaDesiderata,quantitaProdotta,tipoTelaio,stato,descrizione) VALUES(?,?,?,?,?,?,?,?,?,?)";
 					
-					SQLPrepare(sqlStmtHandle, &query, SQL_NTS);
+					SQLPrepare(sqlStmtHandle, (SQLWCHAR*)"INSERT INTO stodb.dbo.statoordini (idLotto,startPianificata,startEffettiva,dueDatePianificata,dueDateEffettiva,quantitaDesiderata,quantitaProdotta,tipoTelaio,stato,descrizione) VALUES(?,?,?,?,?,?,?,?,?,?)", SQL_NTS);
 					SQLBindParameter(sqlStmtHandle, 2, SQL_PARAM_INPUT, SQL_INTEGER, SQL_INTEGER, 11, 0, &idLotto, 0, (SQLINTEGER*) 11);
 					SQLBindParameter(sqlStmtHandle, 3, SQL_PARAM_INPUT, SQL_DATETIME, SQL_CHAR, 100, 0, &start, 0, (SQLINTEGER*) 100);
 					SQLBindParameter(sqlStmtHandle, 4, SQL_PARAM_INPUT, SQL_DATETIME, SQL_CHAR, 100, 0, &start, 0, (SQLINTEGER*) 100);
@@ -100,8 +101,8 @@ void MPS::getMPS(SQLHANDLE sqlStmtHandle)
 					}
 					SQLFreeStmt(sqlStmtHandle, SQL_RESET_PARAMS);
 
-					SQLWCHAR query1 = (SQLWCHAR)"INSERT INTO stodb.dbo.mps (running) VALUES (1)";
-					SQLPrepare(sqlStmtHandle, &query, SQL_NTS);
+					//SQLCHAR query1 = (SQLCHAR)"INSERT INTO stodb.dbo.mps (running) VALUES (1)";
+					SQLPrepare(sqlStmtHandle,(SQLWCHAR*)"INSERT INTO stodb.dbo.mps (running) VALUES (1)", SQL_NTS);
 
 					if (SQL_SUCCESS != SQLExecute(sqlStmtHandle))
 					{
