@@ -27,8 +27,8 @@ namespace Bike1
                 SqlCommand comm = new SqlCommand(query, conn);
 
                 SqlDataAdapter adapter = new SqlDataAdapter(comm);
-                conn.Open();
-                //and filling the results in a Table
+                if (conn != null && conn.State == ConnectionState.Closed)
+                    conn.Open();
                 DataTable table = new DataTable();
                 adapter.Fill(table);
                 //getting then the data from the table
@@ -65,18 +65,20 @@ namespace Bike1
                     comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
                     comm.Parameters.AddWithValue("@stato", "running");
                     comm.Parameters.AddWithValue("@descrizione", "");
-                    conn.Open();
+                    if (conn != null && conn.State == ConnectionState.Closed)
+                        conn.Open();
                     comm.ExecuteNonQuery();
-                    conn.Close();
+                    //conn.Close();
 
                     // i set then the flag to 1 into the 'mps' table
                     query = "UPDATE stodb.dbo.mps SET running = 1 WHERE id = @idLotto";
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.AddWithValue("@idLotto", id[i]);
 
-                    conn.Open();
+                    if (conn != null && conn.State == ConnectionState.Closed)
+                        conn.Open();
                     comm.ExecuteNonQuery();
-                    conn.Close();
+                    //conn.Close();
 
                     //and i check how many stuff i need for that kind of bike
                     query = "SELECT quantitaTubi FROM dbo.ricette WHERE tipoTelaio = @tipoTelaio";
