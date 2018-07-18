@@ -23,22 +23,14 @@ namespace Bike1
 
             conn = con;
             Thread t1 = new Thread(new ThreadStart(getMPSCaller));
-            Thread t2 = new Thread(new ThreadStart(getMPSCaller2));
 
             t1.Start();
-            t2.Start();
         }
 
         static void getMPSCaller()
         {
             MPS mps = new MPS();
-            mps.getMPS(conn,1);
-        }
-
-        static void getMPSCaller2()
-        {
-            MPS mps = new MPS();
-            mps.getMPS(conn,2);
+            mps.getMPS(conn);
         }
     }
 }
