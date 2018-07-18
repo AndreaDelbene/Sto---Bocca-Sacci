@@ -32,13 +32,13 @@ namespace Bike1
         static void getMPSCaller()
         {
             MPS mps = new MPS();
-            mps.getMPS(conn,1);
+            mps.getMPS(conn);
         }
 
         static void getRawMaterial()
         {
             RawMaterial rawMaterial = new RawMaterial(conn);
-            rawMaterial.getRawFromFile(@"C:\Users\Simone\Desktop\rawMaterial.xlsx");
+            rawMaterial.getRawFromFile(@"C:\Users\Simone\Desktop\rawMaterial2.xlsx");
         }
     }
 }

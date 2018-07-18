@@ -25,7 +25,8 @@ namespace Bike1
                 SqlCommand comm = new SqlCommand(query, conn);
 
                 SqlDataAdapter adapter = new SqlDataAdapter(comm);
-                conn.Open();
+                if (conn != null && conn.State == ConnectionState.Closed)
+                    conn.Open();
                 DataTable table = new DataTable();
                 adapter.Fill(table);
                 int[] id, quantita, priorita;
@@ -41,7 +42,7 @@ namespace Bike1
                 priorita = (from DataRow r in table.Rows select (int)r["priorita"]).ToArray();
                 running = (from DataRow r in table.Rows select (Byte)r["running"]).ToArray();
                 
-                conn.Close();
+                //conn.Close();
                 for(int i = 0; i < id.Length; i++)
                 {
                     query = "INSERT INTO stodb.dbo.statoordini (idLotto, startPianificata, startEffettiva, dueDatePianificata, quantitaDesiderata, quantitaProdotta, tipoTelaio, stato, descrizione) " +
@@ -57,17 +58,19 @@ namespace Bike1
                     comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
                     comm.Parameters.AddWithValue("@stato", "running");
                     comm.Parameters.AddWithValue("@descrizione", "");
-                    conn.Open();
+                    if (conn != null && conn.State == ConnectionState.Closed)
+                        conn.Open();
                     comm.ExecuteNonQuery();
-                    conn.Close();
+                    //conn.Close();
 
                     query = "UPDATE stodb.dbo.mps SET running = 1 WHERE id = @idLotto";
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.AddWithValue("@idLotto", id[i]);
 
-                    conn.Open();
+                    if (conn != null && conn.State == ConnectionState.Closed)
+                        conn.Open();
                     comm.ExecuteNonQuery();
-                    conn.Close();
+                    //conn.Close();
 
                     Console.WriteLine(i);
                 }
