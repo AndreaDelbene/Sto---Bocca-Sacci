@@ -20,15 +20,18 @@ namespace Bike1
 
         public void getMPS(SqlConnection conn, ConcurrentQueue<object> _queue, AutoResetEvent _signal)
         {
-            while(true)
+            while (true)
             {
                 //checking whenever a new MPS has been uploaded
                 string query = "SELECT * FROM stodb.dbo.mps WHERE running = 0";
                 SqlCommand comm = new SqlCommand(query, conn);
 
                 SqlDataAdapter adapter = new SqlDataAdapter(comm);
+
+                //problems with other threads trying to open a connection already opened
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();
+
                 DataTable table = new DataTable();
                 adapter.Fill(table);
                 //getting then the data from the table
@@ -46,10 +49,10 @@ namespace Bike1
                 running = (from DataRow r in table.Rows select (Byte)r["running"]).ToArray();
 
                 int[] quantitaTubi = new int[id.Length];
-                
+
                 conn.Close();
                 //for each element in the table we got back from the first request
-                for(int i = 0; i < id.Length; i++)
+                for (int i = 0; i < id.Length; i++)
                 {
                     //I update the 'statoordini' table in the DB
                     query = "INSERT INTO stodb.dbo.statoordini (idLotto, startPianificata, startEffettiva, dueDatePianificata, quantitaDesiderata, quantitaProdotta, tipoTelaio, stato, descrizione) " +
@@ -65,8 +68,10 @@ namespace Bike1
                     comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
                     comm.Parameters.AddWithValue("@stato", "running");
                     comm.Parameters.AddWithValue("@descrizione", "");
+
                     if (conn != null && conn.State == ConnectionState.Closed)
                         conn.Open();
+
                     comm.ExecuteNonQuery();
                     //conn.Close();
 
@@ -77,6 +82,7 @@ namespace Bike1
 
                     if (conn != null && conn.State == ConnectionState.Closed)
                         conn.Open();
+
                     comm.ExecuteNonQuery();
                     //conn.Close();
 
@@ -84,9 +90,10 @@ namespace Bike1
                     query = "SELECT quantitaTubi FROM dbo.ricette WHERE tipoTelaio = @tipoTelaio";
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
-                    
-                    conn.Open();
 
+                    if (conn != null && conn.State == ConnectionState.Closed)
+                        conn.Open();
+                    
                     comm.ExecuteNonQuery();
 
                     SqlDataReader reader = comm.ExecuteReader();
@@ -95,10 +102,13 @@ namespace Bike1
                     Console.WriteLine(i);
 
                 }
-                //queue=FIFO, i save in it the amount of ids and tubes, and i sleep for the next 2 secs.
-                _queue.Enqueue(id);
-                _queue.Enqueue(quantitaTubi);
-                _signal.Set();
+                if(id.Length != 0)
+                {
+                    //queue=FIFO, i save in it the amount of ids and tubes, and i sleep for the next 2 secs.
+                    _queue.Enqueue(id);
+                    _queue.Enqueue(quantitaTubi);
+                    _signal.Set();
+                }
                 Thread.Sleep(2000);
             }
         }
