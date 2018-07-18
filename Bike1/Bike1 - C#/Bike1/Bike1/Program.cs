@@ -12,8 +12,8 @@ namespace Bike1
     class Program
     {
         static SqlConnection conn;
-        private readonly ConcurrentQueue<Item> _queue = new ConcurrentQueue<Item>();
-        private readonly AutoResetEvent _signal = new AutoResetEvent();
+        static private readonly ConcurrentQueue<object> _queue = new ConcurrentQueue<object>();
+        static private readonly AutoResetEvent _signal = new AutoResetEvent(false);
 
 
         static void Main(string[] args)
@@ -28,15 +28,17 @@ namespace Bike1
             conn = con;
             Thread t1 = new Thread(new ThreadStart(getMPSCaller));
             Thread t2 = new Thread(new ThreadStart(getRawMaterial));
+            Thread t3 = new Thread(new ThreadStart(routingMagazzinoCaller));
 
             t1.Start();
+            t3.Start();
             t2.Start();
         }
 
         static void getMPSCaller()
         {
             MPS mps = new MPS();
-            mps.getMPS(conn);
+            mps.getMPS(conn, _queue, _signal);
         }
 
         static void getRawMaterial()
@@ -45,8 +47,14 @@ namespace Bike1
             //rawMaterial.getRawFromFile(@"C:\Users\Simone\Desktop\rawMaterial.xlsx");
         }
 
+        static void routingMagazzinoCaller()
+        {
+            Routing rm = new Routing();
+            rm.routingMagazzino(conn, _queue, _signal);
+        }
 
-        void ProducerThread()
+
+        /*void ProducerThread()
         {
             while (ShouldRun)
             {
@@ -61,7 +69,7 @@ namespace Bike1
         {
             while (ShouldRun)
             {
-                _signal.Wait();
+                _signal.WaitOne();
 
                 Item item = null;
                 while (_queue.TryDequeue(out item))
@@ -69,6 +77,6 @@ namespace Bike1
                     // do stuff
                 }
             }
-        }
+        }*/
     }
 }
