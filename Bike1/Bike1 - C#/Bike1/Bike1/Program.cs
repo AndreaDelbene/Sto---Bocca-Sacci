@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
@@ -11,6 +12,9 @@ namespace Bike1
     class Program
     {
         static SqlConnection conn;
+        private readonly ConcurrentQueue<Item> _queue = new ConcurrentQueue<Item>();
+        private readonly AutoResetEvent _signal = new AutoResetEvent();
+
 
         static void Main(string[] args)
         {
@@ -38,7 +42,33 @@ namespace Bike1
         static void getRawMaterial()
         {
             RawMaterial rawMaterial = new RawMaterial(conn);
-            rawMaterial.getRawFromFile(@"C:\Users\Simone\Desktop\rawMaterial2.xlsx");
+            //rawMaterial.getRawFromFile(@"C:\Users\Simone\Desktop\rawMaterial.xlsx");
+        }
+
+
+        void ProducerThread()
+        {
+            while (ShouldRun)
+            {
+                Item item = GetNextItem();
+                _queue.Enqueue(item);
+                _signal.Set();
+            }
+
+        }
+
+        void ConsumerThread()
+        {
+            while (ShouldRun)
+            {
+                _signal.Wait();
+
+                Item item = null;
+                while (_queue.TryDequeue(out item))
+                {
+                    // do stuff
+                }
+            }
         }
     }
 }

@@ -41,7 +41,9 @@ namespace Bike1
                 colore = (from DataRow r in table.Rows select (string)r["colore"]).ToArray();
                 priorita = (from DataRow r in table.Rows select (int)r["priorita"]).ToArray();
                 running = (from DataRow r in table.Rows select (Byte)r["running"]).ToArray();
-                
+
+                string[] quantitaTubi = new string[id.Length];
+
                 //conn.Close();
                 for(int i = 0; i < id.Length; i++)
                 {
@@ -72,7 +74,19 @@ namespace Bike1
                     comm.ExecuteNonQuery();
                     //conn.Close();
 
+                    query = "SELECT quantitaTubi FROM dbo.ricette WHERE tipoTelaio = @tipoTelaio";
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
+                    
+                    conn.Open();
+
+                    comm.ExecuteNonQuery();
+
+                    SqlDataReader reader = comm.ExecuteReader();
+                    quantitaTubi[i] = (string)reader["quantitaTubi"];
+                    conn.Close();
                     Console.WriteLine(i);
+
                 }
                 Thread.Sleep(2000);
             }
