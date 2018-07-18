@@ -38,7 +38,7 @@ SQLHANDLE BikeDBConnection::createConnection()
 		switch (SQLDriverConnect(sqlConnHandle,
 			NULL,
 			//(SQLWCHAR*)L"DRIVER={SQL Server};SERVER=localhost, 1433;DATABASE=master;UID=username;PWD=password;",
-			(SQLWCHAR*)L"DRIVER={SQL Server};SERVER=LAPTOP-DT8KB2TQ\STODB, 1433;DATABASE=stodb;Trusted=true;",
+			(SQLWCHAR*)L"DRIVER={SQL Server};SERVER=localhost, 1433;DATABASE=stodb;Trusted=true;",
 			SQL_NTS,
 			retconstring,
 			1024,

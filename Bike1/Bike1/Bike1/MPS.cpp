@@ -1,11 +1,13 @@
 #include "stdafx.h"
 #include "MPS.h"
+#include <windows.h>
 #include <thread>
 #include <chrono>
 #include <vector>
 #include <numeric>
 #include <iostream>
 #include <ctime>
+#include "sql.h"
 #include <sqlext.h>
 #include <sqltypes.h>
 #include <string>
@@ -45,30 +47,30 @@ void MPS::getMPS(SQLHANDLE sqlStmtHandle)
 		//determing the next time the thread will get executed
 		nextStartTime = currentStartTime + intervalPeriodMillis;
 		// Preparing the query to execute
-		//SQLWCHAR query = (SQLWCHAR)"SELECT * FROM stodb.dbo.mps WHERE running == 0";
-		cout << "dioprocodo";
-		SQLPrepare(sqlStmtHandle, (SQLWCHAR*) "SELECT * FROM stodb.dbo.mps WHERE running == 0", SQL_NTS);
+		SQLPrepare(sqlStmtHandle, (SQLWCHAR*) "SELECT * FROM stodb.dbo.mps WHERE running = 0", SQL_NTS);
 		// And executing the query itself
 		if (SQL_SUCCESS != SQLExecute(sqlStmtHandle))
 		{
+
+			cout << "dioprocodo";
 			//getting the data returned
 			retCode = SQLFetch(sqlStmtHandle);
 			//if there is something (new MPS!!!), then i update the table and I fulfill the table "statoordini"
 			if (retCode != SQL_NO_DATA)
 			{
-				SQLLEN numRows;
-				SQLSMALLINT numCols;
-				retCode = SQLRowCount(sqlStmtHandle, &numRows);
-				retCode = SQLNumResultCols(sqlStmtHandle, &numCols);
 
-				for (int i = 0; i < numRows; i++)
+				SQLHANDLE sqlStmt = sqlStmtHandle;
+				cout << SQLFetch(sqlStmt);
+				while(SQLFetch(sqlStmt) == SQL_SUCCESS)
 				{
+					int i = 1;
 					int idLotto[11], quantita[11], priorita[11];
 					char tipoTelaio[100], colore[100], start[100], dueDate[100];
 					int running[1];
 					SQLINTEGER numBytes;
 
 
+					cout << i;
 					retCode = SQLGetData(sqlStmtHandle, 1, SQL_INTEGER, idLotto, 10, &numBytes);
 					retCode = SQLGetData(sqlStmtHandle, 2, SQL_DATETIME, start, 100, &numBytes);
 					retCode = SQLGetData(sqlStmtHandle, 3, SQL_DATETIME, dueDate, 100, &numBytes);
@@ -82,7 +84,7 @@ void MPS::getMPS(SQLHANDLE sqlStmtHandle)
 
 					//SQLWCHAR query = (SQLWCHAR*)"INSERT INTO stodb.dbo.statoordini (idLotto,startPianificata,startEffettiva,dueDatePianificata,dueDateEffettiva,quantitaDesiderata,quantitaProdotta,tipoTelaio,stato,descrizione) VALUES(?,?,?,?,?,?,?,?,?,?)";
 					
-					SQLPrepare(sqlStmtHandle, (SQLWCHAR*)"INSERT INTO stodb.dbo.statoordini (idLotto,startPianificata,startEffettiva,dueDatePianificata,dueDateEffettiva,quantitaDesiderata,quantitaProdotta,tipoTelaio,stato,descrizione) VALUES(?,?,?,?,?,?,?,?,?,?)", SQL_NTS);
+					/*SQLPrepare(sqlStmtHandle, (SQLWCHAR*)"INSERT INTO stodb.dbo.statoordini (idLotto,startPianificata,startEffettiva,dueDatePianificata,dueDateEffettiva,quantitaDesiderata,quantitaProdotta,tipoTelaio,stato,descrizione) VALUES(?,?,?,?,?,?,?,?,?,?)", SQL_NTS);
 					SQLBindParameter(sqlStmtHandle, 2, SQL_PARAM_INPUT, SQL_INTEGER, SQL_INTEGER, 11, 0, &idLotto, 0, (SQLINTEGER*) 11);
 					SQLBindParameter(sqlStmtHandle, 3, SQL_PARAM_INPUT, SQL_DATETIME, SQL_CHAR, 100, 0, &start, 0, (SQLINTEGER*) 100);
 					SQLBindParameter(sqlStmtHandle, 4, SQL_PARAM_INPUT, SQL_DATETIME, SQL_CHAR, 100, 0, &start, 0, (SQLINTEGER*) 100);
@@ -109,7 +111,8 @@ void MPS::getMPS(SQLHANDLE sqlStmtHandle)
 						cout << "error in executing the query";
 						this_thread::sleep_until(nextStartTime);
 						return;
-					}
+					}*/
+					i++;
 
 
 				}
