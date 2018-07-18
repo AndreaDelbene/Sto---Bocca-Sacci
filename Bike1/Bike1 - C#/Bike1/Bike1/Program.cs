@@ -17,13 +17,13 @@ namespace Bike1
 
             SqlConnection con = new SqlConnection();
             con.ConnectionString =
-            "Server=LAPTOP-DT8KB2TQ;" +
+            "Server=SIMONE-PC\\SQLEXPRESS;" +
             "Database=stodb;" +
             "Integrated Security=True";
 
             conn = con;
             Thread t1 = new Thread(new ThreadStart(getMPSCaller));
-            Thread t2 = new Thread(new ThreadStart(getMPSCaller2));
+            Thread t2 = new Thread(new ThreadStart(getRawMaterial));
 
             t1.Start();
             t2.Start();
@@ -35,10 +35,10 @@ namespace Bike1
             mps.getMPS(conn,1);
         }
 
-        static void getMPSCaller2()
+        static void getRawMaterial()
         {
-            MPS mps = new MPS();
-            mps.getMPS(conn,2);
+            RawMaterial rawMaterial = new RawMaterial(conn);
+            rawMaterial.getRawFromFile(@"C:\Users\Simone\Desktop\rawMaterial.xlsx");
         }
     }
 }
