@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -17,18 +18,23 @@ namespace Bike1
         {
         }
 
-        public void getMPS(SqlConnection conn)
+        public void getMPS(SqlConnection conn, ConcurrentQueue<object> _queue, AutoResetEvent _signal)
         {
-            while(true)
+            while (true)
             {
+                //checking whenever a new MPS has been uploaded
                 string query = "SELECT * FROM stodb.dbo.mps WHERE running = 0";
                 SqlCommand comm = new SqlCommand(query, conn);
 
                 SqlDataAdapter adapter = new SqlDataAdapter(comm);
+
+                //problems with other threads trying to open a connection already opened
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();
+
                 DataTable table = new DataTable();
                 adapter.Fill(table);
+                //getting then the data from the table
                 int[] id, quantita, priorita;
                 string[] tipoTelaio, colore;
                 DateTime[] startDate, dueDate;
@@ -42,11 +48,13 @@ namespace Bike1
                 priorita = (from DataRow r in table.Rows select (int)r["priorita"]).ToArray();
                 running = (from DataRow r in table.Rows select (Byte)r["running"]).ToArray();
 
-                string[] quantitaTubi = new string[id.Length];
+                int[] quantitaTubi = new int[id.Length];
 
-                //conn.Close();
-                for(int i = 0; i < id.Length; i++)
+                conn.Close();
+                //for each element in the table we got back from the first request
+                for (int i = 0; i < id.Length; i++)
                 {
+                    //I update the 'statoordini' table in the DB
                     query = "INSERT INTO stodb.dbo.statoordini (idLotto, startPianificata, startEffettiva, dueDatePianificata, quantitaDesiderata, quantitaProdotta, tipoTelaio, stato, descrizione) " +
                         "VALUES(@idLotto, @startPianificata, @startEffettiva, @dueDatePianificata, @quantitaDesiderata, @quantitaProdotta, @tipoTelaio, @stato, @descrizione)";
 
@@ -60,33 +68,46 @@ namespace Bike1
                     comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
                     comm.Parameters.AddWithValue("@stato", "running");
                     comm.Parameters.AddWithValue("@descrizione", "");
+
                     if (conn != null && conn.State == ConnectionState.Closed)
                         conn.Open();
+
                     comm.ExecuteNonQuery();
                     //conn.Close();
 
+                    // i set then the flag to 1 into the 'mps' table
                     query = "UPDATE stodb.dbo.mps SET running = 1 WHERE id = @idLotto";
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.AddWithValue("@idLotto", id[i]);
 
                     if (conn != null && conn.State == ConnectionState.Closed)
                         conn.Open();
+
                     comm.ExecuteNonQuery();
                     //conn.Close();
 
+                    //and i check how many stuff i need for that kind of bike
                     query = "SELECT quantitaTubi FROM dbo.ricette WHERE tipoTelaio = @tipoTelaio";
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
-                    
-                    conn.Open();
 
+                    if (conn != null && conn.State == ConnectionState.Closed)
+                        conn.Open();
+                    
                     comm.ExecuteNonQuery();
 
                     SqlDataReader reader = comm.ExecuteReader();
-                    quantitaTubi[i] = (string)reader["quantitaTubi"];
+                    quantitaTubi[i] = (int)reader["quantitaTubi"];
                     conn.Close();
                     Console.WriteLine(i);
 
+                }
+                if(id.Length != 0)
+                {
+                    //queue=FIFO, i save in it the amount of ids and tubes, and i sleep for the next 2 secs.
+                    _queue.Enqueue(id);
+                    _queue.Enqueue(quantitaTubi);
+                    _signal.Set();
                 }
                 Thread.Sleep(2000);
             }

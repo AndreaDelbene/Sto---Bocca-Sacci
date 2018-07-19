@@ -30,15 +30,17 @@ namespace Bike1
             conn = con;
             Thread t1 = new Thread(new ThreadStart(getMPSCaller));
             Thread t2 = new Thread(new ThreadStart(getRawMaterial));
+            Thread t3 = new Thread(new ThreadStart(routingMagazzinoCaller));
 
             t1.Start();
+            t3.Start();
             t2.Start();
         }
 
         static void getMPSCaller()
         {
             MPS mps = new MPS();
-            mps.getMPS(conn);
+            mps.getMPS(conn, _queue, _signal);
         }
 
         static void getRawMaterial()
@@ -46,6 +48,12 @@ namespace Bike1
             RawMaterial rawMaterial = new RawMaterial(conn);
             string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"excelFiles\rawMaterial.xlsx");
             rawMaterial.getRawFromFile(path);
+        }
+
+        static void routingMagazzinoCaller()
+        {
+            Routing rm = new Routing();
+            rm.routingMagazzino(conn, _queue, _signal);
         }
 
 
@@ -64,7 +72,7 @@ namespace Bike1
         {
             while (ShouldRun)
             {
-                _signal.Wait();
+                _signal.WaitOne();
 
                 Item item = null;
                 while (_queue.TryDequeue(out item))
