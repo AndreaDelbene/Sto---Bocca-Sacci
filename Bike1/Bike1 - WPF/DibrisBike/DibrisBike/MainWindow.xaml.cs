@@ -1,26 +1,40 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using System.Collections.Concurrent;
+using System.IO;
+using Microsoft.Win32;
 
-namespace Bike1
+namespace DibrisBike
 {
-
-    class Program
+    /// <summary>
+    /// Logica di interazione per MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
     {
+
         static SqlConnection conn;
         //private readonly ConcurrentQueue<Item> _queue = new ConcurrentQueue<Item>();
         //private readonly AutoResetEvent _signal = new AutoResetEvent();
 
-
-        static void Main(string[] args)
+        public MainWindow()
         {
+            InitializeComponent();
+
 
             SqlConnection con = new SqlConnection();
             con.ConnectionString =
@@ -30,12 +44,10 @@ namespace Bike1
 
             conn = con;
             Thread t1 = new Thread(new ThreadStart(getMPSCaller));
-            Thread t2 = new Thread(new ThreadStart(getRawMaterial));
             Thread t3 = new Thread(new ThreadStart(routingMagazzinoCaller));
 
             t1.Start();
             t3.Start();
-            t2.Start();
         }
 
         static void getMPSCaller()
@@ -44,10 +56,9 @@ namespace Bike1
             //mps.getMPS(conn, _queue, _signal);
         }
 
-        static void getRawMaterial()
+        static void getRawMaterial(String path)
         {
             RawMaterial rawMaterial = new RawMaterial(conn);
-            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"excelFiles\rawMaterial.xlsx");
             rawMaterial.getRawFromFile(path);
         }
 
@@ -57,6 +68,29 @@ namespace Bike1
             //rm.routingMagazzino(conn, _queue, _signal);
         }
 
+        private void MPSChooser_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void RMChooser_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.Multiselect = false;
+            fileDialog.Filter = "Excel File|*.xlsx";
+            fileDialog.DefaultExt = ".xlsx";
+            Nullable<bool> dialogOk = fileDialog.ShowDialog();
+
+            String rawMaterialFilePath = string.Empty;
+            if(dialogOk == true)
+            {
+                rawMaterialFilePath = fileDialog.FileName;
+                RMPathLabel.Content = rawMaterialFilePath;
+                spinnerRM.Visibility = Visibility.Visible;
+                getRawMaterial(rawMaterialFilePath);
+                spinnerRM.Visibility = Visibility.Hidden;
+            }
+        }
 
         /*void ProducerThread()
         {

@@ -1,0 +1,33 @@
+﻿<Window x:Class="DibrisBike.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DibrisBike"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
+        mc:Ignorable="d"
+        Title="Dibris Bike" Height="450" Width="704">
+    <Border Padding="10">
+        <StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="10*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <Button x:Name="MPSChooser" Margin="0 0 10 10" Grid.Column="0" Grid.Row="0" Click="MPSChooser_Click">Carica MPS file</Button>
+                <Button x:Name="RMChooser" Margin="0 0 10 10" Grid.Column="0" Grid.Row="1" Click="RMChooser_Click">Carica Raw Material file</Button>
+                <fa:ImageAwesome x:Name="spinnerMPS" Grid.Column="1" Grid.Row="0" Height="30" Icon="Cog" Spin="True" SpinDuration="2" Visibility="Visible"/>
+                <fa:ImageAwesome x:Name="spinnerRM" Grid.Column="1" Grid.Row="1" Height="30" Icon="Cog" Spin="True" SpinDuration="2" Visibility="Visible"/>
+
+                <Label x:Name="MPSPathLabel" Margin="0 0 10 10" Grid.Column="2" Grid.Row="0">Testo della label</Label>
+                <Label x:Name="RMPathLabel" Margin="0 0 10 10" Grid.Column="2" Grid.Row="1">Testo della label</Label>
+            </Grid>
+        </StackPanel>
+    </Border>
+</Window>
