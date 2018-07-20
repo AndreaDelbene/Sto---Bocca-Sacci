@@ -18,6 +18,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition />
+                    <RowDefinition />
                 </Grid.RowDefinitions>
 
                 <Button x:Name="MPSChooser" Margin="0 0 10 10" Grid.Column="0" Grid.Row="0" Click="MPSChooser_Click">Carica MPS file</Button>
@@ -27,6 +28,8 @@
 
                 <Label x:Name="MPSPathLabel" Margin="0 0 10 10" Grid.Column="2" Grid.Row="0">Testo della label</Label>
                 <Label x:Name="RMPathLabel" Margin="0 0 10 10" Grid.Column="2" Grid.Row="1">Testo della label</Label>
+
+                <DataGrid Margin="0 30 0 0" AutoGenerateColumns="True" x:Name="statoOrdiniGrid" Grid.Row="3" Grid.ColumnSpan="3" />
             </Grid>
         </StackPanel>
     </Border>

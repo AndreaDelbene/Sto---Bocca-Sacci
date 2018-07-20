@@ -18,6 +18,7 @@ using System.Windows.Shapes;
 using System.Collections.Concurrent;
 using System.IO;
 using Microsoft.Win32;
+using System.Data;
 
 namespace DibrisBike
 {
@@ -48,9 +49,11 @@ namespace DibrisBike
             conn = con;
             Thread t1 = new Thread(new ThreadStart(getMPSCaller));
             Thread t3 = new Thread(new ThreadStart(routingMagazzinoCaller));
+            Thread t4 = new Thread(new ThreadStart(printStatoOrdini));
 
             t1.Start();
             t3.Start();
+            t4.Start();
         }
 
         static void getMPSCaller()
@@ -59,10 +62,26 @@ namespace DibrisBike
             mps.getMPS(conn, _queue, _signal);
         }
 
-        static void getRawMaterial(String path)
+        public void printStatoOrdini()
         {
-            RawMaterial rawMaterial = new RawMaterial(conn);
-            rawMaterial.getRawFromFile(path);
+            //PrintSO printSO = new PrintSO(conn);
+            while (true)
+            {
+                //DataTable table = printSO.startPrintingThread();
+                this.Dispatcher.Invoke(() => {
+                    String query = "SELECT * FROM dbo.statoordini";
+                    SqlCommand comm = new SqlCommand(query, conn);
+                    if (conn != null && conn.State == ConnectionState.Closed)
+                        conn.Open();
+                    comm.ExecuteNonQuery();
+
+                    SqlDataAdapter adapter = new SqlDataAdapter(comm);
+                    DataTable table = new DataTable();
+                    adapter.Fill(table);
+                    statoOrdiniGrid.ItemsSource = table.DefaultView;
+                });
+                Thread.Sleep(2000);
+            }
         }
 
         static void routingMagazzinoCaller()
@@ -109,6 +128,12 @@ namespace DibrisBike
                 RMPathLabel.Content = rawMaterialFilePath;
                 getRawMaterial(rawMaterialFilePath);
             }
+        }
+
+        static void getRawMaterial(String path)
+        {
+            RawMaterial rawMaterial = new RawMaterial(conn);
+            rawMaterial.getRawFromFile(path);
         }
 
         /*void ProducerThread()
