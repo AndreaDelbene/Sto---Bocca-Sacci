@@ -16,18 +16,16 @@ namespace DibrisBike
         {
         }
 
-        public void routingMagazzino(SqlConnection conn, ConcurrentQueue<object> _queue, AutoResetEvent _signal)
+        public void routingMagazzino(SqlConnection conn, ConcurrentQueue<int[]> _queue, AutoResetEvent _signal)
         {
             while (true)
             {
                 //waiting until some data comes from the queue
                 _signal.WaitOne();
                 //getting it then
-                object id, tubi;
-                _queue.TryDequeue(out id);
-                _queue.TryDequeue(out tubi);
-                int[] idLotto = (int[])id;
-                int[] quantitaTubi = (int[])tubi;
+                int[] idLotto,quantitaTubi;
+                _queue.TryDequeue(out idLotto);
+                _queue.TryDequeue(out quantitaTubi);
 
                 for (int i = 0; i < idLotto.Length; i++)
                 {
@@ -46,7 +44,7 @@ namespace DibrisBike
                     adapter.Fill(table);
 
                     //If i have it, i proceed in updating the 'routing' table
-                    if (table.Rows.Count >= quantitaTubi[i])
+                    if (table.Rows.Count == quantitaTubi[i])
                     {
                         //TODO
                     }

@@ -18,7 +18,7 @@ namespace DibrisBike
         {
         }
 
-        public void getMPS(SqlConnection conn, ConcurrentQueue<object> _queue, AutoResetEvent _signal)
+        public void getMPS(SqlConnection conn, ConcurrentQueue<int[]> _queue, AutoResetEvent _signal)
         {
             while (true)
             {

@@ -28,8 +28,8 @@ namespace DibrisBike
     {
 
         static SqlConnection conn;
-        //private readonly ConcurrentQueue<Item> _queue = new ConcurrentQueue<Item>();
-        //private readonly AutoResetEvent _signal = new AutoResetEvent();
+        static private readonly ConcurrentQueue<int[]> _queue = new ConcurrentQueue<int[]>();
+        static private readonly AutoResetEvent _signal = new AutoResetEvent(false);
 
         public MainWindow()
         {
@@ -53,7 +53,7 @@ namespace DibrisBike
         static void getMPSCaller()
         {
             MPS mps = new MPS();
-            //mps.getMPS(conn, _queue, _signal);
+            mps.getMPS(conn, _queue, _signal);
         }
 
         static void getRawMaterial(String path)
@@ -65,7 +65,7 @@ namespace DibrisBike
         static void routingMagazzinoCaller()
         {
             Routing rm = new Routing();
-            //rm.routingMagazzino(conn, _queue, _signal);
+            rm.routingMagazzino(conn, _queue, _signal);
         }
 
         private void MPSChooser_Click(object sender, RoutedEventArgs e)
