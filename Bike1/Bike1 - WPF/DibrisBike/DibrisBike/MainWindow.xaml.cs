@@ -30,6 +30,10 @@ namespace DibrisBike
         static SqlConnection conn;
         static private readonly ConcurrentQueue<int[]> _queue = new ConcurrentQueue<int[]>();
         static private readonly AutoResetEvent _signal = new AutoResetEvent(false);
+        static private readonly ConcurrentQueue<string[]> _queueLC1 = new ConcurrentQueue<string[]>();
+        static private readonly ConcurrentQueue<string[]> _queueLC2 = new ConcurrentQueue<string[]>();
+        static private readonly ConcurrentQueue<string[]> _queueLC3 = new ConcurrentQueue<string[]>();
+        static private readonly AutoResetEvent _signalLC = new AutoResetEvent(false);
 
         public MainWindow()
         {
@@ -64,7 +68,7 @@ namespace DibrisBike
         static void routingMagazzinoCaller()
         {
             Routing rm = new Routing();
-            rm.routingMagazzino(conn, _queue, _signal);
+            rm.routingMagazzino(conn, _queue, _signal, _queueLC1, _queueLC2, _queueLC3, _signalLC);
         }
 
         private void MPSChooser_Click(object sender, RoutedEventArgs e)
