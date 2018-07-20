@@ -20,7 +20,7 @@ namespace DibrisBike
         {
         }
 
-        public void getMPS(SqlConnection conn, ConcurrentQueue<object> _queue, AutoResetEvent _signal)
+        public void getMPS(SqlConnection conn, ConcurrentQueue<int[]> _queue, AutoResetEvent _signal)
         {
             while (true)
             {
@@ -137,41 +137,37 @@ namespace DibrisBike
                 comm.Parameters.Clear();
                 for (int j = 1; j <= colCount; j++)
                 {
-                    if (j == 1)
+                    switch(j)
                     {
-                        DateTime campo = (DateTime)xlRange.Cells[i, j].Value2.ToString();
-                        comm.Parameters.Add("@start", campo);
+                        case 1: DateTime campo = (DateTime)xlRange.Cells[i, j].Value2.ToString();
+                                comm.Parameters.Add("@start", campo);
+                                break;
+
+                        case 2: DateTime campo2 = (DateTime)xlRange.Cells[i, j].Value2.ToString();
+                                comm.Parameters.Add("@dueDate", campo2);
+                                break;
+
+                        case 3: int campo3 = (int)xlRange.Cells[i, j].Value2;
+                                comm.Parameters.Add("@quantita", campo3);
+                                break;
+
+                        case 4: String campo4 = (String)xlRange.Cells[i, j].Value2;
+                                comm.Parameters.Add("@tipoTelaio", campo4);
+                                break;
+
+                        case 5: String campo5 = (String)xlRange.Cells[i, j].Value2;
+                                comm.Parameters.Add("@colore", campo5);
+                                break;
+
+                        case 6: int campo6 = (int)xlRange.Cells[i, j].Value2;
+                                comm.Parameters.Add("@priorita", campo6);
+                                break;
+
+                        default: int campodef = (int)xlRange.Cells[i, j].Value2;
+                                 comm.Parameters.Add("@running", campodef);
+                                 break;
                     }
-                    else if (j == 2)
-                    {
-                        DateTime campo = (DateTime)xlRange.Cells[i, j].Value2.ToString();
-                        comm.Parameters.Add("@dueDate", campo);
-                    }
-                    else if (j == 3)
-                    {
-                        int campo = (int)xlRange.Cells[i, j].Value2;
-                        comm.Parameters.Add("@quantita", campo);
-                    }
-                    else if (j == 4)
-                    {
-                        String campo = (String)xlRange.Cells[i, j].Value2;
-                        comm.Parameters.Add("@tipoTelaio", campo);
-                    }
-                    else if (j == 5)
-                    {
-                        String campo = (String)xlRange.Cells[i, j].Value2;
-                        comm.Parameters.Add("@colore", campo);
-                    }
-                    else if (j == 6)
-                    {
-                        int campo = (int)xlRange.Cells[i, j].Value2;
-                        comm.Parameters.Add("@priorita", campo);
-                    }
-                    else
-                    {
-                        int campo = (int)xlRange.Cells[i, j].Value2;
-                        comm.Parameters.Add("@running", campo);
-                    }
+                    
                 }
 
                 if (conn != null && conn.State == ConnectionState.Closed)
