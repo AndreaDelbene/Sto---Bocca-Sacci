@@ -35,7 +35,6 @@ namespace DibrisBike
         {
             InitializeComponent();
 
-
             SqlConnection con = new SqlConnection();
             con.ConnectionString =
             "Server=SIMONE-PC\\SQLEXPRESS;" +
@@ -70,7 +69,25 @@ namespace DibrisBike
 
         private void MPSChooser_Click(object sender, RoutedEventArgs e)
         {
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.Multiselect = false;
+            fileDialog.Filter = "Excel File|*.xlsx";
+            fileDialog.DefaultExt = ".xlsx";
+            Nullable<bool> dialogOk = fileDialog.ShowDialog();
 
+            String MPSFilePath = string.Empty;
+            if (dialogOk == true)
+            {
+                MPSFilePath = fileDialog.FileName;
+                RMPathLabel.Content = MPSFilePath;
+                getMPS(MPSFilePath);
+            }
+        }
+
+        private void getMPS(string mpsFilePath)
+        {
+            MPS mps = new MPS();
+            mps.getMPSFromFile(mpsFilePath, conn);
         }
 
         private void RMChooser_Click(object sender, RoutedEventArgs e)
@@ -86,9 +103,7 @@ namespace DibrisBike
             {
                 rawMaterialFilePath = fileDialog.FileName;
                 RMPathLabel.Content = rawMaterialFilePath;
-                spinnerRM.Visibility = Visibility.Visible;
                 getRawMaterial(rawMaterialFilePath);
-                spinnerRM.Visibility = Visibility.Hidden;
             }
         }
 
