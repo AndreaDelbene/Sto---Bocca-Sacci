@@ -22,20 +22,12 @@ namespace DibrisBike
         public RawMaterial(SqlConnection conn)
         {
             this.conn = conn;
-            columnName = new List<string>();
-            columnName.Add("@codiceBarre");
-            columnName.Add("@descrizione");
-            columnName.Add("@diametro");
-            columnName.Add("@peso");
-            columnName.Add("@lunghezza");
             query = "INSERT INTO dbo.magazzinomateriali (codiceBarre,descrizione,diametro,peso,lunghezza) VALUES (@codiceBarre,@descrizione,@diametro,@peso,@lunghezza)";
             comm = new SqlCommand(query, conn);
         }
 
         public void getRawFromFile(String pathToFile)
         {
-
-
             //Create COM Objects. Create a COM object for everything that is referenced
             Excel.Application xlApp = new Excel.Application();
             Excel.Workbook xlWorkbook = xlApp.Workbooks.Open(pathToFile);
