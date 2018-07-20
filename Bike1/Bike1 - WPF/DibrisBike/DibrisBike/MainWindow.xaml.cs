@@ -41,17 +41,20 @@ namespace DibrisBike
             InitializeComponent();
 
             SqlConnection con = new SqlConnection();
+            //SIMONE-PC\\SQLEXPRESS;
             con.ConnectionString =
-            "Server=SIMONE-PC\\SQLEXPRESS;" +
+            "Server=LAPTOP-DT8KB2TQ;" +
             "Database=stodb;" +
             "Integrated Security=True";
 
             conn = con;
             Thread t1 = new Thread(new ThreadStart(getMPSCaller));
-            Thread t3 = new Thread(new ThreadStart(routingMagazzinoCaller));
-            Thread t4 = new Thread(new ThreadStart(printStatoOrdini));
+            Thread t2 = new Thread(new ThreadStart(routingMagazzinoCaller));
+            Thread t3 = new Thread(new ThreadStart(printStatoOrdini));
+            Thread t4 = new Thread(new ThreadStart(accumuloSaldCaller));
 
             t1.Start();
+            t2.Start();
             t3.Start();
             t4.Start();
         }
@@ -134,6 +137,12 @@ namespace DibrisBike
         {
             RawMaterial rawMaterial = new RawMaterial(conn);
             rawMaterial.getRawFromFile(path);
+        }
+
+        static void accumuloSaldCaller()
+        {
+            accumuloSald aS = new accumuloSald();
+            aS.setAccumuloSald(_queueLC1, _queueLC2, _queueLC3, _signalLC);
         }
 
         /*void ProducerThread()
