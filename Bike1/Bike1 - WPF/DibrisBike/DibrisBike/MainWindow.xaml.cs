@@ -44,6 +44,9 @@ namespace DibrisBike
         static private readonly ConcurrentQueue<int> _queueForno = new ConcurrentQueue<int>();
         static private readonly AutoResetEvent _signalForno = new AutoResetEvent(false);
 
+        static private readonly ConcurrentQueue<int> _queueToPrint = new ConcurrentQueue<int>();
+        static private readonly AutoResetEvent _signalToPrint = new AutoResetEvent(false);
+
         public MainWindow()
         {
             InitializeComponent();
@@ -61,12 +64,14 @@ namespace DibrisBike
             Thread t3 = new Thread(new ThreadStart(printStatoOrdini));
             Thread t4 = new Thread(new ThreadStart(accumuloSaldCaller));
             Thread t5 = new Thread(new ThreadStart(saldCaller));
+            Thread t6 = new Thread(new ThreadStart(furnaceCaller));
 
             t1.Start();
             t2.Start();
             t3.Start();
             t4.Start();
             t5.Start();
+            t6.Start();
         }
 
         static void getMPSCaller()
@@ -157,9 +162,14 @@ namespace DibrisBike
 
         static void saldCaller()
         {
-            Saldatura s = new Saldatura();
-            s.startSaldatura(conn, _queueSald, _signalSald, _queueForno, _signalForno);
-            
+            Saldatura sald = new Saldatura();
+            sald.startSaldatura(conn, _queueSald, _signalSald, _queueForno, _signalForno);
+        }
+
+        static void furnaceCaller()
+        {
+            Furnace fur = new Furnace();
+            fur.startCooking(conn, _queueForno, _signalForno, _queueToPrint, _signalToPrint);
         }
 
         /*void ProducerThread()

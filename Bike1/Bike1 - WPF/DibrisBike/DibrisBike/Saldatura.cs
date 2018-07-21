@@ -24,8 +24,10 @@ namespace DibrisBike
                 string[] codiceBarre;
                 _queueSald.TryDequeue(out codiceBarre);
                 //transponting the tubes from the storage to the welder (saldatrice)
-                Console.WriteLine("TRANSPORTING TO WELMER");
                 Thread.Sleep(2000);
+
+                //going for the welmer then
+                Console.WriteLine("WELMING");
                 //creating a new row into the table that contains frames that are being welmed/cooked/painted/dried
                 string query = "INSERT INTO stodb.dbo.saldessdp (startTime,stato) VALUES (@startTime, @stato)";
 

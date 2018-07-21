@@ -64,9 +64,12 @@ namespace DibrisBike
 
                             comm.ExecuteNonQuery();
                         }
-                        //waiting until the stuff passes under the Quallity Control Area
-                        Console.WriteLine("ACQ");
+                        //waiting until the stuff passes under the Quality Control Area
                         Thread.Sleep(5000);
+
+                        //Going for the Laser Cut then
+                        Console.WriteLine("LASER CUT");
+
                         //selecting the frame (telaio) type
                         query = "SELECT tipoTelaio FROM stodb.dbo.mps WHERE id = @idLotto";
                         
@@ -138,6 +141,8 @@ namespace DibrisBike
                         comm.ExecuteNonQuery();
                         //signaling the service after the laser cut.
                         _signalLC.Set();
+
+                        //TODO: Complete the routing process--------------------------------------------------------------------------------------------------
                     }
                     else
                     {

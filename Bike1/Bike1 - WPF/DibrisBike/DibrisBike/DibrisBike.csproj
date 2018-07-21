@@ -61,6 +61,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AccumuloSald.cs" />
+    <Compile Include="Furnace.cs" />
     <Compile Include="PrintSO.cs" />
     <Compile Include="RawMaterial.cs" />
     <Compile Include="Routing.cs" />

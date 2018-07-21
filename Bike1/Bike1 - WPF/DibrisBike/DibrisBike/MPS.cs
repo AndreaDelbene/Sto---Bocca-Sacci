@@ -110,8 +110,11 @@ namespace DibrisBike
                     _queue.Enqueue(id);
                     _queue.Enqueue(quantitaTubi);
                     _signal.Set();
+                    //the stuff passes under the Quality Control Area
+                    Console.WriteLine("ACQ");
                 }
-                //Thread.Sleep(2000);
+
+                Thread.Sleep(2000);
             }
         }
 

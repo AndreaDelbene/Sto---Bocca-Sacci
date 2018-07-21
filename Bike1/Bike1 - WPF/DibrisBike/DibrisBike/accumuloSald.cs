@@ -31,11 +31,12 @@ namespace DibrisBike
                 else
                     _queueLC3.TryDequeue(out codiceBarre);
                 //sleep the Thread (simulating laser cut)
-                Console.WriteLine("LASER CUT");
                 Thread.Sleep(5000);
 
-                SqlCommand comm;
+                //transponting the tubes from the storage to the welder (saldatrice)
+                Console.WriteLine("STORING");
                 //updating the storage that contains the tubes to be welmed.
+                SqlCommand comm;
                 for (int i=0;i<codiceBarre.Length;i++)
                 {
                     string query = "INSERT INTO stodb.dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
