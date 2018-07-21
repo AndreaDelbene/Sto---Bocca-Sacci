@@ -36,7 +36,9 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@quantita", quantitaTubi[i]);
 
                     SqlDataAdapter adapter = new SqlDataAdapter(comm);
-                    conn.Open();
+
+                    if (conn != null && conn.State == ConnectionState.Closed)
+                        conn.Open();
 
                     comm.ExecuteNonQuery();
 
@@ -48,7 +50,7 @@ namespace DibrisBike
                     {
                         //TODO
                     }
-                    conn.Close();
+                    //conn.Close();
                 }
 
                 Thread.Sleep(2000);

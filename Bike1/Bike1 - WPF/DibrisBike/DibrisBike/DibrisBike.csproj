@@ -60,7 +60,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="PrintSO.cs" />
     <Compile Include="RawMaterial.cs" />
     <Compile Include="Routing.cs" />
     <Page Include="MainWindow.xaml">

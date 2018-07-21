@@ -40,9 +40,11 @@ namespace DibrisBike
             con.ConnectionString =
             "Server=SIMONE-PC\\SQLEXPRESS;" +
             "Database=stodb;" +
-            "Integrated Security=True";
+            "Integrated Security=True;" +
+            "MultipleActiveResultSets=true";
 
             conn = con;
+            conn.Open();
             Thread t1 = new Thread(new ThreadStart(getMPSCaller));
             Thread t3 = new Thread(new ThreadStart(routingMagazzinoCaller));
             Thread t4 = new Thread(new ThreadStart(printStatoOrdini));
@@ -60,21 +62,25 @@ namespace DibrisBike
 
         public void printStatoOrdini()
         {
-            //PrintSO printSO = new PrintSO(conn);
             while (true)
             {
-                //DataTable table = printSO.startPrintingThread();
-                this.Dispatcher.Invoke(() => {
+                this.Dispatcher.Invoke(() =>
+                {
                     String query = "SELECT * FROM dbo.statoordini";
                     SqlCommand comm = new SqlCommand(query, conn);
                     if (conn != null && conn.State == ConnectionState.Closed)
                         conn.Open();
+
                     comm.ExecuteNonQuery();
 
                     SqlDataAdapter adapter = new SqlDataAdapter(comm);
                     DataTable table = new DataTable();
-                    adapter.Fill(table);
-                    statoOrdiniGrid.ItemsSource = table.DefaultView;
+                    if (table != null)
+                    {
+                        adapter.Fill(table);
+                        statoOrdiniGrid.ItemsSource = table.DefaultView;
+                        adapter.Update(table);
+                    }
                 });
                 Thread.Sleep(2000);
             }
