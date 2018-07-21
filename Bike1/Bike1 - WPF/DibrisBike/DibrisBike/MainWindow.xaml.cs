@@ -28,13 +28,21 @@ namespace DibrisBike
     public partial class MainWindow : Window
     {
 
-        static SqlConnection conn;
+        static private SqlConnection conn;
+
         static private readonly ConcurrentQueue<int[]> _queue = new ConcurrentQueue<int[]>();
         static private readonly AutoResetEvent _signal = new AutoResetEvent(false);
+
         static private readonly ConcurrentQueue<string[]> _queueLC1 = new ConcurrentQueue<string[]>();
         static private readonly ConcurrentQueue<string[]> _queueLC2 = new ConcurrentQueue<string[]>();
         static private readonly ConcurrentQueue<string[]> _queueLC3 = new ConcurrentQueue<string[]>();
         static private readonly AutoResetEvent _signalLC = new AutoResetEvent(false);
+
+        static private readonly ConcurrentQueue<string[]> _queueSald = new ConcurrentQueue<string[]>();
+        static private readonly AutoResetEvent _signalSald = new AutoResetEvent(false);
+
+        static private readonly ConcurrentQueue<int> _queueForno = new ConcurrentQueue<int>();
+        static private readonly AutoResetEvent _signalForno = new AutoResetEvent(false);
 
         public MainWindow()
         {
@@ -52,11 +60,13 @@ namespace DibrisBike
             Thread t2 = new Thread(new ThreadStart(routingMagazzinoCaller));
             Thread t3 = new Thread(new ThreadStart(printStatoOrdini));
             Thread t4 = new Thread(new ThreadStart(accumuloSaldCaller));
+            Thread t5 = new Thread(new ThreadStart(saldCaller));
 
             t1.Start();
             t2.Start();
             t3.Start();
             t4.Start();
+            t5.Start();
         }
 
         static void getMPSCaller()
@@ -141,8 +151,15 @@ namespace DibrisBike
 
         static void accumuloSaldCaller()
         {
-            accumuloSald aS = new accumuloSald();
-            aS.setAccumuloSald(_queueLC1, _queueLC2, _queueLC3, _signalLC);
+            AccumuloSald aS = new AccumuloSald();
+            aS.setAccumuloSald(conn, _queueLC1, _queueLC2, _queueLC3, _signalLC, _queueSald, _signalSald);
+        }
+
+        static void saldCaller()
+        {
+            Saldatura s = new Saldatura();
+            s.startSaldatura(conn, _queueSald, _signalSald, _queueForno, _signalForno);
+            
         }
 
         /*void ProducerThread()

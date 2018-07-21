@@ -60,10 +60,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="accumuloSald.cs" />
+    <Compile Include="AccumuloSald.cs" />
     <Compile Include="PrintSO.cs" />
     <Compile Include="RawMaterial.cs" />
     <Compile Include="Routing.cs" />
+    <Compile Include="Saldatura.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

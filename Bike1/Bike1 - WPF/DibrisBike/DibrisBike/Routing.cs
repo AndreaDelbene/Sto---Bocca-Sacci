@@ -52,9 +52,21 @@ namespace DibrisBike
                     //If i have it, i proceed in updating the 'routing' table
                     if (table.Rows.Count == quantitaTubi[i])
                     {
+                        //deleting every tube I get from the storage.
+                        for(int j=0;j<quantitaTubi.Length;j++)
+                        {
+                            comm = new SqlCommand(query, conn);
+                            query = "DELETE FROM stodb.mpo.magazzinomateriali WHERE codiceBarre = @codiceBarre";
+                            comm.Parameters.AddWithValue("@codiceBarre", codiceBarre[j]);
+
+                            if (conn != null && conn.State == ConnectionState.Closed)
+                                conn.Open();
+
+                            comm.ExecuteNonQuery();
+                        }
                         //waiting until the stuff passes under the Quallity Control Area
-                        Thread.Sleep(5000);
                         Console.WriteLine("ACQ");
+                        Thread.Sleep(5000);
                         //selecting the frame (telaio) type
                         query = "SELECT tipoTelaio FROM stodb.dbo.mps WHERE id = @idLotto";
                         
@@ -78,12 +90,12 @@ namespace DibrisBike
                         int rInt = r.Next(1, 4);
 
                         //preparing the insertion into the routing table
-                        query = "INSERT INTO stodb.dbo.routing (@idLotto,@idPezzo,@step,@durata,@durataSetUp,@opMacchina) VALUES (?,?,?,?,?,?)";
+                        query = "INSERT INTO stodb.dbo.routing (idLotto,idPezzo,step,durata,durataSetUp,opMacchina) VALUES (@idLotto,@idPezzo,@step,@durata,@durataSetUp,@opMacchina)";
                         comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
                         comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
-                        comm.Parameters.AddWithValue("@idLotto", 1);
-                        comm.Parameters.AddWithValue("@idLotto", 5);
-                        comm.Parameters.AddWithValue("@idLotto", 0);
+                        comm.Parameters.AddWithValue("@step", 1);
+                        comm.Parameters.AddWithValue("@durata", 5);
+                        comm.Parameters.AddWithValue("@durataSetUp", 0);
 
 
                         switch (tipoTelaio[i])
@@ -127,10 +139,14 @@ namespace DibrisBike
                         //signaling the service after the laser cut.
                         _signalLC.Set();
                     }
+                    else
+                    {
+                        //launch exception on storage?
+                    }
                     conn.Close();
                 }
                 //sleeping the thread for 2 secs
-                Thread.Sleep(2000);
+                //Thread.Sleep(2000);
             }
         }
     }
