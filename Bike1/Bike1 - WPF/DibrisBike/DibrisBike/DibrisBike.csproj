@@ -60,12 +60,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AccumuloPrint.cs" />
+    <Compile Include="AccumuloPaint.cs" />
     <Compile Include="AccumuloSald.cs" />
     <Compile Include="Furnace.cs" />
     <Compile Include="ModifyOrdiniPage.xaml.cs">
       <DependentUpon>ModifyOrdiniPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Paint.cs" />
     <Compile Include="RawMaterial.cs" />
     <Compile Include="Routing.cs" />
     <Compile Include="Saldatura.cs" />
@@ -145,7 +146,7 @@
     <COMReference Include="Microsoft.Office.Interop.Excel">
       <Guid>{00020813-0000-0000-C000-000000000046}</Guid>
       <VersionMajor>1</VersionMajor>
-      <VersionMinor>9</VersionMinor>
+      <VersionMinor>8</VersionMinor>
       <Lcid>0</Lcid>
       <WrapperTool>primary</WrapperTool>
       <Isolated>False</Isolated>

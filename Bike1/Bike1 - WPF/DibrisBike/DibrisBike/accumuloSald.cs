@@ -16,15 +16,19 @@ namespace DibrisBike
         {
         }
 
-        public void setAccumuloSald1(SqlConnection conn, ConcurrentQueue<string[]> _queueLC1, AutoResetEvent _signalLC1, ConcurrentQueue<string[]> _queueSald, AutoResetEvent _signalSald)
+        public void setAccumuloSald1(SqlConnection conn, ConcurrentQueue<object> _queueLC1, AutoResetEvent _signalLC1, ConcurrentQueue<object> _queueSald, AutoResetEvent _signalSald)
         {
             while(true)
             {
                 _signalLC1.WaitOne();
+                object codiceBarreTemp, idLottoTemp;
                 string[] codiceBarre;
-                
-                _queueLC1.TryDequeue(out codiceBarre);
-               
+                int idLotto;
+                _queueLC1.TryDequeue(out codiceBarreTemp);
+                _queueLC1.TryDequeue(out idLottoTemp);
+
+                codiceBarre = (string[])codiceBarreTemp;
+                idLotto = (int)idLottoTemp;
                 //sleep the Thread (simulating laser cut)
                 Thread.Sleep(5000);
 
@@ -34,10 +38,10 @@ namespace DibrisBike
                 SqlCommand comm;
                 for (int i=0;i<codiceBarre.Length;i++)
                 {
-                    string query = "INSERT INTO stodb.dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
+                    string query = "INSERT INTO dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
 
-                     comm = new SqlCommand(query, conn);
-
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
                     comm.Parameters.AddWithValue("@descrizione", "");
                     comm.Parameters.AddWithValue("@diametro", 5.0);
@@ -51,6 +55,7 @@ namespace DibrisBike
                 }
                 //insereting the bar codes into the queue for the next step
                 _queueSald.Enqueue(codiceBarre);
+                _queueSald.Enqueue(idLotto);
                 //and signaling it to another thread
                 _signalSald.Set();
                 //conn.Close();
@@ -59,14 +64,20 @@ namespace DibrisBike
             }
         }
 
-        public void setAccumuloSald2(SqlConnection conn, ConcurrentQueue<string[]> _queueLC2, AutoResetEvent _signalLC2, ConcurrentQueue<string[]> _queueSald, AutoResetEvent _signalSald)
+        public void setAccumuloSald2(SqlConnection conn, ConcurrentQueue<object> _queueLC2, AutoResetEvent _signalLC2, ConcurrentQueue<object> _queueSald, AutoResetEvent _signalSald)
         {
             while (true)
             {
                 _signalLC2.WaitOne();
+                object codiceBarreTemp, idLottoTemp;
                 string[] codiceBarre;
-               
-                _queueLC2.TryDequeue(out codiceBarre);
+                int idLotto;
+
+                _queueLC2.TryDequeue(out codiceBarreTemp);
+                _queueLC2.TryDequeue(out idLottoTemp);
+
+                codiceBarre = (string[])codiceBarreTemp;
+                idLotto = (int)idLottoTemp;
                 //sleep the Thread (simulating laser cut)
                 Thread.Sleep(5000);
 
@@ -76,10 +87,10 @@ namespace DibrisBike
                 SqlCommand comm;
                 for (int i = 0; i < codiceBarre.Length; i++)
                 {
-                    string query = "INSERT INTO stodb.dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
+                    string query = "INSERT INTO dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
 
                     comm = new SqlCommand(query, conn);
-
+                    comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
                     comm.Parameters.AddWithValue("@descrizione", "");
                     comm.Parameters.AddWithValue("@diametro", 5.0);
@@ -93,6 +104,7 @@ namespace DibrisBike
                 }
                 //insereting the bar codes into the queue for the next step
                 _queueSald.Enqueue(codiceBarre);
+                _queueSald.Enqueue(idLotto);
                 //and signaling it to another thread
                 _signalSald.Set();
                 conn.Close();
@@ -101,14 +113,20 @@ namespace DibrisBike
             }
         }
 
-        public void setAccumuloSald3(SqlConnection conn, ConcurrentQueue<string[]> _queueLC3, AutoResetEvent _signalLC3, ConcurrentQueue<string[]> _queueSald, AutoResetEvent _signalSald)
+        public void setAccumuloSald3(SqlConnection conn, ConcurrentQueue<object> _queueLC3, AutoResetEvent _signalLC3, ConcurrentQueue<object> _queueSald, AutoResetEvent _signalSald)
         {
             while (true)
             {
                 _signalLC3.WaitOne();
+                object codiceBarreTemp, idLottoTemp;
                 string[] codiceBarre;
-                
-                _queueLC3.TryDequeue(out codiceBarre);
+                int idLotto;
+
+                _queueLC3.TryDequeue(out codiceBarreTemp);
+                _queueLC3.TryDequeue(out idLottoTemp);
+
+                codiceBarre = (string[])codiceBarreTemp;
+                idLotto = (int)idLottoTemp;
                 //sleep the Thread (simulating laser cut)
                 Thread.Sleep(5000);
 
@@ -118,10 +136,10 @@ namespace DibrisBike
                 SqlCommand comm;
                 for (int i = 0; i < codiceBarre.Length; i++)
                 {
-                    string query = "INSERT INTO stodb.dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
+                    string query = "INSERT INTO dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
 
                     comm = new SqlCommand(query, conn);
-
+                    comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
                     comm.Parameters.AddWithValue("@descrizione", "");
                     comm.Parameters.AddWithValue("@diametro", 5.0);
@@ -135,6 +153,7 @@ namespace DibrisBike
                 }
                 //insereting the bar codes into the queue for the next step
                 _queueSald.Enqueue(codiceBarre);
+                _queueSald.Enqueue(idLotto);
                 //and signaling it to another thread
                 _signalSald.Set();
                 conn.Close();

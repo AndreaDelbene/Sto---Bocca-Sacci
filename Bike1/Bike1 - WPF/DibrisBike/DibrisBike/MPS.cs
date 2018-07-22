@@ -20,12 +20,12 @@ namespace DibrisBike
         {
         }
 
-        public void getMPS(SqlConnection conn, ConcurrentQueue<int[]> _queue, AutoResetEvent _signal)
+        public void getMPS(SqlConnection conn, ConcurrentQueue<object> _queue, AutoResetEvent _signal)
         {
             while (true)
             {
                 //checking whenever a new MPS has been uploaded
-                string query = "SELECT * FROM stodb.dbo.mps WHERE running = 0";
+                string query = "SELECT * FROM dbo.mps WHERE running = 0";
                 SqlCommand comm = new SqlCommand(query, conn);
 
                 SqlDataAdapter adapter = new SqlDataAdapter(comm);
@@ -38,7 +38,7 @@ namespace DibrisBike
                 adapter.Fill(table);
                 //getting then the data from the table
                 int[] id, quantita, priorita;
-                string[] tipoTelaio, colore;
+                string[] tipoTelaio, colore, linea;
                 DateTime[] startDate, dueDate;
                 Byte[] running;
                 id = (from DataRow r in table.Rows select (int)r["id"]).ToArray();
@@ -47,20 +47,27 @@ namespace DibrisBike
                 quantita = (from DataRow r in table.Rows select (int)r["quantita"]).ToArray();
                 tipoTelaio = (from DataRow r in table.Rows select (string)r["tipoTelaio"]).ToArray();
                 colore = (from DataRow r in table.Rows select (string)r["colore"]).ToArray();
+                linea = (from DataRow r in table.Rows select (string)r["linea"]).ToArray();
                 priorita = (from DataRow r in table.Rows select (int)r["priorita"]).ToArray();
                 running = (from DataRow r in table.Rows select (Byte)r["running"]).ToArray();
 
                 int[] quantitaTubi = new int[id.Length];
+
+                if(priorita.Length>1)
+                {
+                    //TODO: Change Id vector to insert in priority order.
+                }
 
                 //conn.Close();
                 //for each element in the table we got back from the first request
                 for (int i = 0; i < id.Length; i++)
                 {
                     //I update the 'statoordini' table in the DB
-                    query = "INSERT INTO stodb.dbo.statoordini (idLotto, startPianificata, startEffettiva, dueDatePianificata, quantitaDesiderata, quantitaProdotta, tipoTelaio, stato, descrizione) " +
+                    query = "INSERT INTO dbo.statoordini (idLotto, startPianificata, startEffettiva, dueDatePianificata, quantitaDesiderata, quantitaProdotta, tipoTelaio, stato, descrizione) " +
                         "VALUES(@idLotto, @startPianificata, @startEffettiva, @dueDatePianificata, @quantitaDesiderata, @quantitaProdotta, @tipoTelaio, @stato, @descrizione)";
 
                     comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@idLotto", id[i]);
                     comm.Parameters.AddWithValue("@startPianificata", startDate[i]);
                     comm.Parameters.AddWithValue("@startEffettiva", startDate[i]);
@@ -80,6 +87,7 @@ namespace DibrisBike
                     // i set then the flag to 1 into the 'mps' table
                     query = "UPDATE stodb.dbo.mps SET running = 1 WHERE id = @idLotto";
                     comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@idLotto", id[i]);
 
                     if (conn != null && conn.State == ConnectionState.Closed)
@@ -91,6 +99,7 @@ namespace DibrisBike
                     //and i check how many stuff i need for that kind of bike
                     query = "SELECT quantitaTubi FROM dbo.ricette WHERE tipoTelaio = @tipoTelaio";
                     comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
 
                     if (conn != null && conn.State == ConnectionState.Closed)
@@ -105,6 +114,7 @@ namespace DibrisBike
                         quantitaTubi[i] = 3;    //Valore impostato finchè non si avrà la tabella ricette popolata
                     //conn.Close();
                     Console.WriteLine(i);
+                    reader.Close();
 
                 }
                 if (id.Length != 0)
@@ -112,11 +122,12 @@ namespace DibrisBike
                     //queue=FIFO, i save in it the amount of ids and tubes, and i sleep for the next 2 secs.
                     _queue.Enqueue(id);
                     _queue.Enqueue(quantitaTubi);
+                    _queue.Enqueue(linea);
                     _signal.Set();
                     //the stuff passes under the Quality Control Area
                     Console.WriteLine("ACQ");
                 }
-
+                conn.Close();
                 Thread.Sleep(2000);
             }
         }
@@ -224,7 +235,7 @@ namespace DibrisBike
             xlApp.Quit();
             Marshal.ReleaseComObject(xlApp);
 
-            Console.WriteLine("Lettura e salvattagio MPS completato");
+            Console.WriteLine("Lettura e salvataggio MPS completato");
         }
     }
 }

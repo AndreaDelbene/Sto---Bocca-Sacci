@@ -16,22 +16,25 @@ namespace DibrisBike
         {
         }
 
-        public void startCooking(SqlConnection conn, ConcurrentQueue<int> _queueForno, AutoResetEvent _signalForno, ConcurrentQueue<int> _queueToPrint, AutoResetEvent _signalToPrint)
+        public void startCooking(SqlConnection conn, ConcurrentQueue<int> _queueForno, AutoResetEvent _signalForno, ConcurrentQueue<int> _queueToPaint, AutoResetEvent _signalToPaint)
         {
             while(true)
             {
                 _signalForno.WaitOne();
                 int idTelaio;
+                int idLotto;
                 _queueForno.TryDequeue(out idTelaio);
+                _queueForno.TryDequeue(out idLotto);
                 // simulating the Welmer
                 Thread.Sleep(5000);
 
                 //Let's cook the frame now!
                 Console.WriteLine("FURNACE");
-                string query = "UPDATE stodb.dbo.saldessdp SET stato = @stato, endTimeSald = @endTimeSald, startTimeForno = @startTimeForno WHERE idTelaio = @idTelaio";
+                string query = "UPDATE dbo.saldessdp SET stato = @stato, endTimeSald = @endTimeSald, startTimeForno = @startTimeForno WHERE idTelaio = @idTelaio";
 
                 SqlCommand comm = new SqlCommand(query, conn);
                 //state is "cooking"
+                comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "cooking");
                 comm.Parameters.AddWithValue("@idTelaio", idTelaio);
                 comm.Parameters.AddWithValue("@endTimeSald", DateTime.Now.ToString());
@@ -42,8 +45,21 @@ namespace DibrisBike
 
                 comm.ExecuteNonQuery();
 
-                _queueToPrint.Enqueue(idTelaio);
-                //conn.Close();
+                //updating the order state table
+                query = "UPDATE dbo.statoordini SET stato = @stato WHERE idLotto = @idLotto";
+                comm = new SqlCommand(query, conn);
+                comm.Parameters.Clear();
+                comm.Parameters.AddWithValue("@stato", "cooking");
+                comm.Parameters.AddWithValue("@idLotto", idLotto);
+                if (conn != null && conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                comm.ExecuteNonQuery();
+                //filling the queue for the Painting and signaling it
+                _queueToPaint.Enqueue(idTelaio);
+                _queueToPaint.Enqueue(idLotto);
+                _signalToPaint.Set();
+                conn.Close();
             }
         }
     }

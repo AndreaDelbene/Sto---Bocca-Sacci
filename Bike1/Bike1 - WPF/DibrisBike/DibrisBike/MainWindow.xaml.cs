@@ -30,24 +30,34 @@ namespace DibrisBike
 
         static private SqlConnection conn;
 
-        static private readonly ConcurrentQueue<int[]> _queue = new ConcurrentQueue<int[]>();
+        static private readonly ConcurrentQueue<object> _queue = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signal = new AutoResetEvent(false);
 
-        static private readonly ConcurrentQueue<string[]> _queueLC1 = new ConcurrentQueue<string[]>();
-        static private readonly ConcurrentQueue<string[]> _queueLC2 = new ConcurrentQueue<string[]>();
-        static private readonly ConcurrentQueue<string[]> _queueLC3 = new ConcurrentQueue<string[]>();
+        static private readonly ConcurrentQueue<object> _queueLC1 = new ConcurrentQueue<object>();
+        static private readonly ConcurrentQueue<object> _queueLC2 = new ConcurrentQueue<object>();
+        static private readonly ConcurrentQueue<object> _queueLC3 = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signalLC1 = new AutoResetEvent(false);
         static private readonly AutoResetEvent _signalLC2 = new AutoResetEvent(false);
         static private readonly AutoResetEvent _signalLC3 = new AutoResetEvent(false);
 
-        static private readonly ConcurrentQueue<string[]> _queueSald = new ConcurrentQueue<string[]>();
+        static private readonly ConcurrentQueue<object> _queueSald = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signalSald = new AutoResetEvent(false);
 
         static private readonly ConcurrentQueue<int> _queueForno = new ConcurrentQueue<int>();
         static private readonly AutoResetEvent _signalForno = new AutoResetEvent(false);
 
-        static private readonly ConcurrentQueue<int> _queueToPrint = new ConcurrentQueue<int>();
-        static private readonly AutoResetEvent _signalToPrint = new AutoResetEvent(false);
+        static private readonly ConcurrentQueue<int> _queueToPaint = new ConcurrentQueue<int>();
+        static private readonly AutoResetEvent _signalToPaint = new AutoResetEvent(false);
+
+
+        static private readonly ConcurrentQueue<object> _queuePast = new ConcurrentQueue<object>();
+        static private readonly AutoResetEvent _signalPast = new AutoResetEvent(false);
+        static private readonly ConcurrentQueue<object> _queueMetal = new ConcurrentQueue<object>();
+        static private readonly AutoResetEvent _signalMetal = new AutoResetEvent(false);
+
+
+        static private readonly ConcurrentQueue<int> _queueEssic = new ConcurrentQueue<int>();
+        static private readonly AutoResetEvent _signalEssic = new AutoResetEvent(false);
 
         public MainWindow()
         {
@@ -72,6 +82,8 @@ namespace DibrisBike
             Thread t4 = new Thread(new ThreadStart(accumuloSaldCaller));
             Thread t5 = new Thread(new ThreadStart(saldCaller));
             Thread t6 = new Thread(new ThreadStart(furnaceCaller));
+            Thread t7 = new Thread(new ThreadStart(accumuloPaintCaller));
+            Thread t8 = new Thread(new ThreadStart(paintCaller));
 
             t1.Start();
             t2.Start();
@@ -79,6 +91,8 @@ namespace DibrisBike
             t4.Start();
             t5.Start();
             t6.Start();
+            t7.Start();
+            t8.Start();
         }
 
         static void getMPSCaller()
@@ -211,7 +225,13 @@ namespace DibrisBike
         static void furnaceCaller()
         {
             Furnace fur = new Furnace();
-            fur.startCooking(conn, _queueForno, _signalForno, _queueToPrint, _signalToPrint);
+            fur.startCooking(conn, _queueForno, _signalForno, _queueToPaint, _signalToPaint);
+        }
+
+        static void accumuloPaintCaller()
+        {
+            AccumuloPaint ap = new AccumuloPaint();
+           ap.setAccumuloPaint(conn, _queueToPaint, _signalToPaint, _queuePast, _queueMetal, _signalPast, _signalMetal);
         }
 
         private void ordiniModify_Click(object sender, RoutedEventArgs e)
@@ -220,6 +240,12 @@ namespace DibrisBike
             modifyOrdiniPage.Show();
         }
 
+        static void paintCaller()
+        {
+            Paint paint = new Paint();
+            paint.startPaintingPast(conn, _queuePast, _signalPast, _queueEssic, _signalEssic);
+            paint.startPaintingMetal(conn, _queueMetal, _signalMetal, _queueEssic, _signalEssic);
+        }
         /*void ProducerThread()
         {
             while (ShouldRun)
