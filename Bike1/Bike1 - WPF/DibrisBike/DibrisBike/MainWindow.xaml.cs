@@ -27,35 +27,35 @@ namespace DibrisBike
     /// </summary>
     public partial class MainWindow : Window
     {
-
+        //Connection
         static private SqlConnection conn;
-
+        // queues and signals for MPS - Routing
         static private readonly ConcurrentQueue<object> _queue = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signal = new AutoResetEvent(false);
-
+        static private readonly AutoResetEvent _signalError = new AutoResetEvent(false);
+        static private bool flagError = false;
+        //queues and signals for Routing - WelmStorage
         static private readonly ConcurrentQueue<object> _queueLC1 = new ConcurrentQueue<object>();
         static private readonly ConcurrentQueue<object> _queueLC2 = new ConcurrentQueue<object>();
         static private readonly ConcurrentQueue<object> _queueLC3 = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signalLC1 = new AutoResetEvent(false);
         static private readonly AutoResetEvent _signalLC2 = new AutoResetEvent(false);
         static private readonly AutoResetEvent _signalLC3 = new AutoResetEvent(false);
-
+        //queues and signals for WelmStorage - Welming
         static private readonly ConcurrentQueue<object> _queueSald = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signalSald = new AutoResetEvent(false);
-
+        //queues and signals for Welming - Furnace
         static private readonly ConcurrentQueue<int> _queueForno = new ConcurrentQueue<int>();
         static private readonly AutoResetEvent _signalForno = new AutoResetEvent(false);
-
+        //queues and signals for Furnace - PaintStorage
         static private readonly ConcurrentQueue<int> _queueToPaint = new ConcurrentQueue<int>();
         static private readonly AutoResetEvent _signalToPaint = new AutoResetEvent(false);
-
-
+        //queues and signals for PaintStorage - Painting
         static private readonly ConcurrentQueue<object> _queuePast = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signalPast = new AutoResetEvent(false);
         static private readonly ConcurrentQueue<object> _queueMetal = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signalMetal = new AutoResetEvent(false);
-
-
+        //queues and signals for Painting - Drying
         static private readonly ConcurrentQueue<int> _queueEssic = new ConcurrentQueue<int>();
         static private readonly AutoResetEvent _signalEssic = new AutoResetEvent(false);
 
@@ -138,7 +138,7 @@ namespace DibrisBike
         static void routingMagazzinoCaller()
         {
             Routing rm = new Routing();
-            rm.routingMagazzino(conn, _queue, _signal, _queueLC1, _queueLC2, _queueLC3, _signalLC1, _signalLC2, _signalLC3);
+            rm.routingMagazzino(conn, _queue, _signal, _queueLC1, _queueLC2, _queueLC3, _signalLC1, _signalLC2, _signalLC3, _signalError, flagError);
         }
 
         private void MPSChooser_Click(object sender, RoutedEventArgs e)
@@ -210,7 +210,7 @@ namespace DibrisBike
 
         static void accumuloSaldCaller()
         {
-            AccumuloSald aS = new AccumuloSald();
+            WelmStorage aS = new WelmStorage();
             aS.setAccumuloSald1(conn, _queueLC1, _signalLC1, _queueSald, _signalSald);
             aS.setAccumuloSald2(conn, _queueLC2, _signalLC2, _queueSald, _signalSald);
             aS.setAccumuloSald3(conn, _queueLC3, _signalLC3, _queueSald, _signalSald);
@@ -218,7 +218,7 @@ namespace DibrisBike
 
         static void saldCaller()
         {
-            Saldatura sald = new Saldatura();
+            Welming sald = new Welming();
             sald.startSaldatura(conn, _queueSald, _signalSald, _queueForno, _signalForno);
         }
 
@@ -230,7 +230,7 @@ namespace DibrisBike
 
         static void accumuloPaintCaller()
         {
-            AccumuloPaint ap = new AccumuloPaint();
+            PaintStorage ap = new PaintStorage();
            ap.setAccumuloPaint(conn, _queueToPaint, _signalToPaint, _queuePast, _queueMetal, _signalPast, _signalMetal);
         }
 
@@ -242,7 +242,7 @@ namespace DibrisBike
 
         static void paintCaller()
         {
-            Paint paint = new Paint();
+            Painting paint = new Painting();
             paint.startPaintingPast(conn, _queuePast, _signalPast, _queueEssic, _signalEssic);
             paint.startPaintingMetal(conn, _queueMetal, _signalMetal, _queueEssic, _signalEssic);
         }

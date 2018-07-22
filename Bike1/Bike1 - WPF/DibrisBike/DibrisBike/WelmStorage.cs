@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace DibrisBike
 {
-    class AccumuloSald
+    class WelmStorage
     {
-        public AccumuloSald()
+        public WelmStorage()
         {
         }
 

@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace DibrisBike
 {
-    class Saldatura
+    class Welming
     {
-        public Saldatura()
+        public Welming()
         {
         }
 

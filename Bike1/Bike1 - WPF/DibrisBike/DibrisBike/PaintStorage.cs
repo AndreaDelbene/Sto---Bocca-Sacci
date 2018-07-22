@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace DibrisBike
 {
-    class AccumuloPaint
+    class PaintStorage
     {
-        public AccumuloPaint()
+        public PaintStorage()
         {
         }
 
