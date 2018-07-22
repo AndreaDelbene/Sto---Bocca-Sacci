@@ -25,7 +25,7 @@ namespace DibrisBike
             while (true)
             {
                 //checking whenever a new MPS has been uploaded
-                string query = "SELECT * FROM stodb.dbo.mps WHERE running = 0";
+                string query = "SELECT * FROM dbo.mps WHERE running = 0";
                 SqlCommand comm = new SqlCommand(query, conn);
 
                 SqlDataAdapter adapter = new SqlDataAdapter(comm);
@@ -38,7 +38,7 @@ namespace DibrisBike
                 adapter.Fill(table);
                 //getting then the data from the table
                 int[] id, quantita, priorita;
-                string[] tipoTelaio, colore;
+                string[] tipoTelaio, colore, linea;
                 DateTime[] startDate, dueDate;
                 Byte[] running;
                 id = (from DataRow r in table.Rows select (int)r["id"]).ToArray();
@@ -47,6 +47,7 @@ namespace DibrisBike
                 quantita = (from DataRow r in table.Rows select (int)r["quantita"]).ToArray();
                 tipoTelaio = (from DataRow r in table.Rows select (string)r["tipoTelaio"]).ToArray();
                 colore = (from DataRow r in table.Rows select (string)r["colore"]).ToArray();
+                linea = (from DataRow r in table.Rows select (string)r["linea"]).ToArray();
                 priorita = (from DataRow r in table.Rows select (int)r["priorita"]).ToArray();
                 running = (from DataRow r in table.Rows select (Byte)r["running"]).ToArray();
 
@@ -57,7 +58,7 @@ namespace DibrisBike
                 for (int i = 0; i < id.Length; i++)
                 {
                     //I update the 'statoordini' table in the DB
-                    query = "INSERT INTO stodb.dbo.statoordini (idLotto, startPianificata, startEffettiva, dueDatePianificata, quantitaDesiderata, quantitaProdotta, tipoTelaio, stato, descrizione) " +
+                    query = "INSERT INTO dbo.statoordini (idLotto, startPianificata, startEffettiva, dueDatePianificata, quantitaDesiderata, quantitaProdotta, tipoTelaio, stato, descrizione) " +
                         "VALUES(@idLotto, @startPianificata, @startEffettiva, @dueDatePianificata, @quantitaDesiderata, @quantitaProdotta, @tipoTelaio, @stato, @descrizione)";
 
                     comm = new SqlCommand(query, conn);

@@ -16,7 +16,7 @@ namespace DibrisBike
         {
         }
 
-        public void routingMagazzino(SqlConnection conn, ConcurrentQueue<int[]> _queue, AutoResetEvent _signal, ConcurrentQueue<string[]> _queueLC1, ConcurrentQueue<string[]> _queueLC2, ConcurrentQueue<string[]> _queueLC3, AutoResetEvent _signalLC1, AutoResetEvent _signalLC2, AutoResetEvent _signalLC3)
+        public void routingMagazzino(SqlConnection conn, ConcurrentQueue<int[]> _queue, AutoResetEvent _signal, ConcurrentQueue<object> _queueLC1, ConcurrentQueue<object> _queueLC2, ConcurrentQueue<object> _queueLC3, AutoResetEvent _signalLC1, AutoResetEvent _signalLC2, AutoResetEvent _signalLC3)
         {
             while (true)
             {
@@ -32,7 +32,7 @@ namespace DibrisBike
                 for (int i = 0; i < idLotto.Length; i++)
                 {
                     //and checking, for each request, whenever I have still tubes in the storage
-                    string query = "SELECT TOP (@quantita) * FROM stodb.dbo.magazzinomateriali";
+                    string query = "SELECT TOP (@quantita) * FROM dbo.magazzinomateriali";
                     SqlCommand comm = new SqlCommand(query, conn);
 
                     comm.Parameters.AddWithValue("@quantita", quantitaTubi[i]);
@@ -57,7 +57,7 @@ namespace DibrisBike
                         for(int j=0;j<quantitaTubi.Length;j++)
                         {
                             comm = new SqlCommand(query, conn);
-                            query = "DELETE FROM stodb.mpo.magazzinomateriali WHERE codiceBarre = @codiceBarre";
+                            query = "DELETE FROM dbo.magazzinomateriali WHERE codiceBarre = @codiceBarre";
                             comm.Parameters.AddWithValue("@codiceBarre", codiceBarre[j]);
 
                             if (conn != null && conn.State == ConnectionState.Closed)
@@ -72,7 +72,7 @@ namespace DibrisBike
                         Console.WriteLine("LASER CUT");
 
                         //selecting the frame (telaio) type
-                        query = "SELECT tipoTelaio FROM stodb.dbo.mps WHERE id = @idLotto";
+                        query = "SELECT tipoTelaio FROM dbo.mps WHERE id = @idLotto";
                         
                         comm = new SqlCommand(query, conn);
                         SqlDataReader reader;
@@ -95,7 +95,7 @@ namespace DibrisBike
                         bool flag = false;
 
                         //preparing the insertion into the routing table
-                        query = "INSERT INTO stodb.dbo.routing (idLotto,idPezzo,step,durata,durataSetUp,opMacchina) VALUES (@idLotto,@idPezzo,@step,@durata,@durataSetUp,@opMacchina)";
+                        query = "INSERT INTO dbo.routing (idLotto,idPezzo,step,durata,durataSetUp,opMacchina) VALUES (@idLotto,@idPezzo,@step,@durata,@durataSetUp,@opMacchina)";
                         comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
                         comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
                         comm.Parameters.AddWithValue("@step", 1);
@@ -132,6 +132,14 @@ namespace DibrisBike
 
                         //TODO: Complete the routing process--------------------------------------------------------------------------------------------------
 
+                        query = "UPDATE stodb.dbo.statoordini SET stato = @stato WHERE idLotto = @idLotto";
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.AddWithValue("@stato", "cutting");
+                        comm.Parameters.AddWithValue("@idLotto", idLotto);
+                        if (conn != null && conn.State == ConnectionState.Closed)
+                            conn.Open();
+
+                        comm.ExecuteNonQuery();
 
                         if (flag)
                         {
@@ -139,18 +147,21 @@ namespace DibrisBike
                             if (rInt == 1)
                             {
                                 _queueLC1.Enqueue(codiceBarre);
+                                _queueLC1.Enqueue(idLotto[0]);
                                 //signaling the service after the laser cut.
                                 _signalLC1.Set();
                             }
                             else if (rInt == 2)
                             {
                                 _queueLC2.Enqueue(codiceBarre);
+                                _queueLC2.Enqueue(idLotto[0]);
                                 _signalLC2.Set();
 
                             }
                             else
                             {
                                 _queueLC3.Enqueue(codiceBarre);
+                                _queueLC3.Enqueue(idLotto[0]);
                                 _signalLC3.Set();
                             }
 
@@ -158,6 +169,7 @@ namespace DibrisBike
                         else
                         {
                             _queueLC3.Enqueue(codiceBarre);
+                            _queueLC3.Enqueue(idLotto[0]);
                             //signaling the service after the laser cut.
                             _signalLC3.Set();
                         }                     
