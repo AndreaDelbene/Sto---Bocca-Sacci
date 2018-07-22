@@ -16,7 +16,7 @@ namespace DibrisBike
         {
         }
 
-        public void routingMagazzino(SqlConnection conn, ConcurrentQueue<int[]> _queue, AutoResetEvent _signal, ConcurrentQueue<string[]> _queueLC1, ConcurrentQueue<string[]> _queueLC2, ConcurrentQueue<string[]> _queueLC3, AutoResetEvent _signalLC)
+        public void routingMagazzino(SqlConnection conn, ConcurrentQueue<int[]> _queue, AutoResetEvent _signal, ConcurrentQueue<string[]> _queueLC1, ConcurrentQueue<string[]> _queueLC2, ConcurrentQueue<string[]> _queueLC3, AutoResetEvent _signalLC1, AutoResetEvent _signalLC2, AutoResetEvent _signalLC3)
         {
             while (true)
             {
@@ -91,6 +91,7 @@ namespace DibrisBike
                         //alternatively it's possible to do a control on queue's dimensions and pick the lowest one.
                         Random r = new Random();
                         int rInt = r.Next(1, 4);
+                        bool flag = false;
 
                         //preparing the insertion into the routing table
                         query = "INSERT INTO stodb.dbo.routing (idLotto,idPezzo,step,durata,durataSetUp,opMacchina) VALUES (@idLotto,@idPezzo,@step,@durata,@durataSetUp,@opMacchina)";
@@ -105,48 +106,67 @@ namespace DibrisBike
                         {
                             case "graziella":
                                 comm.Parameters.AddWithValue("@opMacchina", rInt);
-                                //updating the interested LC's queue
-                                if (rInt == 1)
-                                    _queueLC1.Enqueue(codiceBarre);
-                                else if (rInt == 2)
-                                    _queueLC2.Enqueue(codiceBarre);
-                                else
-                                    _queueLC3.Enqueue(codiceBarre);
+                                flag = true;
                                 break;
 
                             case "corsa":
                                 comm.Parameters.AddWithValue("@opMacchina", rInt);
-                                if (rInt == 1)
-                                    _queueLC1.Enqueue(codiceBarre);
-                                else if (rInt == 2)
-                                    _queueLC2.Enqueue(codiceBarre);
-                                else
-                                    _queueLC3.Enqueue(codiceBarre);
+                                flag = true;
                                 break;
 
                             case "mbike":
                                 comm.Parameters.AddWithValue("@opMacchina", 3);
-                                _queueLC3.Enqueue(codiceBarre);
                                 break;
 
                             case "personalizzato":
                                 comm.Parameters.AddWithValue("@opMacchina", 3);
-                                _queueLC3.Enqueue(codiceBarre);
                                 break;
 
                             default:
                                 break;
                         }
+
                         //and executing the command
                         comm.ExecuteNonQuery();
-                        //signaling the service after the laser cut.
-                        _signalLC.Set();
 
                         //TODO: Complete the routing process--------------------------------------------------------------------------------------------------
+
+
+                        if (flag)
+                        {
+                            //updating the interested LC's queue
+                            if (rInt == 1)
+                            {
+                                _queueLC1.Enqueue(codiceBarre);
+                                //signaling the service after the laser cut.
+                                _signalLC1.Set();
+                            }
+                            else if (rInt == 2)
+                            {
+                                _queueLC2.Enqueue(codiceBarre);
+                                _signalLC2.Set();
+
+                            }
+                            else
+                            {
+                                _queueLC3.Enqueue(codiceBarre);
+                                _signalLC3.Set();
+                            }
+
+                        }
+                        else
+                        {
+                            _queueLC3.Enqueue(codiceBarre);
+                            //signaling the service after the laser cut.
+                            _signalLC3.Set();
+                        }                     
+                        
                     }
                     else
                     {
                         //launch exception on storage?
+                        Console.WriteLine("NOT ENOUGH RAW MATERIALS");
+                        //TODO: signal to wait --------------------------------------------------------------------------------------
                     }
                     conn.Close();
                 }

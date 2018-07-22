@@ -60,6 +60,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AccumuloPrint.cs" />
     <Compile Include="AccumuloSald.cs" />
     <Compile Include="Furnace.cs" />
     <Compile Include="PrintSO.cs" />

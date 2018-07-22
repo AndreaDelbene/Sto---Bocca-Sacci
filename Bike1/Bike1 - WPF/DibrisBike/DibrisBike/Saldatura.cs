@@ -29,11 +29,11 @@ namespace DibrisBike
                 //going for the welmer then
                 Console.WriteLine("WELMING");
                 //creating a new row into the table that contains frames that are being welmed/cooked/painted/dried
-                string query = "INSERT INTO stodb.dbo.saldessdp (startTime,stato) VALUES (@startTime, @stato)";
+                string query = "INSERT INTO stodb.dbo.saldessdp (startTimeSald,stato) VALUES (@startTimeSald, @stato)";
 
                 SqlCommand comm = new SqlCommand(query, conn);
                 //state is "welding"
-                comm.Parameters.AddWithValue("@startTime", DateTime.Now.ToString());
+                comm.Parameters.AddWithValue("@startTimeSald", DateTime.Now.ToString());
                 comm.Parameters.AddWithValue("@stato", "welding");
                 
                 if (conn != null && conn.State == ConnectionState.Closed)

@@ -28,12 +28,14 @@ namespace DibrisBike
 
                 //Let's cook the frame now!
                 Console.WriteLine("FURNACE");
-                string query = "UPDATE stodb.dbo.saldessdp SET stato = @stato WHERE idTelaio = @idTelaio";
+                string query = "UPDATE stodb.dbo.saldessdp SET stato = @stato, endTimeSald = @endTimeSald, startTimeForno = @startTimeForno WHERE idTelaio = @idTelaio";
 
                 SqlCommand comm = new SqlCommand(query, conn);
                 //state is "cooking"
                 comm.Parameters.AddWithValue("@stato", "cooking");
                 comm.Parameters.AddWithValue("@idTelaio", idTelaio);
+                comm.Parameters.AddWithValue("@endTimeSald", DateTime.Now.ToString());
+                comm.Parameters.AddWithValue("@startTimeForno", DateTime.Now.ToString());
 
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();

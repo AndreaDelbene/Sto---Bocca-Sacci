@@ -36,7 +36,9 @@ namespace DibrisBike
         static private readonly ConcurrentQueue<string[]> _queueLC1 = new ConcurrentQueue<string[]>();
         static private readonly ConcurrentQueue<string[]> _queueLC2 = new ConcurrentQueue<string[]>();
         static private readonly ConcurrentQueue<string[]> _queueLC3 = new ConcurrentQueue<string[]>();
-        static private readonly AutoResetEvent _signalLC = new AutoResetEvent(false);
+        static private readonly AutoResetEvent _signalLC1 = new AutoResetEvent(false);
+        static private readonly AutoResetEvent _signalLC2 = new AutoResetEvent(false);
+        static private readonly AutoResetEvent _signalLC3 = new AutoResetEvent(false);
 
         static private readonly ConcurrentQueue<string[]> _queueSald = new ConcurrentQueue<string[]>();
         static private readonly AutoResetEvent _signalSald = new AutoResetEvent(false);
@@ -105,7 +107,7 @@ namespace DibrisBike
         static void routingMagazzinoCaller()
         {
             Routing rm = new Routing();
-            rm.routingMagazzino(conn, _queue, _signal, _queueLC1, _queueLC2, _queueLC3, _signalLC);
+            rm.routingMagazzino(conn, _queue, _signal, _queueLC1, _queueLC2, _queueLC3, _signalLC1, _signalLC2, _signalLC3);
         }
 
         private void MPSChooser_Click(object sender, RoutedEventArgs e)
@@ -157,7 +159,9 @@ namespace DibrisBike
         static void accumuloSaldCaller()
         {
             AccumuloSald aS = new AccumuloSald();
-            aS.setAccumuloSald(conn, _queueLC1, _queueLC2, _queueLC3, _signalLC, _queueSald, _signalSald);
+            aS.setAccumuloSald1(conn, _queueLC1, _signalLC1, _queueSald, _signalSald);
+            aS.setAccumuloSald2(conn, _queueLC2, _signalLC2, _queueSald, _signalSald);
+            aS.setAccumuloSald3(conn, _queueLC3, _signalLC3, _queueSald, _signalSald);
         }
 
         static void saldCaller()
