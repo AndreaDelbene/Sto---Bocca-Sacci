@@ -214,6 +214,12 @@ namespace DibrisBike
             fur.startCooking(conn, _queueForno, _signalForno, _queueToPrint, _signalToPrint);
         }
 
+        private void ordiniModify_Click(object sender, RoutedEventArgs e)
+        {
+            ModifyOrdiniPage modifyOrdiniPage = new ModifyOrdiniPage();
+            modifyOrdiniPage.Show();
+        }
+
         /*void ProducerThread()
         {
             while (ShouldRun)

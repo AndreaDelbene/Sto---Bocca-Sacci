@@ -63,6 +63,9 @@
     <Compile Include="AccumuloPrint.cs" />
     <Compile Include="AccumuloSald.cs" />
     <Compile Include="Furnace.cs" />
+    <Compile Include="ModifyOrdiniPage.xaml.cs">
+      <DependentUpon>ModifyOrdiniPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RawMaterial.cs" />
     <Compile Include="Routing.cs" />
     <Compile Include="Saldatura.cs" />
@@ -78,6 +81,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="ModifyOrdiniPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MPS.cs" />
