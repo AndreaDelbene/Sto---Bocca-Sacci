@@ -52,15 +52,18 @@ namespace DibrisBike
             InitializeComponent();
 
             SqlConnection con = new SqlConnection();
-            //SIMONE-PC\\SQLEXPRESS;
+
+            //LAPTOP - DT8KB2TQ;
             con.ConnectionString =
-            "Server=LAPTOP-DT8KB2TQ;" +
+            "Server=SIMONE-PC\\SQLEXPRESS;" +
             "Database=stodb;" +
             "Integrated Security=True;" +
-            "MultipleActiveResultSets=true";
+            "MultipleActiveResultSets=true;";
 
             conn = con;
             conn.Open();
+               
+
             Thread t1 = new Thread(new ThreadStart(getMPSCaller));
             Thread t2 = new Thread(new ThreadStart(routingMagazzinoCaller));
             Thread t3 = new Thread(new ThreadStart(printStatoOrdini));
@@ -91,17 +94,25 @@ namespace DibrisBike
                     String query = "SELECT * FROM dbo.statoordini";
                     SqlCommand comm = new SqlCommand(query, conn);
                     if (conn != null && conn.State == ConnectionState.Closed)
-                        conn.Open();
-
-                    comm.ExecuteNonQuery();
-
-                    SqlDataAdapter adapter = new SqlDataAdapter(comm);
-                    DataTable table = new DataTable();
-                    if (table != null)
                     {
-                        adapter.Fill(table);
-                        statoOrdiniGrid.ItemsSource = table.DefaultView;
-                        adapter.Update(table);
+                        conn.Open();
+                    }
+                    else
+                    {
+                        while(conn.State == ConnectionState.Connecting)
+                        {
+                            // wait
+                        }
+                        comm.ExecuteNonQuery();
+
+                        SqlDataAdapter adapter = new SqlDataAdapter(comm);
+                        DataTable table = new DataTable();
+                        if (table != null)
+                        {
+                            adapter.Fill(table);
+                            statoOrdiniGrid.ItemsSource = table.DefaultView;
+                            adapter.Update(table);
+                        }
                     }
                 });
                 Thread.Sleep(2000);
@@ -126,8 +137,11 @@ namespace DibrisBike
             if (dialogOk == true)
             {
                 MPSFilePath = fileDialog.FileName;
-                RMPathLabel.Content = MPSFilePath;
-                getMPS(MPSFilePath);
+                MPSPathLabel.Content = MPSFilePath;
+                Thread thread = new Thread(new ThreadStart(() => {
+                    getMPS(MPSFilePath);
+                }));
+                thread.Start();
             }
         }
 
@@ -135,6 +149,7 @@ namespace DibrisBike
         {
             MPS mps = new MPS();
             mps.getMPSFromFile(mpsFilePath, conn);
+            updateLabel(MPSPathLabel, "MPS caricato con successo");
         }
 
         private void RMChooser_Click(object sender, RoutedEventArgs e)
@@ -146,18 +161,35 @@ namespace DibrisBike
             Nullable<bool> dialogOk = fileDialog.ShowDialog();
 
             String rawMaterialFilePath = string.Empty;
-            if(dialogOk == true)
+            if (dialogOk == true)
             {
                 rawMaterialFilePath = fileDialog.FileName;
                 RMPathLabel.Content = rawMaterialFilePath;
-                getRawMaterial(rawMaterialFilePath);
+                Thread thread = new Thread(new ThreadStart(() =>
+                {
+                    getRawMaterial(rawMaterialFilePath);
+                }));
+                thread.Start();
             }
         }
 
-        static void getRawMaterial(String path)
+        private void getRawMaterial(String path)
         {
-            RawMaterial rawMaterial = new RawMaterial(conn);
-            rawMaterial.getRawFromFile(path);
+                RawMaterial rawMaterial = new RawMaterial(conn);
+                rawMaterial.getRawFromFile(path);
+                updateLabel(RMPathLabel, "Raw Material caricato con successo");
+        }
+
+        private void updateLabel(Label label, string message)
+        {
+            Action action = () => label.Content = message;
+            Dispatcher.Invoke(action);
+        }
+
+        private void updateMPSLabel(string message)
+        {
+            Action action = () => MPSPathLabel.Content = message;
+            Dispatcher.Invoke(action);
         }
 
         static void accumuloSaldCaller()

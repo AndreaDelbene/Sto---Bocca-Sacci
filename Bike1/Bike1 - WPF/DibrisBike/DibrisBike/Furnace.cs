@@ -41,7 +41,7 @@ namespace DibrisBike
                 comm.ExecuteNonQuery();
 
                 _queueToPrint.Enqueue(idTelaio);
-                conn.Close();
+                //conn.Close();
             }
         }
     }

@@ -32,7 +32,7 @@ namespace DibrisBike
                 for (int i = 0; i < idLotto.Length; i++)
                 {
                     //and checking, for each request, whenever I have still tubes in the storage
-                    string query = "SELECT TOP @quantita FROM stodb.dbo.magazzinomateriali";
+                    string query = "SELECT TOP (@quantita) * FROM stodb.dbo.magazzinomateriali";
                     SqlCommand comm = new SqlCommand(query, conn);
 
                     comm.Parameters.AddWithValue("@quantita", quantitaTubi[i]);
@@ -152,7 +152,7 @@ namespace DibrisBike
                     //conn.Close();
                 }
                 //sleeping the thread for 2 secs
-                //Thread.Sleep(2000);
+                Thread.Sleep(10000);
             }
         }
     }

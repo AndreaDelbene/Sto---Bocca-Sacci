@@ -52,7 +52,7 @@ namespace DibrisBike
 
                 int[] quantitaTubi = new int[id.Length];
 
-                conn.Close();
+                //conn.Close();
                 //for each element in the table we got back from the first request
                 for (int i = 0; i < id.Length; i++)
                 {
@@ -99,8 +99,11 @@ namespace DibrisBike
                     comm.ExecuteNonQuery();
 
                     SqlDataReader reader = comm.ExecuteReader();
-                    quantitaTubi[i] = (int)reader["quantitaTubi"];
-                    conn.Close();
+                    if (reader.HasRows)
+                        quantitaTubi[i] = (int)reader["quantitaTubi"];
+                    else
+                        quantitaTubi[i] = 3;    //Valore impostato finchè non si avrà la tabella ricette popolata
+                    //conn.Close();
                     Console.WriteLine(i);
 
                 }
@@ -140,40 +143,47 @@ namespace DibrisBike
                 comm.Parameters.Clear();
                 for (int j = 1; j <= colCount; j++)
                 {
-                    switch(j)
+                    switch (j)
                     {
-                        case 1: String campo = xlRange.Cells[i, j].Value2.ToString();
-                                DateTime date = DateTime.ParseExact(campo, "MM/dd/yy HH:mm:ss", null);
-                                comm.Parameters.AddWithValue("@start", date);
-                                break;
+                        case 1:
+                            String campo = xlRange.Cells[i, j].Value2.ToString();
+                            DateTime date = DateTime.ParseExact(campo, "MM/dd/yy HH:mm:ss", null);
+                            comm.Parameters.AddWithValue("@start", date);
+                            break;
 
-                        case 2: String campo2 = xlRange.Cells[i, j].Value2.ToString();
-                                DateTime date2 = DateTime.ParseExact(campo2, "MM/dd/yy HH:mm:ss", null);
-                                comm.Parameters.AddWithValue("@dueDate", date2);
-                                break;
+                        case 2:
+                            String campo2 = xlRange.Cells[i, j].Value2.ToString();
+                            DateTime date2 = DateTime.ParseExact(campo2, "MM/dd/yy HH:mm:ss", null);
+                            comm.Parameters.AddWithValue("@dueDate", date2);
+                            break;
 
-                        case 3: int campo3 = (int)xlRange.Cells[i, j].Value2;
-                                comm.Parameters.AddWithValue("@quantita", campo3);
-                                break;
+                        case 3:
+                            int campo3 = (int)xlRange.Cells[i, j].Value2;
+                            comm.Parameters.AddWithValue("@quantita", campo3);
+                            break;
 
-                        case 4: String campo4 = (String)xlRange.Cells[i, j].Value2;
-                                comm.Parameters.AddWithValue("@tipoTelaio", campo4);
-                                break;
+                        case 4:
+                            String campo4 = (String)xlRange.Cells[i, j].Value2;
+                            comm.Parameters.AddWithValue("@tipoTelaio", campo4);
+                            break;
 
-                        case 5: String campo5 = (String)xlRange.Cells[i, j].Value2;
-                                comm.Parameters.AddWithValue("@colore", campo5);
-                                break;
+                        case 5:
+                            String campo5 = (String)xlRange.Cells[i, j].Value2;
+                            comm.Parameters.AddWithValue("@colore", campo5);
+                            break;
 
-                        case 6: int campo6 = (int)xlRange.Cells[i, j].Value2;
-                                comm.Parameters.AddWithValue("@priorita", campo6);
-                                break;
+                        case 6:
+                            int campo6 = (int)xlRange.Cells[i, j].Value2;
+                            comm.Parameters.AddWithValue("@priorita", campo6);
+                            break;
 
-                        case 7: String campodef = xlRange.Cells[i, j].Value2.ToString();
-                                 int campodefInt = Int32.Parse(campodef);
-                                 comm.Parameters.AddWithValue("@running", campodefInt);
-                                 break;
+                        case 7:
+                            String campodef = xlRange.Cells[i, j].Value2.ToString();
+                            int campodefInt = Int32.Parse(campodef);
+                            comm.Parameters.AddWithValue("@running", campodefInt);
+                            break;
                     }
-                    
+
                 }
 
                 if (conn != null && conn.State == ConnectionState.Closed)
