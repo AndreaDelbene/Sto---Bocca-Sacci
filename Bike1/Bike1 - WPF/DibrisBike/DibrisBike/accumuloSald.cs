@@ -53,7 +53,7 @@ namespace DibrisBike
                 _queueSald.Enqueue(codiceBarre);
                 //and signaling it to another thread
                 _signalSald.Set();
-                conn.Close();
+                //conn.Close();
 
                 //Thread.Sleep(2000);
             }

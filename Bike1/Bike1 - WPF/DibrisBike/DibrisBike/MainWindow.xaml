@@ -19,17 +19,21 @@
                     <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
                 </Grid.RowDefinitions>
 
-                <Button x:Name="MPSChooser" Margin="0 0 10 10" Grid.Column="0" Grid.Row="0" Click="MPSChooser_Click">Carica MPS file</Button>
-                <Button x:Name="RMChooser" Margin="0 0 10 10" Grid.Column="0" Grid.Row="1" Click="RMChooser_Click">Carica Raw Material file</Button>
-                <fa:ImageAwesome x:Name="spinnerMPS" Grid.Column="1" Grid.Row="0" Height="30" Icon="Cog" Spin="True" SpinDuration="2" Visibility="Visible"/>
-                <fa:ImageAwesome x:Name="spinnerRM" Grid.Column="1" Grid.Row="1" Height="30" Icon="Cog" Spin="True" SpinDuration="2" Visibility="Visible"/>
+                <Button x:Name="MPSChooser" Margin="0 0 10 10" Grid.Column="0" Grid.Row="0" Click="MPSChooser_Click" Content="Carica MPS file" />
+                <Button x:Name="RMChooser" Margin="0 0 10 10" Grid.Column="0" Grid.Row="1" Click="RMChooser_Click" Content="Carica Raw Material file" />
+                <fa:ImageAwesome x:Name="spinnerMPS" Grid.Column="1" Grid.Row="0" Height="30" Icon="Cog" Spin="True" SpinDuration="2" Visibility="Hidden"/>
+                <fa:ImageAwesome x:Name="spinnerRM" Grid.Column="1" Grid.Row="1" Height="30" Icon="Cog" Spin="True" SpinDuration="2" Visibility="Hidden"/>
 
-                <Label x:Name="MPSPathLabel" Margin="0 0 10 10" Grid.Column="2" Grid.Row="0">Testo della label</Label>
-                <Label x:Name="RMPathLabel" Margin="0 0 10 10" Grid.Column="2" Grid.Row="1">Testo della label</Label>
+                <Label x:Name="MPSPathLabel" Margin="0 0 10 10" Grid.Column="2" Grid.Row="0" Content="" />
+                <Label x:Name="RMPathLabel" Margin="0 0 10 10" Grid.Column="2" Grid.Row="1" Content="" />
 
-                <DataGrid Margin="0 30 0 0" AutoGenerateColumns="True" x:Name="statoOrdiniGrid" Grid.Row="3" Grid.ColumnSpan="3" />
+                <Label x:Name="statoordiniGridLabel" Grid.Row="2" Grid.ColumnSpan="3" Content="Stato ordini" Margin="0 20 0 0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" FontWeight="DemiBold" />
+                <DataGrid Margin="0 0 0 0" AutoGenerateColumns="True" x:Name="statoOrdiniGrid" Grid.Row="3" Grid.ColumnSpan="3" />
             </Grid>
         </StackPanel>
     </Border>

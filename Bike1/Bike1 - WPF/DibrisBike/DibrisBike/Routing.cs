@@ -32,12 +32,13 @@ namespace DibrisBike
                 for (int i = 0; i < idLotto.Length; i++)
                 {
                     //and checking, for each request, whenever I have still tubes in the storage
-                    string query = "SELECT TOP @quantita FROM stodb.dbo.magazzinomateriali";
+                    string query = "SELECT TOP (@quantita) * FROM stodb.dbo.magazzinomateriali";
                     SqlCommand comm = new SqlCommand(query, conn);
 
                     comm.Parameters.AddWithValue("@quantita", quantitaTubi[i]);
 
                     SqlDataAdapter adapter = new SqlDataAdapter(comm);
+
                     if (conn != null && conn.State == ConnectionState.Closed)
                         conn.Open();
 
@@ -168,10 +169,10 @@ namespace DibrisBike
                         Console.WriteLine("NOT ENOUGH RAW MATERIALS");
                         //TODO: signal to wait --------------------------------------------------------------------------------------
                     }
-                    conn.Close();
+                    //conn.Close();
                 }
                 //sleeping the thread for 2 secs
-                //Thread.Sleep(2000);
+                Thread.Sleep(10000);
             }
         }
     }
