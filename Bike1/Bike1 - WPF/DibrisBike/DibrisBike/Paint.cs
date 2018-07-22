@@ -47,6 +47,7 @@ namespace DibrisBike
 
                 SqlCommand comm = new SqlCommand(query, conn);
                 //state is "drying"
+                comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "drying");
                 comm.Parameters.AddWithValue("@idTelaio", idTelaio);
                 comm.Parameters.AddWithValue("@endTimePaint", DateTime.Now.ToString());
@@ -60,6 +61,7 @@ namespace DibrisBike
                 //and the state of orders.
                 query = "UPDATE dbo.statoordini SET stato = @stato WHERE idLotto = @idLotto";
                 comm = new SqlCommand(query, conn);
+                comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "drying");
                 comm.Parameters.AddWithValue("@idLotto", idLotto);
                 if (conn != null && conn.State == ConnectionState.Closed)
@@ -108,6 +110,7 @@ namespace DibrisBike
 
                 SqlCommand comm = new SqlCommand(query, conn);
                 //state is "drying"
+                comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "drying");
                 comm.Parameters.AddWithValue("@idTelaio", idTelaio);
                 comm.Parameters.AddWithValue("@endTimePaint", DateTime.Now.ToString());
@@ -120,6 +123,7 @@ namespace DibrisBike
 
                 query = "UPDATE dbo.statoordini SET stato = @stato WHERE idLotto = @idLotto";
                 comm = new SqlCommand(query, conn);
+                comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "drying");
                 comm.Parameters.AddWithValue("@idLotto", idLotto);
                 if (conn != null && conn.State == ConnectionState.Closed)

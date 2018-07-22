@@ -34,6 +34,7 @@ namespace DibrisBike
 
                 SqlCommand comm = new SqlCommand(query, conn);
                 //state is "cooking"
+                comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "cooking");
                 comm.Parameters.AddWithValue("@idTelaio", idTelaio);
                 comm.Parameters.AddWithValue("@endTimeSald", DateTime.Now.ToString());
@@ -47,6 +48,7 @@ namespace DibrisBike
                 //updating the order state table
                 query = "UPDATE dbo.statoordini SET stato = @stato WHERE idLotto = @idLotto";
                 comm = new SqlCommand(query, conn);
+                comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "cooking");
                 comm.Parameters.AddWithValue("@idLotto", idLotto);
                 if (conn != null && conn.State == ConnectionState.Closed)

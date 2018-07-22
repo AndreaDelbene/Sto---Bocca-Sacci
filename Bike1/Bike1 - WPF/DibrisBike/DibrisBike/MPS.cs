@@ -20,7 +20,7 @@ namespace DibrisBike
         {
         }
 
-        public void getMPS(SqlConnection conn, ConcurrentQueue<int[]> _queue, AutoResetEvent _signal)
+        public void getMPS(SqlConnection conn, ConcurrentQueue<object> _queue, AutoResetEvent _signal)
         {
             while (true)
             {
@@ -53,6 +53,11 @@ namespace DibrisBike
 
                 int[] quantitaTubi = new int[id.Length];
 
+                if(priorita.Length>1)
+                {
+                    //TODO: Change Id vector to insert in priority order.
+                }
+
                 //conn.Close();
                 //for each element in the table we got back from the first request
                 for (int i = 0; i < id.Length; i++)
@@ -62,6 +67,7 @@ namespace DibrisBike
                         "VALUES(@idLotto, @startPianificata, @startEffettiva, @dueDatePianificata, @quantitaDesiderata, @quantitaProdotta, @tipoTelaio, @stato, @descrizione)";
 
                     comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@idLotto", id[i]);
                     comm.Parameters.AddWithValue("@startPianificata", startDate[i]);
                     comm.Parameters.AddWithValue("@startEffettiva", startDate[i]);
@@ -81,6 +87,7 @@ namespace DibrisBike
                     // i set then the flag to 1 into the 'mps' table
                     query = "UPDATE stodb.dbo.mps SET running = 1 WHERE id = @idLotto";
                     comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@idLotto", id[i]);
 
                     if (conn != null && conn.State == ConnectionState.Closed)
@@ -92,6 +99,7 @@ namespace DibrisBike
                     //and i check how many stuff i need for that kind of bike
                     query = "SELECT quantitaTubi FROM dbo.ricette WHERE tipoTelaio = @tipoTelaio";
                     comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
 
                     if (conn != null && conn.State == ConnectionState.Closed)
@@ -106,6 +114,7 @@ namespace DibrisBike
                         quantitaTubi[i] = 3;    //Valore impostato finchè non si avrà la tabella ricette popolata
                     //conn.Close();
                     Console.WriteLine(i);
+                    reader.Close();
 
                 }
                 if (id.Length != 0)
@@ -113,11 +122,12 @@ namespace DibrisBike
                     //queue=FIFO, i save in it the amount of ids and tubes, and i sleep for the next 2 secs.
                     _queue.Enqueue(id);
                     _queue.Enqueue(quantitaTubi);
+                    _queue.Enqueue(linea);
                     _signal.Set();
                     //the stuff passes under the Quality Control Area
                     Console.WriteLine("ACQ");
                 }
-
+                conn.Close();
                 Thread.Sleep(2000);
             }
         }
@@ -225,7 +235,7 @@ namespace DibrisBike
             xlApp.Quit();
             Marshal.ReleaseComObject(xlApp);
 
-            Console.WriteLine("Lettura e salvattagio MPS completato");
+            Console.WriteLine("Lettura e salvataggio MPS completato");
         }
     }
 }

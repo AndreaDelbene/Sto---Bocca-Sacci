@@ -30,7 +30,7 @@ namespace DibrisBike
 
         static private SqlConnection conn;
 
-        static private readonly ConcurrentQueue<int[]> _queue = new ConcurrentQueue<int[]>();
+        static private readonly ConcurrentQueue<object> _queue = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signal = new AutoResetEvent(false);
 
         static private readonly ConcurrentQueue<object> _queueLC1 = new ConcurrentQueue<object>();

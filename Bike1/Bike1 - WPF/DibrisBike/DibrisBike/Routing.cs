@@ -16,16 +16,23 @@ namespace DibrisBike
         {
         }
 
-        public void routingMagazzino(SqlConnection conn, ConcurrentQueue<int[]> _queue, AutoResetEvent _signal, ConcurrentQueue<object> _queueLC1, ConcurrentQueue<object> _queueLC2, ConcurrentQueue<object> _queueLC3, AutoResetEvent _signalLC1, AutoResetEvent _signalLC2, AutoResetEvent _signalLC3)
+        public void routingMagazzino(SqlConnection conn, ConcurrentQueue<object> _queue, AutoResetEvent _signal, ConcurrentQueue<object> _queueLC1, ConcurrentQueue<object> _queueLC2, ConcurrentQueue<object> _queueLC3, AutoResetEvent _signalLC1, AutoResetEvent _signalLC2, AutoResetEvent _signalLC3)
         {
             while (true)
             {
                 //waiting until some data comes from the queue
                 _signal.WaitOne();
                 //getting it then
+                object idLottoTemp, quantitaTubiTemp, lineaTemp;
                 int[] idLotto,quantitaTubi;
-                _queue.TryDequeue(out idLotto);
-                _queue.TryDequeue(out quantitaTubi);
+                string[] linea;
+                _queue.TryDequeue(out idLottoTemp);
+                _queue.TryDequeue(out quantitaTubiTemp);
+                _queue.TryDequeue(out lineaTemp);
+
+                idLotto = (int[])idLottoTemp;
+                quantitaTubi = (int[])quantitaTubiTemp;
+                linea = (string[])lineaTemp;
 
                 string[] tipoTelaio = new string[idLotto.Length];
 
@@ -87,15 +94,19 @@ namespace DibrisBike
 
                         tipoTelaio[i] = (string)reader["tipoTelaio"];
 
+                        reader.Close();
+
                         comm = new SqlCommand(query, conn);
                         //getting a random number to select in which Laser Cut send the set of tubes.
                         //alternatively it's possible to do a control on queue's dimensions and pick the lowest one.
                         Random r = new Random();
+                        
                         int rInt = r.Next(1, 4);
                         bool flag = false;
 
                         //preparing the insertion into the routing table
                         query = "INSERT INTO dbo.routing (idLotto,idPezzo,step,durata,durataSetUp,opMacchina) VALUES (@idLotto,@idPezzo,@step,@durata,@durataSetUp,@opMacchina)";
+                        comm.Parameters.Clear();
                         comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
                         comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
                         comm.Parameters.AddWithValue("@step", 1);
@@ -130,10 +141,75 @@ namespace DibrisBike
                         //and executing the command
                         comm.ExecuteNonQuery();
 
-                        //TODO: Complete the routing process--------------------------------------------------------------------------------------------------
+                        //and keeping updating the routing 
+                        
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
+                        comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                        comm.Parameters.AddWithValue("@step", 2);
+                        comm.Parameters.AddWithValue("@durata", 5);
+                        comm.Parameters.AddWithValue("@durataSetUp", 0);
+                        comm.Parameters.AddWithValue("@opMacchina", 9);
 
+
+                        comm.ExecuteNonQuery();
+                        
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
+                        comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                        comm.Parameters.AddWithValue("@step", 3);
+                        comm.Parameters.AddWithValue("@durata", 5);
+                        comm.Parameters.AddWithValue("@durataSetUp", 0);
+                        comm.Parameters.AddWithValue("@opMacchina", 10);
+
+
+                        comm.ExecuteNonQuery();
+                        
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
+                        comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                        comm.Parameters.AddWithValue("@step", 4);
+                        comm.Parameters.AddWithValue("@durata", 5);
+                        comm.Parameters.AddWithValue("@durataSetUp", 0);
+
+                        if (linea[i].CompareTo("pastello")==0)
+                        {
+                            comm.Parameters.AddWithValue("@opMacchina", 11);
+                        }
+                        else if(linea[i].CompareTo("metallizzato")==0)
+                        {
+                            comm.Parameters.AddWithValue("@opMacchina", 12);
+                        }
+                       
+                        comm.ExecuteNonQuery();
+                        
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
+                        comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                        comm.Parameters.AddWithValue("@step", 5);
+                        comm.Parameters.AddWithValue("@durata", 5);
+                        comm.Parameters.AddWithValue("@durataSetUp", 0);
+                        comm.Parameters.AddWithValue("@opMacchina", 13);
+
+
+                        comm.ExecuteNonQuery();
+                        
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
+                        comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                        comm.Parameters.AddWithValue("@step", 6);
+                        comm.Parameters.AddWithValue("@durata", 5);
+                        comm.Parameters.AddWithValue("@durataSetUp", 0);
+                        comm.Parameters.AddWithValue("@opMacchina", 14);
+
+
+                        comm.ExecuteNonQuery();
+                        
+                       
+                       
                         query = "UPDATE stodb.dbo.statoordini SET stato = @stato WHERE idLotto = @idLotto";
                         comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
                         comm.Parameters.AddWithValue("@stato", "cutting");
                         comm.Parameters.AddWithValue("@idLotto", idLotto);
                         if (conn != null && conn.State == ConnectionState.Closed)

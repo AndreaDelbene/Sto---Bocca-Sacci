@@ -34,6 +34,7 @@ namespace DibrisBike
 
                 SqlCommand comm = new SqlCommand(query, conn);
                 //state is "painting"
+                comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "painting");
                 comm.Parameters.AddWithValue("@idTelaio", idTelaio);
                 comm.Parameters.AddWithValue("@endTimeForno", DateTime.Now.ToString());
@@ -63,6 +64,7 @@ namespace DibrisBike
                 //updating the order state table
                 query = "UPDATE dbo.statoordini SET stato = @stato WHERE idLotto = @idLotto";
                 comm = new SqlCommand(query, conn);
+                comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "painting");
                 comm.Parameters.AddWithValue("@idLotto", idLotto);
                 if (conn != null && conn.State == ConnectionState.Closed)
@@ -74,7 +76,7 @@ namespace DibrisBike
                 query = "SELECT colore,linea FROM stodb.dbo.mps WHERE id = @idLotto";
                 comm = new SqlCommand(query, conn);
                 SqlDataReader reader;
-
+                comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@idLotto", idLotto);
 
                 if (conn != null && conn.State == ConnectionState.Closed)
@@ -85,8 +87,9 @@ namespace DibrisBike
                 string colore = (string)reader["colore"];
                 string linea = (string)reader["linea"];
 
+                reader.Close();
                 //and we fill the queue, according to values.
-                if(linea.CompareTo("pastello")==0)
+                if (linea.CompareTo("pastello")==0)
                 {
                     _queuePast.Enqueue(linea);
                     _queuePast.Enqueue(colore);

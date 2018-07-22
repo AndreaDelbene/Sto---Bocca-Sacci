@@ -31,6 +31,7 @@ namespace DibrisBike
 
                 string query = "UPDATE dbo.statoordini SET stato = @stato WHERE idLotto = @idLotto";
                 SqlCommand comm = new SqlCommand(query, conn);
+                comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "storing for welming");
                 comm.Parameters.AddWithValue("@idLotto", idLotto);
                 if (conn != null && conn.State == ConnectionState.Closed)
@@ -47,6 +48,7 @@ namespace DibrisBike
 
                 comm = new SqlCommand(query, conn);
                 //state is "welding"
+                comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@startTimeSald", DateTime.Now.ToString());
                 comm.Parameters.AddWithValue("@stato", "welding");
                 
@@ -58,6 +60,7 @@ namespace DibrisBike
                 query = "SELECT TOP 1 idTelaio FROM dbo.saldess ORDER BY idTelaio DESC";
 
                 comm = new SqlCommand(query, conn);
+                comm.Parameters.Clear();
                 SqlDataReader reader;
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();
@@ -65,13 +68,14 @@ namespace DibrisBike
                 reader = comm.ExecuteReader();
                 reader.Read();
                 int idTelaio = (int)reader["idTelaio"];
+                reader.Close();
                 //and then we come back to update the storage infos.
                 for (int i=0; i<codiceBarre.Length;i++)
                 {
                     query = "UPDATE dbo.accumulosaldaturadp SET idTelaio = @idTelaio WHERE codiceTubo = @codiceTubo";
 
                     comm = new SqlCommand(query, conn);
-
+                    comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@idTelaio", idTelaio);
                     comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
 
@@ -84,6 +88,7 @@ namespace DibrisBike
 
                 query = "UPDATE dbo.statoordini SET stato = @stato WHERE idLotto = @idLotto";
                 comm = new SqlCommand(query, conn);
+                comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "welming");
                 comm.Parameters.AddWithValue("@idLotto", idLotto);
                 if (conn != null && conn.State == ConnectionState.Closed)

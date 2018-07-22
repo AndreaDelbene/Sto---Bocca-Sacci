@@ -40,8 +40,8 @@ namespace DibrisBike
                 {
                     string query = "INSERT INTO dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
 
-                     comm = new SqlCommand(query, conn);
-
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
                     comm.Parameters.AddWithValue("@descrizione", "");
                     comm.Parameters.AddWithValue("@diametro", 5.0);
@@ -90,7 +90,7 @@ namespace DibrisBike
                     string query = "INSERT INTO dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
 
                     comm = new SqlCommand(query, conn);
-
+                    comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
                     comm.Parameters.AddWithValue("@descrizione", "");
                     comm.Parameters.AddWithValue("@diametro", 5.0);
@@ -139,7 +139,7 @@ namespace DibrisBike
                     string query = "INSERT INTO dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
 
                     comm = new SqlCommand(query, conn);
-
+                    comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
                     comm.Parameters.AddWithValue("@descrizione", "");
                     comm.Parameters.AddWithValue("@diametro", 5.0);
