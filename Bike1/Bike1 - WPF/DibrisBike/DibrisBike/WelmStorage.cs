@@ -79,7 +79,7 @@ namespace DibrisBike
                 codiceBarre = (string[])codiceBarreTemp;
                 idLotto = (int)idLottoTemp;
                 //sleep the Thread (simulating laser cut)
-                Thread.Sleep(5000);
+                Thread.Sleep(10000);
 
                 //transponting the tubes from the storage to the welder (saldatrice)
                 Console.WriteLine("STORING");

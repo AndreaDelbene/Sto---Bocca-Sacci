@@ -37,7 +37,7 @@ namespace DibrisBike
                 linea = (string)lineaTemp;
 
                 // simulating the Paint
-                Thread.Sleep(5000);
+                Thread.Sleep(7000);
 
                 //Let's Dry the frame now!
                 Console.WriteLine("DRYING");

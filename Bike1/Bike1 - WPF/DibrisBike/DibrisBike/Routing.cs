@@ -111,13 +111,14 @@ namespace DibrisBike
                             bool flag = false;
 
                             //preparing the insertion into the routing table
+                            //Laser Cut step
                             query = "INSERT INTO dbo.routing (idLotto,idPezzo,step,durata,durataSetUp,opMacchina) VALUES (@idLotto,@idPezzo,@step,@durata,@durataSetUp,@opMacchina)";
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
                             comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
                             comm.Parameters.AddWithValue("@step", 1);
-                            comm.Parameters.AddWithValue("@durata", 5);
-                            comm.Parameters.AddWithValue("@durataSetUp", 0);
+                            comm.Parameters.AddWithValue("@durata", 9);
+                            comm.Parameters.AddWithValue("@durataSetUp", 1);
 
 
                             switch (tipoTelaio[i])
@@ -148,35 +149,35 @@ namespace DibrisBike
                             comm.ExecuteNonQuery();
 
                             //and keeping updating the routing 
-
+                            //Welming step
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
                             comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
                             comm.Parameters.AddWithValue("@step", 2);
-                            comm.Parameters.AddWithValue("@durata", 5);
-                            comm.Parameters.AddWithValue("@durataSetUp", 0);
+                            comm.Parameters.AddWithValue("@durata", 8);
+                            comm.Parameters.AddWithValue("@durataSetUp", 1);
                             comm.Parameters.AddWithValue("@opMacchina", 9);
 
 
                             comm.ExecuteNonQuery();
-
+                            //Furnace Step
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
                             comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
                             comm.Parameters.AddWithValue("@step", 3);
-                            comm.Parameters.AddWithValue("@durata", 5);
+                            comm.Parameters.AddWithValue("@durata", 8);
                             comm.Parameters.AddWithValue("@durataSetUp", 0);
                             comm.Parameters.AddWithValue("@opMacchina", 10);
 
 
                             comm.ExecuteNonQuery();
-
+                            //Painting Step
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
                             comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
                             comm.Parameters.AddWithValue("@step", 4);
                             comm.Parameters.AddWithValue("@durata", 5);
-                            comm.Parameters.AddWithValue("@durataSetUp", 0);
+                            comm.Parameters.AddWithValue("@durataSetUp", 2);
 
                             if (linea[i].CompareTo("pastello") == 0)
                             {
@@ -188,24 +189,24 @@ namespace DibrisBike
                             }
 
                             comm.ExecuteNonQuery();
-
+                            //Drying Step
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
                             comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
                             comm.Parameters.AddWithValue("@step", 5);
-                            comm.Parameters.AddWithValue("@durata", 5);
+                            comm.Parameters.AddWithValue("@durata", 6);
                             comm.Parameters.AddWithValue("@durataSetUp", 0);
                             comm.Parameters.AddWithValue("@opMacchina", 13);
 
 
                             comm.ExecuteNonQuery();
-
+                            //Assembling Step
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
                             comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
                             comm.Parameters.AddWithValue("@step", 6);
-                            comm.Parameters.AddWithValue("@durata", 5);
-                            comm.Parameters.AddWithValue("@durataSetUp", 0);
+                            comm.Parameters.AddWithValue("@durata", 4);
+                            comm.Parameters.AddWithValue("@durataSetUp", 1);
                             comm.Parameters.AddWithValue("@opMacchina", 14);
 
 

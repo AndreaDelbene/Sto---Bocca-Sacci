@@ -26,7 +26,7 @@ namespace DibrisBike
                 _queueForno.TryDequeue(out idTelaio);
                 _queueForno.TryDequeue(out idLotto);
                 // simulating the Welmer
-                Thread.Sleep(5000);
+                Thread.Sleep(8000);
 
                 //Let's cook the frame now!
                 Console.WriteLine("FURNACE");

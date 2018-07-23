@@ -60,6 +60,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Assembling.cs" />
     <Compile Include="Drying.cs" />
     <Compile Include="PaintStorage.cs" />
     <Compile Include="WelmStorage.cs" />

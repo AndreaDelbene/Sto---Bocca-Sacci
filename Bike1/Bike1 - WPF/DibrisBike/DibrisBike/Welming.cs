@@ -39,7 +39,7 @@ namespace DibrisBike
 
                 comm.ExecuteNonQuery();
                 //transponting the tubes from the storage to the welder (saldatrice)
-                Thread.Sleep(2000);
+                Thread.Sleep(1000);
 
                 //going for the welmer then
                 Console.WriteLine("WELMING");
