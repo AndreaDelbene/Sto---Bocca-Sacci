@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace DibrisBike
 {
-    class AccumuloSald
+    class WelmStorage
     {
-        public AccumuloSald()
+        public WelmStorage()
         {
         }
 
@@ -52,6 +52,17 @@ namespace DibrisBike
                         conn.Open();
 
                     comm.ExecuteNonQuery();
+
+                    //updating the lasercut table for each tube
+                    comm = new SqlCommand(query, conn);
+                    query = "UPDATE dbo.lasercutdp SET endTime = @endTime WHERE codiceTubo = @codiceTubo";
+                    comm.Parameters.AddWithValue("@endTime", DateTime.Now.ToString());
+                    comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
+
+                    if (conn != null && conn.State == ConnectionState.Closed)
+                        conn.Open();
+
+                    comm.ExecuteNonQuery();
                 }
                 //insereting the bar codes into the queue for the next step
                 _queueSald.Enqueue(codiceBarre);
@@ -79,7 +90,7 @@ namespace DibrisBike
                 codiceBarre = (string[])codiceBarreTemp;
                 idLotto = (int)idLottoTemp;
                 //sleep the Thread (simulating laser cut)
-                Thread.Sleep(5000);
+                Thread.Sleep(10000);
 
                 //transponting the tubes from the storage to the welder (saldatrice)
                 Console.WriteLine("STORING");
@@ -96,6 +107,17 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@diametro", 5.0);
                     comm.Parameters.AddWithValue("@peso", 10.2);
                     comm.Parameters.AddWithValue("@lunghezza", 1.7);
+
+                    if (conn != null && conn.State == ConnectionState.Closed)
+                        conn.Open();
+
+                    comm.ExecuteNonQuery();
+
+                    query = "UPDATE dbo.lasercutdp SET endTime = @endTime WHERE codiceTubo = @codiceTubo";
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@endTime", DateTime.Now.ToString());
+                    comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
 
                     if (conn != null && conn.State == ConnectionState.Closed)
                         conn.Open();

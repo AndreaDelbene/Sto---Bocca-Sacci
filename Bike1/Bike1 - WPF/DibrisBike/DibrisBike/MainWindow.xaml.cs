@@ -27,54 +27,58 @@ namespace DibrisBike
     /// </summary>
     public partial class MainWindow : Window
     {
-
+        //Connection
         static private SqlConnection conn;
-
+        // queues and signals for MPS - Routing
         static private readonly ConcurrentQueue<object> _queue = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signal = new AutoResetEvent(false);
-
+        static private readonly AutoResetEvent _signalError = new AutoResetEvent(false);
+        static private bool flagError = false;
+        //queues and signals for Routing - WelmStorage
         static private readonly ConcurrentQueue<object> _queueLC1 = new ConcurrentQueue<object>();
         static private readonly ConcurrentQueue<object> _queueLC2 = new ConcurrentQueue<object>();
         static private readonly ConcurrentQueue<object> _queueLC3 = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signalLC1 = new AutoResetEvent(false);
         static private readonly AutoResetEvent _signalLC2 = new AutoResetEvent(false);
         static private readonly AutoResetEvent _signalLC3 = new AutoResetEvent(false);
-
+        //queues and signals for WelmStorage - Welming
         static private readonly ConcurrentQueue<object> _queueSald = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signalSald = new AutoResetEvent(false);
-
+        //queues and signals for Welming - Furnace
         static private readonly ConcurrentQueue<int> _queueForno = new ConcurrentQueue<int>();
         static private readonly AutoResetEvent _signalForno = new AutoResetEvent(false);
-
+        //queues and signals for Furnace - PaintStorage
         static private readonly ConcurrentQueue<int> _queueToPaint = new ConcurrentQueue<int>();
         static private readonly AutoResetEvent _signalToPaint = new AutoResetEvent(false);
-
-
+        //queues and signals for PaintStorage - Painting
         static private readonly ConcurrentQueue<object> _queuePast = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signalPast = new AutoResetEvent(false);
         static private readonly ConcurrentQueue<object> _queueMetal = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signalMetal = new AutoResetEvent(false);
-
-
+        //queues and signals for Painting - Drying
         static private readonly ConcurrentQueue<int> _queueEssic = new ConcurrentQueue<int>();
         static private readonly AutoResetEvent _signalEssic = new AutoResetEvent(false);
+        //queues and signals for Drying - Assembling
+        static private readonly ConcurrentQueue<int> _queueAssemb = new ConcurrentQueue<int>();
+        static private readonly AutoResetEvent _signalAssemb = new AutoResetEvent(false);
+        static private readonly AutoResetEvent _signalErrorEssic = new AutoResetEvent(false);
 
         public MainWindow()
         {
             InitializeComponent();
 
             SqlConnection con = new SqlConnection();
-
+            //SIMONE - PC\\SQLEXPRESS
             //LAPTOP - DT8KB2TQ;
             con.ConnectionString =
-            "Server=SIMONE-PC\\SQLEXPRESS;" +
+            "Server=LAPTOP-DT8KB2TQ;" +
             "Database=stodb;" +
             "Integrated Security=True;" +
             "MultipleActiveResultSets=true;";
 
             conn = con;
             conn.Open();
-               
+
 
             Thread t1 = new Thread(new ThreadStart(getMPSCaller));
             Thread t2 = new Thread(new ThreadStart(routingMagazzinoCaller));
@@ -84,6 +88,8 @@ namespace DibrisBike
             Thread t6 = new Thread(new ThreadStart(furnaceCaller));
             Thread t7 = new Thread(new ThreadStart(accumuloPaintCaller));
             Thread t8 = new Thread(new ThreadStart(paintCaller));
+            Thread t9 = new Thread(new ThreadStart(dryCaller));
+            Thread t10 = new Thread(new ThreadStart(assembCaller));
 
             t1.Start();
             t2.Start();
@@ -93,6 +99,8 @@ namespace DibrisBike
             t6.Start();
             t7.Start();
             t8.Start();
+            t9.Start();
+            t10.Start();
         }
 
         static void getMPSCaller()
@@ -115,7 +123,7 @@ namespace DibrisBike
                     }
                     else
                     {
-                        while(conn.State == ConnectionState.Connecting)
+                        while (conn.State == ConnectionState.Connecting)
                         {
                             // wait
                         }
@@ -138,7 +146,7 @@ namespace DibrisBike
         static void routingMagazzinoCaller()
         {
             Routing rm = new Routing();
-            rm.routingMagazzino(conn, _queue, _signal, _queueLC1, _queueLC2, _queueLC3, _signalLC1, _signalLC2, _signalLC3);
+            rm.routingMagazzino(conn, _queue, _signal, _queueLC1, _queueLC2, _queueLC3, _signalLC1, _signalLC2, _signalLC3, _signalError, flagError);
         }
 
         private void MPSChooser_Click(object sender, RoutedEventArgs e)
@@ -154,7 +162,8 @@ namespace DibrisBike
             {
                 MPSFilePath = fileDialog.FileName;
                 MPSPathLabel.Content = MPSFilePath;
-                Thread thread = new Thread(new ThreadStart(() => {
+                Thread thread = new Thread(new ThreadStart(() =>
+                {
                     getMPS(MPSFilePath);
                 }));
                 thread.Start();
@@ -191,9 +200,9 @@ namespace DibrisBike
 
         private void getRawMaterial(String path)
         {
-                RawMaterial rawMaterial = new RawMaterial(conn);
-                rawMaterial.getRawFromFile(path);
-                updateLabel(RMPathLabel, "Raw Material caricato con successo");
+            RawMaterial rawMaterial = new RawMaterial(conn);
+            rawMaterial.getRawFromFile(path);
+            updateLabel(RMPathLabel, "Raw Material caricato con successo");
         }
 
         private void updateLabel(Label label, string message)
@@ -210,7 +219,7 @@ namespace DibrisBike
 
         static void accumuloSaldCaller()
         {
-            AccumuloSald aS = new AccumuloSald();
+            WelmStorage aS = new WelmStorage();
             aS.setAccumuloSald1(conn, _queueLC1, _signalLC1, _queueSald, _signalSald);
             aS.setAccumuloSald2(conn, _queueLC2, _signalLC2, _queueSald, _signalSald);
             aS.setAccumuloSald3(conn, _queueLC3, _signalLC3, _queueSald, _signalSald);
@@ -218,7 +227,7 @@ namespace DibrisBike
 
         static void saldCaller()
         {
-            Saldatura sald = new Saldatura();
+            Welming sald = new Welming();
             sald.startSaldatura(conn, _queueSald, _signalSald, _queueForno, _signalForno);
         }
 
@@ -230,8 +239,8 @@ namespace DibrisBike
 
         static void accumuloPaintCaller()
         {
-            AccumuloPaint ap = new AccumuloPaint();
-           ap.setAccumuloPaint(conn, _queueToPaint, _signalToPaint, _queuePast, _queueMetal, _signalPast, _signalMetal);
+            PaintStorage ap = new PaintStorage();
+            ap.setAccumuloPaint(conn, _queueToPaint, _signalToPaint, _queuePast, _queueMetal, _signalPast, _signalMetal);
         }
 
         private void ordiniModify_Click(object sender, RoutedEventArgs e)
@@ -242,33 +251,21 @@ namespace DibrisBike
 
         static void paintCaller()
         {
-            Paint paint = new Paint();
+            Painting paint = new Painting();
             paint.startPaintingPast(conn, _queuePast, _signalPast, _queueEssic, _signalEssic);
             paint.startPaintingMetal(conn, _queueMetal, _signalMetal, _queueEssic, _signalEssic);
         }
-        /*void ProducerThread()
-        {
-            while (ShouldRun)
-            {
-                Item item = GetNextItem();
-                _queue.Enqueue(item);
-                _signal.Set();
-            }
 
+        static void dryCaller()
+        {
+            Drying dry = new Drying();
+            dry.startDrying(conn, _queueEssic, _signalEssic, _queueAssemb, _signalAssemb, _signalErrorEssic);
         }
 
-        void ConsumerThread()
+        static void assembCaller()
         {
-            while (ShouldRun)
-            {
-                _signal.WaitOne();
-
-                Item item = null;
-                while (_queue.TryDequeue(out item))
-                {
-                    // do stuff
-                }
-            }
-        }*/
+            Assembling assemb = new Assembling();
+            assemb.startAssembling(conn, _queueAssemb, _signalAssemb);
+        }
     }
 }

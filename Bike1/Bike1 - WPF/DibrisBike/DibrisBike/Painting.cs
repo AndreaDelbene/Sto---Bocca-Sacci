@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace DibrisBike
 {
-    class Paint
+    class Painting
     {
-        public Paint()
+        public Painting()
         {
         }
 
@@ -37,7 +37,7 @@ namespace DibrisBike
                 linea = (string)lineaTemp;
 
                 // simulating the Paint
-                Thread.Sleep(5000);
+                Thread.Sleep(7000);
 
                 //Let's Dry the frame now!
                 Console.WriteLine("DRYING");
@@ -121,6 +121,7 @@ namespace DibrisBike
 
                 comm.ExecuteNonQuery();
 
+                //updating 'statoordini'
                 query = "UPDATE dbo.statoordini SET stato = @stato WHERE idLotto = @idLotto";
                 comm = new SqlCommand(query, conn);
                 comm.Parameters.Clear();
@@ -130,7 +131,7 @@ namespace DibrisBike
                     conn.Open();
 
                 comm.ExecuteNonQuery();
-
+                //and preparing the stuff for the next step.
                 _queueEssic.Enqueue(idTelaio);
                 _queueEssic.Enqueue(idLotto);
                 _signalEssic.Set();

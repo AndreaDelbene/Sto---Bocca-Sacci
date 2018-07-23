@@ -41,22 +41,43 @@ namespace DibrisBike
                 string[] tipoTelaio, colore, linea;
                 DateTime[] startDate, dueDate;
                 Byte[] running;
-                id = (from DataRow r in table.Rows select (int)r["id"]).ToArray();
-                startDate = (from DataRow r in table.Rows select (DateTime)r["startDate"]).ToArray();
-                dueDate = (from DataRow r in table.Rows select (DateTime)r["dueDate"]).ToArray();
-                quantita = (from DataRow r in table.Rows select (int)r["quantita"]).ToArray();
-                tipoTelaio = (from DataRow r in table.Rows select (string)r["tipoTelaio"]).ToArray();
-                colore = (from DataRow r in table.Rows select (string)r["colore"]).ToArray();
-                linea = (from DataRow r in table.Rows select (string)r["linea"]).ToArray();
+
+                //if we have more than one order, they may have different priorities
                 priorita = (from DataRow r in table.Rows select (int)r["priorita"]).ToArray();
-                running = (from DataRow r in table.Rows select (Byte)r["running"]).ToArray();
+                
+                if (priorita.Length > 1)
+                {
+                    //sorting the rows on the "priorita" column
+                    DataView dv = table.DefaultView;
+                    dv.Sort = "priorita desc";
+                    DataTable sortedTable = dv.ToTable();
+                    //then getting the data
+                    id = (from DataRow r in sortedTable.Rows select (int)r["id"]).ToArray();
+                    startDate = (from DataRow r in sortedTable.Rows select (DateTime)r["startDate"]).ToArray();
+                    dueDate = (from DataRow r in sortedTable.Rows select (DateTime)r["dueDate"]).ToArray();
+                    quantita = (from DataRow r in sortedTable.Rows select (int)r["quantita"]).ToArray();
+                    tipoTelaio = (from DataRow r in sortedTable.Rows select (string)r["tipoTelaio"]).ToArray();
+                    colore = (from DataRow r in sortedTable.Rows select (string)r["colore"]).ToArray();
+                    linea = (from DataRow r in sortedTable.Rows select (string)r["linea"]).ToArray();
+                    priorita = (from DataRow r in sortedTable.Rows select (int)r["priorita"]).ToArray();
+                    running = (from DataRow r in sortedTable.Rows select (Byte)r["running"]).ToArray();
+                }
+                else
+                {
+                    //else we get data normally from the table.
+                    id = (from DataRow r in table.Rows select (int)r["id"]).ToArray();
+                    startDate = (from DataRow r in table.Rows select (DateTime)r["startDate"]).ToArray();
+                    dueDate = (from DataRow r in table.Rows select (DateTime)r["dueDate"]).ToArray();
+                    quantita = (from DataRow r in table.Rows select (int)r["quantita"]).ToArray();
+                    tipoTelaio = (from DataRow r in table.Rows select (string)r["tipoTelaio"]).ToArray();
+                    colore = (from DataRow r in table.Rows select (string)r["colore"]).ToArray();
+                    linea = (from DataRow r in table.Rows select (string)r["linea"]).ToArray();
+                    running = (from DataRow r in table.Rows select (Byte)r["running"]).ToArray();
+                }
 
                 int[] quantitaTubi = new int[id.Length];
 
-                if(priorita.Length>1)
-                {
-                    //TODO: Change Id vector to insert in priority order.
-                }
+           
 
                 //conn.Close();
                 //for each element in the table we got back from the first request
@@ -119,10 +140,11 @@ namespace DibrisBike
                 }
                 if (id.Length != 0)
                 {
-                    //queue=FIFO, i save in it the amount of ids and tubes, and i sleep for the next 2 secs.
+                    //queue=FIFO, i save in it the amount of ids, tubes and other stuff.
                     _queue.Enqueue(id);
                     _queue.Enqueue(quantitaTubi);
                     _queue.Enqueue(linea);
+                    _queue.Enqueue(quantita);
                     _signal.Set();
                     //the stuff passes under the Quality Control Area
                     Console.WriteLine("ACQ");

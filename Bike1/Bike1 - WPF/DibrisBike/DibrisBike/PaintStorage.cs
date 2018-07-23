@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace DibrisBike
 {
-    class AccumuloPaint
+    class PaintStorage
     {
-        public AccumuloPaint()
+        public PaintStorage()
         {
         }
 
@@ -26,7 +26,7 @@ namespace DibrisBike
                 _queueToPaint.TryDequeue(out idTelaio);
                 _queueToPaint.TryDequeue(out idLotto);
                 // simulating the Furnace
-                Thread.Sleep(5000);
+                Thread.Sleep(8000);
 
                 //Let's Paint the frame now!
                 Console.WriteLine("PAINTING");
