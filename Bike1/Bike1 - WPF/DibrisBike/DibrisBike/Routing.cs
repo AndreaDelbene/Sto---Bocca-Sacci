@@ -78,12 +78,7 @@ namespace DibrisBike
 
                                 comm.ExecuteNonQuery();
                             }
-                            //waiting until the stuff passes under the Quality Control Area
-                            Thread.Sleep(5000);
-
-                            //Going for the Laser Cut then
-                            Console.WriteLine("LASER CUT");
-
+                            
                             //selecting the frame (telaio) type
                             query = "SELECT tipoTelaio FROM dbo.mps WHERE id = @idLotto";
 
@@ -109,6 +104,7 @@ namespace DibrisBike
 
                             int rInt = r.Next(1, 4);
                             bool flag = false;
+                            int idPercorso = 0;
 
                             //preparing the insertion into the routing table
                             //Laser Cut step
@@ -126,19 +122,23 @@ namespace DibrisBike
                                 case "graziella":
                                     comm.Parameters.AddWithValue("@opMacchina", rInt);
                                     flag = true;
+                                    idPercorso = rInt;
                                     break;
 
                                 case "corsa":
                                     comm.Parameters.AddWithValue("@opMacchina", rInt);
                                     flag = true;
+                                    idPercorso = rInt;
                                     break;
 
                                 case "mbike":
                                     comm.Parameters.AddWithValue("@opMacchina", 3);
+                                    idPercorso = 3;
                                     break;
 
                                 case "personalizzato":
                                     comm.Parameters.AddWithValue("@opMacchina", 3);
+                                    idPercorso = 3;
                                     break;
 
                                 default:
@@ -212,7 +212,39 @@ namespace DibrisBike
 
                             comm.ExecuteNonQuery();
 
+                            //waiting until the stuff passes under the Quality Control Area
+                            Thread.Sleep(5000);
 
+                            query = "INSERT INTO dbo.percorsiveicoli (idPercorso, idVeicolo, tempoAssegnazione, tempoPartenza) VALUES (@idPercorso, @idVeicolo, @tempoAssegnazione, @tempoPartenza)";
+                            comm = new SqlCommand(query, conn);
+                            comm.Parameters.Clear();
+                            string idVeicolo = "AGV" + idPercorso.ToString();
+                            comm.Parameters.AddWithValue("@idPercorso", idPercorso+1);
+                            comm.Parameters.AddWithValue("@idVeicolo", idVeicolo);
+                            comm.Parameters.AddWithValue("@tempoAssegnazione", DateTime.Now.ToString());
+                            comm.Parameters.AddWithValue("@tempoPartenza", DateTime.Now.ToString());
+                            if (conn != null && conn.State == ConnectionState.Closed)
+                                conn.Open();
+
+                            comm.ExecuteNonQuery();
+
+                            query = "SELECT TOP 1 id FROM dbo.perocorsiveicoli";
+                            comm = new SqlCommand(query, conn);
+                            comm.Parameters.Clear();
+
+                            if (conn != null && conn.State == ConnectionState.Closed)
+                                conn.Open();
+
+                            reader = comm.ExecuteReader();
+                            reader.Read();
+
+                            int idAssegnazione = (int)reader["id"];
+
+                            reader.Close();
+
+
+                            //Going for the Laser Cut then
+                            Console.WriteLine("LASER CUT");
 
                             query = "UPDATE stodb.dbo.statoordini SET stato = @stato WHERE idLotto = @idLotto";
                             comm = new SqlCommand(query, conn);
@@ -224,6 +256,20 @@ namespace DibrisBike
 
                             comm.ExecuteNonQuery();
 
+
+                            for(int k=0;k<quantitaTubi.Length;k++)
+                            {
+                                comm = new SqlCommand(query, conn);
+                                query = "INSERT INTO dbo.lasercutdp (codiceTubo, idAssegnazione, startTime) VALUES (@codiceTubo, @idAssegnazione, @startTime)";
+                                comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[k]);
+                                comm.Parameters.AddWithValue("@idAssegnazione", idAssegnazione);
+                                comm.Parameters.AddWithValue("@startTime", DateTime.Now.ToString());
+
+                                if (conn != null && conn.State == ConnectionState.Closed)
+                                    conn.Open();
+
+                                comm.ExecuteNonQuery();
+                            }
                             if (flag)
                             {
                                 //updating the interested LC's queue

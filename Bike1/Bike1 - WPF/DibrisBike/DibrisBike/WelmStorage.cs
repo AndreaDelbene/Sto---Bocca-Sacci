@@ -101,6 +101,17 @@ namespace DibrisBike
                         conn.Open();
 
                     comm.ExecuteNonQuery();
+
+                    query = "UPDATE dbo.lasercutdp SET endTime = @endTime WHERE codiceTubo = @codiceTubo";
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@endTime", DateTime.Now.ToString());
+                    comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
+
+                    if (conn != null && conn.State == ConnectionState.Closed)
+                        conn.Open();
+
+                    comm.ExecuteNonQuery();
                 }
                 //insereting the bar codes into the queue for the next step
                 _queueSald.Enqueue(codiceBarre);
