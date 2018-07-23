@@ -215,11 +215,12 @@ namespace DibrisBike
                             //waiting until the stuff passes under the Quality Control Area
                             Thread.Sleep(5000);
 
+                            //creating the assignment path-vehicle
                             query = "INSERT INTO dbo.percorsiveicoli (idPercorso, idVeicolo, tempoAssegnazione, tempoPartenza) VALUES (@idPercorso, @idVeicolo, @tempoAssegnazione, @tempoPartenza)";
                             comm = new SqlCommand(query, conn);
                             comm.Parameters.Clear();
                             string idVeicolo = "AGV" + idPercorso.ToString();
-                            comm.Parameters.AddWithValue("@idPercorso", idPercorso+1);
+                            comm.Parameters.AddWithValue("@idPercorso", idPercorso);
                             comm.Parameters.AddWithValue("@idVeicolo", idVeicolo);
                             comm.Parameters.AddWithValue("@tempoAssegnazione", DateTime.Now.ToString());
                             comm.Parameters.AddWithValue("@tempoPartenza", DateTime.Now.ToString());
@@ -227,7 +228,7 @@ namespace DibrisBike
                                 conn.Open();
 
                             comm.ExecuteNonQuery();
-
+                            //and getting the id of that assignment
                             query = "SELECT TOP 1 id FROM dbo.perocorsiveicoli";
                             comm = new SqlCommand(query, conn);
                             comm.Parameters.Clear();
@@ -259,6 +260,7 @@ namespace DibrisBike
 
                             for(int k=0;k<quantitaTubi.Length;k++)
                             {
+                                //updating the lasercut table for each tube
                                 comm = new SqlCommand(query, conn);
                                 query = "INSERT INTO dbo.lasercutdp (codiceTubo, idAssegnazione, startTime) VALUES (@codiceTubo, @idAssegnazione, @startTime)";
                                 comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[k]);
