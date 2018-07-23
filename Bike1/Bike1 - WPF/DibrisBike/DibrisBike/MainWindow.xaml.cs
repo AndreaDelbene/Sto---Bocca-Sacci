@@ -90,6 +90,7 @@ namespace DibrisBike
             Thread t8 = new Thread(new ThreadStart(paintCaller));
             Thread t9 = new Thread(new ThreadStart(dryCaller));
             Thread t10 = new Thread(new ThreadStart(assembCaller));
+            Thread t11 = new Thread(new ThreadStart(checkFinishedCaller));
 
             t1.Start();
             t2.Start();
@@ -101,6 +102,7 @@ namespace DibrisBike
             t8.Start();
             t9.Start();
             t10.Start();
+            t11.Start();
         }
 
         static void getMPSCaller()
@@ -266,6 +268,12 @@ namespace DibrisBike
         {
             Assembling assemb = new Assembling();
             assemb.startAssembling(conn, _queueAssemb, _signalAssemb);
+        }
+
+        static void checkFinishedCaller()
+        {
+            ProductionStorage ps = new ProductionStorage();
+            ps.updateProductionStorage(conn);
         }
     }
 }

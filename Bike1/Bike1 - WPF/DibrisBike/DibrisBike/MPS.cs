@@ -34,6 +34,8 @@ namespace DibrisBike
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();
 
+                comm.ExecuteNonQuery();
+
                 DataTable table = new DataTable();
                 adapter.Fill(table);
                 //getting then the data from the table

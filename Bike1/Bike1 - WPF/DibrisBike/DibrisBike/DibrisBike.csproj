@@ -63,6 +63,7 @@
     <Compile Include="Assembling.cs" />
     <Compile Include="Drying.cs" />
     <Compile Include="PaintStorage.cs" />
+    <Compile Include="ProductionStorage.cs" />
     <Compile Include="WelmStorage.cs" />
     <Compile Include="Furnace.cs" />
     <Compile Include="ModifyOrdiniPage.xaml.cs">
