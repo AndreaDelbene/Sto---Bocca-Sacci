@@ -49,7 +49,7 @@ namespace DibrisBike
                 comm = new SqlCommand(query, conn);
                 //state is "welding"
                 comm.Parameters.Clear();
-                comm.Parameters.AddWithValue("@startTimeSald", DateTime.Now.ToString());
+                comm.Parameters.AddWithValue("@startTimeSald", DateTime.Now);
                 comm.Parameters.AddWithValue("@stato", "welding");
                 
                 if (conn != null && conn.State == ConnectionState.Closed)
@@ -57,7 +57,7 @@ namespace DibrisBike
 
                 comm.ExecuteNonQuery();
                 //once we have a number for the frame, we get it
-                query = "SELECT TOP 1 idTelaio FROM dbo.saldess ORDER BY idTelaio DESC";
+                query = "SELECT TOP 1 idTelaio FROM dbo.saldessdp ORDER BY idTelaio DESC";
 
                 comm = new SqlCommand(query, conn);
                 comm.Parameters.Clear();
@@ -101,7 +101,7 @@ namespace DibrisBike
                 _queueForno.Enqueue(idLotto);
                 //and we signal it.
                 _signalForno.Set();
-                conn.Close();
+                //conn.Close();
             }
         }
     }

@@ -60,7 +60,7 @@ namespace DibrisBike
                 comm.Parameters.AddWithValue("@stato", "finished");
                 comm.Parameters.AddWithValue("@idLotto", idLotto);
                 comm.Parameters.AddWithValue("@quantitaProdotta", quantitaProdotta + 1);
-                comm.Parameters.AddWithValue("@dueDateEffettiva", DateTime.Now.ToString());
+                comm.Parameters.AddWithValue("@dueDateEffettiva", DateTime.Now);
 
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();

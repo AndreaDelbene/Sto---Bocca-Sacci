@@ -37,8 +37,8 @@ namespace DibrisBike
                 comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "cooking");
                 comm.Parameters.AddWithValue("@idTelaio", idTelaio);
-                comm.Parameters.AddWithValue("@endTimeSald", DateTime.Now.ToString());
-                comm.Parameters.AddWithValue("@startTimeForno", DateTime.Now.ToString());
+                comm.Parameters.AddWithValue("@endTimeSald", DateTime.Now);
+                comm.Parameters.AddWithValue("@startTimeForno", DateTime.Now);
 
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();
@@ -59,7 +59,7 @@ namespace DibrisBike
                 _queueToPaint.Enqueue(idTelaio);
                 _queueToPaint.Enqueue(idLotto);
                 _signalToPaint.Set();
-                conn.Close();
+                //conn.Close();
             }
         }
     }

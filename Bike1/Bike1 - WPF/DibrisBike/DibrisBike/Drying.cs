@@ -37,7 +37,7 @@ namespace DibrisBike
                 comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "finisheddry");
                 comm.Parameters.AddWithValue("@idTelaio", idTelaio);
-                comm.Parameters.AddWithValue("@endTimeEssic", DateTime.Now.ToString());
+                comm.Parameters.AddWithValue("@endTimeEssic", DateTime.Now);
 
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();
@@ -58,8 +58,8 @@ namespace DibrisBike
                 query = "SELECT tipoTelaio FROM dbo.statoordini WHERE idLotto = @idLotto";
                 comm = new SqlCommand(query, conn);
                 SqlDataReader reader;
-                comm.Parameters.AddWithValue("@idLotto", idLotto);
                 comm.Parameters.Clear();
+                comm.Parameters.AddWithValue("@idLotto", idLotto);
 
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();
@@ -74,8 +74,8 @@ namespace DibrisBike
                 //Getting now a box with the pieces for the assembling, filtering them by the frame type
                 query = "SELECT TOP 1 id FROM dbo.scatole WHERE tipo = @tipoTelaio";
                 comm = new SqlCommand(query, conn);
-                comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio);
                 comm.Parameters.Clear();
+                comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio);
 
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();
@@ -84,18 +84,19 @@ namespace DibrisBike
 
                 reader = comm.ExecuteReader();
                 reader.Read();
+                //---------------------------------------------generates exception - fill the table and do the check on another way
                 string idScatola = (string)reader["id"];
                 reader.Close();
                 //if there are still avaiable boxes in the storage
                 if(idScatola!=null)
                 {
                     //I update the table
-                    query = "INSERT INTO dbo.assemblaggiodp (idTelaio, idScatola, startTime, endTime) VALUES (@idTelaio, @idScatola, @startTime, @endTime)";
+                    query = "INSERT INTO dbo.assemblaggiodp (idTelaio, idScatola, startTime) VALUES (@idTelaio, @idScatola, @startTime)";
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@idTelaio", idTelaio);
                     comm.Parameters.AddWithValue("@idScatola", idScatola);
-                    comm.Parameters.AddWithValue("@startTime", DateTime.Now.ToString());
+                    comm.Parameters.AddWithValue("@startTime", DateTime.Now);
 
                     if (conn != null && conn.State == ConnectionState.Closed)
                         conn.Open();
@@ -130,7 +131,7 @@ namespace DibrisBike
                 }
                 
                 //closing the connection
-                conn.Close();
+                //conn.Close();
             }
         }
     }

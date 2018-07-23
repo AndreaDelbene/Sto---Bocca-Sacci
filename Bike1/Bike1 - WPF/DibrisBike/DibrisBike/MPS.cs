@@ -107,7 +107,7 @@ namespace DibrisBike
                     comm.ExecuteNonQuery();
                     //conn.Close();
 
-                    // i set then the flag to 1 into the 'mps' table
+                    //I set then the flag to 1 into the 'mps' table
                     query = "UPDATE stodb.dbo.mps SET running = 1 WHERE id = @idLotto";
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.Clear();
@@ -119,7 +119,7 @@ namespace DibrisBike
                     comm.ExecuteNonQuery();
                     //conn.Close();
 
-                    //and i check how many stuff i need for that kind of bike
+                    //and I check how many stuff I need for that kind of bike
                     query = "SELECT quantitaTubi FROM dbo.ricette WHERE tipoTelaio = @tipoTelaio";
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.Clear();
@@ -131,10 +131,11 @@ namespace DibrisBike
                     comm.ExecuteNonQuery();
 
                     SqlDataReader reader = comm.ExecuteReader();
-                    if (reader.HasRows)
-                        quantitaTubi[i] = (int)reader["quantitaTubi"];
-                    else
-                        quantitaTubi[i] = 3;    //Valore impostato finchè non si avrà la tabella ricette popolata
+
+                    reader.Read();
+
+                    quantitaTubi[i] = (int)reader["quantitaTubi"];
+                        
                     //conn.Close();
                     Console.WriteLine(i);
                     reader.Close();
@@ -151,7 +152,7 @@ namespace DibrisBike
                     //the stuff passes under the Quality Control Area
                     Console.WriteLine("ACQ");
                 }
-                conn.Close();
+                //conn.Close();
                 Thread.Sleep(2000);
             }
         }

@@ -50,8 +50,8 @@ namespace DibrisBike
                 comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "drying");
                 comm.Parameters.AddWithValue("@idTelaio", idTelaio);
-                comm.Parameters.AddWithValue("@endTimePaint", DateTime.Now.ToString());
-                comm.Parameters.AddWithValue("@startTimeEssic", DateTime.Now.ToString());
+                comm.Parameters.AddWithValue("@endTimePaint", DateTime.Now);
+                comm.Parameters.AddWithValue("@startTimeEssic", DateTime.Now);
 
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();
@@ -113,8 +113,8 @@ namespace DibrisBike
                 comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "drying");
                 comm.Parameters.AddWithValue("@idTelaio", idTelaio);
-                comm.Parameters.AddWithValue("@endTimePaint", DateTime.Now.ToString());
-                comm.Parameters.AddWithValue("@startTimeEssic", DateTime.Now.ToString());
+                comm.Parameters.AddWithValue("@endTimePaint", DateTime.Now);
+                comm.Parameters.AddWithValue("@startTimeEssic", DateTime.Now);
 
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();
@@ -136,7 +136,7 @@ namespace DibrisBike
                 _queueEssic.Enqueue(idLotto);
                 _signalEssic.Set();
 
-                conn.Close();
+                //conn.Close();
             }
         }
     }
