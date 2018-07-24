@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace DibrisBike
 {
@@ -34,6 +30,7 @@ namespace DibrisBike
                 comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "storing for welming");
                 comm.Parameters.AddWithValue("@idLotto", idLotto);
+
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();
 

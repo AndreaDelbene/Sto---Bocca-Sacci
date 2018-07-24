@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace DibrisBike
@@ -127,21 +124,18 @@ namespace DibrisBike
 
                     if (conn != null && conn.State == ConnectionState.Closed)
                         conn.Open();
-
-                    comm.ExecuteNonQuery();
-
+                    
                     SqlDataReader reader = comm.ExecuteReader();
 
                     reader.Read();
 
                     quantitaTubi[i] = (int)reader["quantitaTubi"];
-                        
+                    
                     //conn.Close();
-                    Console.WriteLine(i);
                     reader.Close();
 
                 }
-                if (id.Length != 0)
+                if (id.Length > 0)
                 {
                     //queue=FIFO, i save in it the amount of ids, tubes and other stuff.
                     _queue.Enqueue(id);
@@ -184,7 +178,7 @@ namespace DibrisBike
                         case 1:
                             String campo = xlRange.Cells[i, j].Value2.ToString();
                             DateTime date = DateTime.ParseExact(campo, "MM/dd/yy HH:mm:ss", null);
-                            comm.Parameters.AddWithValue("@start", date);
+                            comm.Parameters.AddWithValue("@start", date); //START DATE could be set as DateTime.Now???
                             break;
 
                         case 2:

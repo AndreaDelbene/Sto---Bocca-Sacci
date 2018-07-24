@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace DibrisBike
 {
@@ -67,8 +64,21 @@ namespace DibrisBike
                         if (table.Rows.Count == quantitaTubi[i])
                         {
                             //deleting every tube I get from the storage.
-                            for (int k = 0; k < quantitaTubi.Length; k++)
+                            for (int k = 0; k < quantitaTubi[i]; k++)
                             {
+                                //after i created the realation frame - tubes
+                                query = "INSERT INTO dbo.pezzotubo (idLotto, idPezzo, codiceTubo) VALUES (@idLotto, @idPezzo, @codiceTubo)";
+                                comm = new SqlCommand(query, conn);
+                                comm.Parameters.Clear();
+                                comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
+                                comm.Parameters.AddWithValue("@idPezzo",idLotto[i] + " - "+  (j + 1));
+                                comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[k]);
+                                
+                                if (conn != null && conn.State == ConnectionState.Closed)
+                                    conn.Open();
+
+                                comm.ExecuteNonQuery();
+
                                 query = "DELETE FROM dbo.magazzinomateriali WHERE codiceBarre = @codiceBarre";
                                 comm = new SqlCommand(query, conn);
                                 comm.Parameters.Clear();
@@ -113,10 +123,11 @@ namespace DibrisBike
                             comm = new SqlCommand(query, conn);
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
-                            comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);//------------------------------------------------------------------------------------
+                            comm.Parameters.AddWithValue("@idPezzo", idLotto[i] + " - " + (j + 1));
                             comm.Parameters.AddWithValue("@step", 1);
                             comm.Parameters.AddWithValue("@durata", 9);
                             comm.Parameters.AddWithValue("@durataSetUp", 1);
+
 
 
                             switch (tipoTelaio[i])
@@ -154,7 +165,7 @@ namespace DibrisBike
                             //Welming step
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
-                            comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                            comm.Parameters.AddWithValue("@idPezzo", idLotto[i] + " - " + (j + 1));
                             comm.Parameters.AddWithValue("@step", 2);
                             comm.Parameters.AddWithValue("@durata", 8);
                             comm.Parameters.AddWithValue("@durataSetUp", 1);
@@ -165,7 +176,7 @@ namespace DibrisBike
                             //Furnace Step
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
-                            comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                            comm.Parameters.AddWithValue("@idPezzo", idLotto[i] + " - " + (j + 1));
                             comm.Parameters.AddWithValue("@step", 3);
                             comm.Parameters.AddWithValue("@durata", 8);
                             comm.Parameters.AddWithValue("@durataSetUp", 0);
@@ -176,7 +187,7 @@ namespace DibrisBike
                             //Painting Step
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
-                            comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                            comm.Parameters.AddWithValue("@idPezzo", idLotto[i] + " - " + (j + 1));
                             comm.Parameters.AddWithValue("@step", 4);
                             comm.Parameters.AddWithValue("@durata", 5);
                             comm.Parameters.AddWithValue("@durataSetUp", 2);
@@ -194,7 +205,7 @@ namespace DibrisBike
                             //Drying Step
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
-                            comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                            comm.Parameters.AddWithValue("@idPezzo", idLotto[i] + " - " + (j + 1));
                             comm.Parameters.AddWithValue("@step", 5);
                             comm.Parameters.AddWithValue("@durata", 6);
                             comm.Parameters.AddWithValue("@durataSetUp", 0);
@@ -205,7 +216,7 @@ namespace DibrisBike
                             //Assembling Step
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
-                            comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                            comm.Parameters.AddWithValue("@idPezzo", idLotto[i] + " - " + (j + 1));
                             comm.Parameters.AddWithValue("@step", 6);
                             comm.Parameters.AddWithValue("@durata", 4);
                             comm.Parameters.AddWithValue("@durataSetUp", 1);
@@ -260,7 +271,7 @@ namespace DibrisBike
                             comm.ExecuteNonQuery();
 
 
-                            for(int k=0;k<quantitaTubi.Length;k++)
+                            for(int k=0;k<quantitaTubi[i];k++)
                             {
                                 //updating the lasercut table for each tube
                                 query = "INSERT INTO dbo.lasercutdp (codiceTubo, idAssegnazione, startTime) VALUES (@codiceTubo, @idAssegnazione, @startTime)";

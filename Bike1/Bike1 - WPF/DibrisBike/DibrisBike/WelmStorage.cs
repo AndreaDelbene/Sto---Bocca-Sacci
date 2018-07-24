@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace DibrisBike
 {
@@ -38,11 +34,17 @@ namespace DibrisBike
                 comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@tempoArrivo", DateTime.Now);
                 comm.Parameters.AddWithValue("@id", idAssegnazione);
+
+
+                if (conn != null && conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                comm.ExecuteNonQuery();
                 //sleep the Thread (simulating laser cut)
                 Thread.Sleep(10000);
 
                 //transponting the tubes from the storage to the welder (saldatrice)
-                Console.WriteLine("STORING");
+                Console.WriteLine("STORING FOR WELMING");
                 //updating the storage that contains the tubes to be welmed.
                 for (int i=0;i<codiceBarre.Length;i++)
                 {
@@ -106,11 +108,16 @@ namespace DibrisBike
                 comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@tempoArrivo", DateTime.Now);
                 comm.Parameters.AddWithValue("@id", idAssegnazione);
+
+                if (conn != null && conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                comm.ExecuteNonQuery();
                 //sleep the Thread (simulating laser cut)
                 Thread.Sleep(10000);
 
                 //transponting the tubes from the storage to the welder (saldatrice)
-                Console.WriteLine("STORING");
+                Console.WriteLine("STORING FOR WELMING");
                 //updating the storage that contains the tubes to be welmed.
                 for (int i = 0; i < codiceBarre.Length; i++)
                 {
@@ -175,11 +182,15 @@ namespace DibrisBike
                 comm.Parameters.AddWithValue("@tempoArrivo", DateTime.Now);
                 comm.Parameters.AddWithValue("@id", idAssegnazione);
 
+                if (conn != null && conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                comm.ExecuteNonQuery();
                 //sleep the Thread (simulating laser cut)
                 Thread.Sleep(10000);
 
                 //transponting the tubes from the storage to the welder (saldatrice)
-                Console.WriteLine("STORING");
+                Console.WriteLine("STORING FOR WELMING");
                 //updating the storage that contains the tubes to be welmed.
                 for (int i = 0; i < codiceBarre.Length; i++)
                 {
