@@ -24,8 +24,9 @@ namespace DibrisBike
                 comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "finished");
 
-                if (conn != null && conn.State == ConnectionState.Closed)
-                    conn.Open();
+                while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                {
+                }
 
                 comm.ExecuteNonQuery();
 
@@ -57,8 +58,9 @@ namespace DibrisBike
                         comm.Parameters.AddWithValue("@quantita", quantita[i]);
                         comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
 
-                        if (conn != null && conn.State == ConnectionState.Closed)
-                            conn.Open();
+                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                        {
+                        }
 
                         comm.ExecuteNonQuery();
 
@@ -71,8 +73,9 @@ namespace DibrisBike
                         comm.Parameters.AddWithValue("@stato", "stored");
                         comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
 
-                        if (conn != null && conn.State == ConnectionState.Closed)
-                            conn.Open();
+                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                        {
+                        }
 
                         comm.ExecuteNonQuery();
 

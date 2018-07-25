@@ -28,8 +28,10 @@ namespace DibrisBike
                 SqlDataAdapter adapter = new SqlDataAdapter(comm);
 
                 //problems with other threads trying to open a connection already opened
-                if (conn != null && conn.State == ConnectionState.Closed)
-                    conn.Open();
+
+                while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                {
+                }
 
                 comm.ExecuteNonQuery();
 
@@ -48,7 +50,7 @@ namespace DibrisBike
                 {
                     //sorting the rows on the "priorita" column
                     DataView dv = table.DefaultView;
-                    dv.Sort = "priorita desc";
+                    dv.Sort = "priorita asc";
                     DataTable sortedTable = dv.ToTable();
                     //then getting the data
                     id = (from DataRow r in sortedTable.Rows select (int)r["id"]).ToArray();
@@ -98,11 +100,11 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@stato", "running");
                     comm.Parameters.AddWithValue("@descrizione", "");
 
-                    if (conn != null && conn.State == ConnectionState.Closed)
-                        conn.Open();
+                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                    {
+                    }
 
                     comm.ExecuteNonQuery();
-                    //conn.Close();
 
                     //I set then the flag to 1 into the 'mps' table
                     query = "UPDATE stodb.dbo.mps SET running = 1 WHERE id = @idLotto";
@@ -110,11 +112,11 @@ namespace DibrisBike
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@idLotto", id[i]);
 
-                    if (conn != null && conn.State == ConnectionState.Closed)
-                        conn.Open();
+                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                    {
+                    }
 
                     comm.ExecuteNonQuery();
-                    //conn.Close();
 
                     //and I check how many stuff I need for that kind of bike
                     query = "SELECT quantitaTubi FROM dbo.ricette WHERE tipoTelaio = @tipoTelaio";
@@ -122,16 +124,16 @@ namespace DibrisBike
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
 
-                    if (conn != null && conn.State == ConnectionState.Closed)
-                        conn.Open();
-                    
+                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                    {
+                    }
+
                     SqlDataReader reader = comm.ExecuteReader();
 
                     reader.Read();
 
                     quantitaTubi[i] = (int)reader["quantitaTubi"];
                     
-                    //conn.Close();
                     reader.Close();
 
                 }
