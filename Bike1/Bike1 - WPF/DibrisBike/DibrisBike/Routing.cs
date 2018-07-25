@@ -24,9 +24,9 @@ namespace DibrisBike
                 object idLottoTemp, quantitaTubiTemp, lineaTemp, quantitaOrdineTemp;
                 int[] idLotto, quantitaTubi, quantitaOrdine;
                 string[] linea;
-                while (_queue.TryDequeue(out idLottoTemp))
+                //'til the queue is full, i get data from it
+                while(_queue.TryDequeue(out idLottoTemp))
                 {
-                    //_queue.TryDequeue(out idLottoTemp);
                     _queue.TryDequeue(out quantitaTubiTemp);
                     _queue.TryDequeue(out lineaTemp);
                     _queue.TryDequeue(out quantitaOrdineTemp);
@@ -51,10 +51,6 @@ namespace DibrisBike
 
                             SqlDataAdapter adapter = new SqlDataAdapter(comm);
 
-                            while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                            {
-                            }
-
                             comm.ExecuteNonQuery();
 
                             DataTable table = new DataTable();
@@ -76,22 +72,14 @@ namespace DibrisBike
                                     comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
                                     comm.Parameters.AddWithValue("@idPezzo", idLotto[i] + " - " + (j + 1));
                                     comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[k]);
-
-                                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                                    {
-                                    }
-
+                                    
                                     comm.ExecuteNonQuery();
 
                                     query = "DELETE FROM dbo.magazzinomateriali WHERE codiceBarre = @codiceBarre";
                                     comm = new SqlCommand(query, conn);
                                     comm.Parameters.Clear();
                                     comm.Parameters.AddWithValue("@codiceBarre", codiceBarre[k]);
-
-                                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                                    {
-                                    }
-
+                                    
                                     comm.ExecuteNonQuery();
                                 }
 
@@ -102,10 +90,6 @@ namespace DibrisBike
 
                                 comm.Parameters.Clear();
                                 comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
-
-                                while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                                {
-                                }
 
                                 reader = comm.ExecuteReader();
                                 reader.Read();
@@ -133,9 +117,7 @@ namespace DibrisBike
                                 comm.Parameters.AddWithValue("@step", 1);
                                 comm.Parameters.AddWithValue("@durata", 9);
                                 comm.Parameters.AddWithValue("@durataSetUp", 1);
-
-
-
+                                
                                 switch (tipoTelaio[i])
                                 {
                                     case "graziella":
@@ -163,11 +145,7 @@ namespace DibrisBike
                                     default:
                                         break;
                                 }
-
-
-                                while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                                {
-                                }
+                                
                                 //and executing the command
                                 comm.ExecuteNonQuery();
 
@@ -180,11 +158,7 @@ namespace DibrisBike
                                 comm.Parameters.AddWithValue("@durata", 8);
                                 comm.Parameters.AddWithValue("@durataSetUp", 1);
                                 comm.Parameters.AddWithValue("@opMacchina", 9);
-
-                                while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                                {
-                                }
-
+                                
                                 comm.ExecuteNonQuery();
                                 //Furnace Step
                                 comm.Parameters.Clear();
@@ -194,11 +168,7 @@ namespace DibrisBike
                                 comm.Parameters.AddWithValue("@durata", 8);
                                 comm.Parameters.AddWithValue("@durataSetUp", 0);
                                 comm.Parameters.AddWithValue("@opMacchina", 10);
-
-                                while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                                {
-                                }
-
+                                
                                 comm.ExecuteNonQuery();
                                 //Painting Step
                                 comm.Parameters.Clear();
@@ -217,10 +187,6 @@ namespace DibrisBike
                                     comm.Parameters.AddWithValue("@opMacchina", 12);
                                 }
 
-                                while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                                {
-                                }
-
                                 comm.ExecuteNonQuery();
                                 //Drying Step
                                 comm.Parameters.Clear();
@@ -231,10 +197,6 @@ namespace DibrisBike
                                 comm.Parameters.AddWithValue("@durataSetUp", 0);
                                 comm.Parameters.AddWithValue("@opMacchina", 13);
 
-                                while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                                {
-                                }
-
                                 comm.ExecuteNonQuery();
                                 //Assembling Step
                                 comm.Parameters.Clear();
@@ -244,11 +206,7 @@ namespace DibrisBike
                                 comm.Parameters.AddWithValue("@durata", 4);
                                 comm.Parameters.AddWithValue("@durataSetUp", 1);
                                 comm.Parameters.AddWithValue("@opMacchina", 14);
-
-                                while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                                {
-                                }
-
+                                
                                 comm.ExecuteNonQuery();
 
                                 //waiting until the stuff passes under the Quality Control Area
@@ -263,21 +221,13 @@ namespace DibrisBike
                                 comm.Parameters.AddWithValue("@idVeicolo", idVeicolo);
                                 comm.Parameters.AddWithValue("@tempoAssegnazione", DateTime.Now);
                                 comm.Parameters.AddWithValue("@tempoPartenza", DateTime.Now);
-
-                                while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                                {
-                                }
-
+                                
                                 comm.ExecuteNonQuery();
                                 //and getting the id of that assignment
                                 query = "SELECT TOP 1 id FROM dbo.percorsiveicoli ORDER BY id DESC";
                                 comm = new SqlCommand(query, conn);
                                 comm.Parameters.Clear();
-
-                                while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                                {
-                                }
-
+                                
                                 reader = comm.ExecuteReader();
                                 reader.Read();
 
@@ -295,10 +245,6 @@ namespace DibrisBike
                                 comm.Parameters.AddWithValue("@stato", "cutting");
                                 comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
 
-                                while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                                {
-                                }
-
                                 comm.ExecuteNonQuery();
 
 
@@ -311,11 +257,7 @@ namespace DibrisBike
                                     comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[k]);
                                     comm.Parameters.AddWithValue("@idAssegnazione", idAssegnazione);
                                     comm.Parameters.AddWithValue("@startTime", DateTime.Now);
-
-                                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                                    {
-                                    }
-
+                                    
                                     comm.ExecuteNonQuery();
                                 }
                                 if (flag)
@@ -367,9 +309,7 @@ namespace DibrisBike
                                 // wait for new raw material
                                 _signalError.WaitOne();
                             }
-                            //conn.Close();
                         }
-
                     }
                     //sleeping the thread for 2 secs
                     Thread.Sleep(2000);

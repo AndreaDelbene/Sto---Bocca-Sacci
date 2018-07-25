@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Data;
 using System.Data.SqlClient;
 using System.Threading;
 
@@ -20,9 +19,7 @@ namespace DibrisBike
                 int idAssemblaggio, idLotto;
                 while(_queueAssemb.TryDequeue(out idAssemblaggio))
                 {
-                    //_queueAssemb.TryDequeue(out idAssemblaggio);
                     _queueAssemb.TryDequeue(out idLotto);
-                    Console.WriteLine(idLotto + " lotto ");
                     //Simulating the Assembling
                     Thread.Sleep(5000);
 
@@ -33,10 +30,6 @@ namespace DibrisBike
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@endTime", DateTime.Now);
 
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
                     comm.ExecuteNonQuery();
 
                     query = "SELECT quantitaDesiderata, quantitaProdotta FROM dbo.statoordini WHERE idLotto = @idLotto";
@@ -45,9 +38,6 @@ namespace DibrisBike
                     comm.Parameters.Clear();
 
                     comm.Parameters.AddWithValue("@idLotto", idLotto);
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
 
                     reader = comm.ExecuteReader();
                     reader.Read();
@@ -67,10 +57,6 @@ namespace DibrisBike
                         comm.Parameters.AddWithValue("@quantitaProdotta", quantitaProdotta + 1);
                         comm.Parameters.AddWithValue("@dueDateEffettiva", DateTime.Now);
 
-                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                        {
-                        }
-
                         comm.ExecuteNonQuery();
 
                         //and inserting into the finished products
@@ -80,10 +66,6 @@ namespace DibrisBike
                         //state is "finisheddry"; from now on the data will be handled by another table
                         comm.Parameters.Clear();
                         comm.Parameters.AddWithValue("@idAssemblaggio", idAssemblaggio);
-
-                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                        {
-                        }
 
                         comm.ExecuteNonQuery();
 
@@ -97,11 +79,7 @@ namespace DibrisBike
                         comm.Parameters.Clear();
                         comm.Parameters.AddWithValue("@idLotto", idLotto);
                         comm.Parameters.AddWithValue("@quantitaProdotta", quantitaProdotta + 1);
-
-                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                        {
-                        }
-
+                        
                         comm.ExecuteNonQuery();
                     }
                 }

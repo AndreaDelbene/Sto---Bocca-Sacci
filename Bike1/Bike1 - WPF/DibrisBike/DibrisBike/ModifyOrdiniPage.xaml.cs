@@ -57,7 +57,6 @@ namespace DibrisBike
         {
             String query = "SELECT * FROM dbo.statoordini WHERE stato!='finished' AND stato!='stored'";
             SqlCommand comm = new SqlCommand(query, conn);
-            conn.Open();
 
             comm.ExecuteNonQuery();
 
@@ -66,7 +65,6 @@ namespace DibrisBike
             adapter.Fill(table);
             statoordiniGridModify.ItemsSource = table.DefaultView;
             GetStatoordiniColumnsNames(table);
-            //conn.Close();
         }
 
         private void GetStatoordiniColumnsNames(DataTable table)

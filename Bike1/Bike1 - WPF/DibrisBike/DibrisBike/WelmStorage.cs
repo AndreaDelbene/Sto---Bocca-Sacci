@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Data;
 using System.Data.SqlClient;
 using System.Threading;
 
@@ -22,7 +21,6 @@ namespace DibrisBike
                 int idLotto, idAssegnazione;
                 while(_queueLC1.TryDequeue(out codiceBarreTemp))
                 {
-                    //_queueLC1.TryDequeue(out codiceBarreTemp);
                     _queueLC1.TryDequeue(out idLottoTemp);
                     _queueLC1.TryDequeue(out idAssegnTemp);
 
@@ -37,10 +35,6 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@tempoArrivo", DateTime.Now);
                     comm.Parameters.AddWithValue("@id", idAssegnazione);
 
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
                     comm.ExecuteNonQuery();
                     //sleep the Thread (simulating laser cut)
                     Thread.Sleep(10000);
@@ -60,10 +54,6 @@ namespace DibrisBike
                         comm.Parameters.AddWithValue("@peso", 10.2);
                         comm.Parameters.AddWithValue("@lunghezza", 1.7);
 
-                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                        {
-                        }
-
                         comm.ExecuteNonQuery();
 
                         //updating the lasercut table for each tube
@@ -72,11 +62,7 @@ namespace DibrisBike
                         comm.Parameters.Clear();
                         comm.Parameters.AddWithValue("@endTime", DateTime.Now);
                         comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
-
-                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                        {
-                        }
-
+                        
                         comm.ExecuteNonQuery();
                     }
                     //insereting the bar codes into the queue for the next step
@@ -84,8 +70,6 @@ namespace DibrisBike
                     _queueSald.Enqueue(idLotto);
                     //and signaling it to another thread
                     _signalSald.Set();
-                    //conn.Close();
-                    //Thread.Sleep(2000);
                 }
             }
         }
@@ -100,7 +84,6 @@ namespace DibrisBike
                 int idLotto, idAssegnazione;
                 while(_queueLC2.TryDequeue(out codiceBarreTemp))
                 {
-                    //_queueLC2.TryDequeue(out codiceBarreTemp);
                     _queueLC2.TryDequeue(out idLottoTemp);
                     _queueLC2.TryDequeue(out idAssegnTemp);
 
@@ -115,10 +98,6 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@tempoArrivo", DateTime.Now);
                     comm.Parameters.AddWithValue("@id", idAssegnazione);
 
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
                     comm.ExecuteNonQuery();
                     //sleep the Thread (simulating laser cut)
                     Thread.Sleep(10000);
@@ -137,11 +116,7 @@ namespace DibrisBike
                         comm.Parameters.AddWithValue("@diametro", 5.0);
                         comm.Parameters.AddWithValue("@peso", 10.2);
                         comm.Parameters.AddWithValue("@lunghezza", 1.7);
-
-                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                        {
-                        }
-
+                        
                         comm.ExecuteNonQuery();
 
                         query = "UPDATE dbo.lasercutdp SET endTime = @endTime WHERE codiceTubo = @codiceTubo";
@@ -149,11 +124,7 @@ namespace DibrisBike
                         comm.Parameters.Clear();
                         comm.Parameters.AddWithValue("@endTime", DateTime.Now);
                         comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
-
-                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                        {
-                        }
-
+                        
                         comm.ExecuteNonQuery();
                     }
                     //insereting the bar codes into the queue for the next step
@@ -161,9 +132,6 @@ namespace DibrisBike
                     _queueSald.Enqueue(idLotto);
                     //and signaling it to another thread
                     _signalSald.Set();
-                    //conn.Close();
-
-                    //Thread.Sleep(2000);
                 }
             }
         }
@@ -178,7 +146,6 @@ namespace DibrisBike
                 int idLotto, idAssegnazione;
                 while(_queueLC3.TryDequeue(out codiceBarreTemp))
                 {
-                    //_queueLC3.TryDequeue(out codiceBarreTemp);
                     _queueLC3.TryDequeue(out idLottoTemp);
                     _queueLC3.TryDequeue(out idAssegnTemp);
 
@@ -192,11 +159,7 @@ namespace DibrisBike
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@tempoArrivo", DateTime.Now);
                     comm.Parameters.AddWithValue("@id", idAssegnazione);
-
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
+                    
                     comm.ExecuteNonQuery();
                     //sleep the Thread (simulating laser cut)
                     Thread.Sleep(10000);
@@ -215,11 +178,7 @@ namespace DibrisBike
                         comm.Parameters.AddWithValue("@diametro", 5.0);
                         comm.Parameters.AddWithValue("@peso", 10.2);
                         comm.Parameters.AddWithValue("@lunghezza", 1.7);
-
-                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                        {
-                        }
-
+                        
                         comm.ExecuteNonQuery();
 
                         //updating the lasercut table for each tube
@@ -228,11 +187,7 @@ namespace DibrisBike
                         comm.Parameters.Clear();
                         comm.Parameters.AddWithValue("@endTime", DateTime.Now);
                         comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
-
-                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                        {
-                        }
-
+                        
                         comm.ExecuteNonQuery();
                     }
                     //insereting the bar codes into the queue for the next step
@@ -240,9 +195,6 @@ namespace DibrisBike
                     _queueSald.Enqueue(idLotto);
                     //and signaling it to another thread
                     _signalSald.Set();
-                    //conn.Close();
-
-                    //Thread.Sleep(2000);
                 }
             }
         }

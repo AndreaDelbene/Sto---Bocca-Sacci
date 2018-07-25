@@ -21,7 +21,6 @@ namespace DibrisBike
                 int idLotto;
                 while(_queueForno.TryDequeue(out idTelaio))
                 {
-                    //_queueForno.TryDequeue(out idTelaio);
                     _queueForno.TryDequeue(out idLotto);
                     // simulating the Welmer
                     Thread.Sleep(8000);
@@ -37,11 +36,7 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@idTelaio", idTelaio);
                     comm.Parameters.AddWithValue("@endTimeSald", DateTime.Now);
                     comm.Parameters.AddWithValue("@startTimeForno", DateTime.Now);
-
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
+                    
                     comm.ExecuteNonQuery();
 
                     //updating the order state table
@@ -50,17 +45,12 @@ namespace DibrisBike
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@stato", "cooking");
                     comm.Parameters.AddWithValue("@idLotto", idLotto);
-
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
+                    
                     comm.ExecuteNonQuery();
                     //filling the queue for the Painting and signaling it
                     _queueToPaint.Enqueue(idTelaio);
                     _queueToPaint.Enqueue(idLotto);
                     _signalToPaint.Set();
-                    //conn.Close();
                 }
             }
         }
