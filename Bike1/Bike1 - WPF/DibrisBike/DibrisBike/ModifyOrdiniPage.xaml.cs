@@ -56,7 +56,6 @@ namespace DibrisBike
         {
             String query = "SELECT * FROM dbo.statoordini";
             SqlCommand comm = new SqlCommand(query, conn);
-            conn.Open();
 
             comm.ExecuteNonQuery();
 
@@ -65,7 +64,6 @@ namespace DibrisBike
             adapter.Fill(table);
             statoordiniGridModify.ItemsSource = table.DefaultView;
             GetStatoordiniColumnsNames(table);
-            conn.Close();
         }
 
         private void GetStatoordiniColumnsNames(DataTable table)
@@ -109,9 +107,9 @@ namespace DibrisBike
             SqlCommand comm = new SqlCommand(query, conn);
             comm.Parameters.AddWithValue("@newQuantita", Int32.Parse(newValueTextBox.Text));
             comm.Parameters.AddWithValue("@idLotto", idLotto);
-            conn.Open();
+            
             comm.ExecuteNonQuery();
-            conn.Close();
+
             FillDataGrid(conn);
         }
     }

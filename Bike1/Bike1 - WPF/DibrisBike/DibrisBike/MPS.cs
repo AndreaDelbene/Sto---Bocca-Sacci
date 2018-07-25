@@ -130,6 +130,41 @@ namespace DibrisBike
                     //the stuff passes under the Quality Control Area
                     Console.WriteLine("ACQ");
                 }
+
+                //checking whenever a new MPS has been updated
+                query = "SELECT * FROM dbo.mps WHERE modified = 1";
+                comm = new SqlCommand(query, conn);
+
+                adapter = new SqlDataAdapter(comm);
+
+                comm.ExecuteNonQuery();
+
+                table = new DataTable();
+                adapter.Fill(table);
+
+                id = (from DataRow r in table.Rows select (int)r["id"]).ToArray();
+                quantita = (from DataRow r in table.Rows select (int)r["quantita"]).ToArray();
+                //and if there are edits, let's update the 'statoordini' table, so more/less bikes will get produced
+                for(int i = 0; i < id.Length; i++)
+                {
+                    query = "UPDATE dbo.statoordini SET quantitaDesiderata = @quantitaDesiderata WHERE idLotto = @idLotto";
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@quantitaDesiderata", quantita[i]);
+                    comm.Parameters.AddWithValue("@idLotto", id[i]);
+
+                    comm.ExecuteNonQuery();
+
+                    //and let's update the 'mps' table too
+                    query = "UPDATE dbo.mps SET modified = 0 WHERE id = @idLotto";
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@idLotto", id[i]);
+
+                    comm.ExecuteNonQuery();
+                }
+
+
                 Thread.Sleep(2000);
             }
         }
