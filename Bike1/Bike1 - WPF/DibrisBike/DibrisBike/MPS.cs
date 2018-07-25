@@ -194,9 +194,15 @@ namespace DibrisBike
                             break;
 
                         case 2:
-                            String campo2 = xlRange.Cells[i, j].Value2.ToString();
-                            DateTime date2 = DateTime.ParseExact(campo2, "MM/dd/yy HH:mm:ss", null);
-                            comm.Parameters.AddWithValue("@dueDate", date2);
+                            Object campo2 = xlRange.Cells[i, j].Value2;
+                            if (campo2 != null)
+                            {
+                                comm.Parameters.AddWithValue("@quantita", (int)(double)campo2);
+                            }
+                            else
+                            {
+                                flagError = true;
+                            }
                             break;
 
                         case 3:
@@ -264,6 +270,7 @@ namespace DibrisBike
                 if (!flagError)
                 {
                     comm.Parameters.AddWithValue("@startDate", DateTime.Now);
+                    comm.Parameters.AddWithValue("@modified", 0);
 
                     if (conn != null && conn.State == ConnectionState.Closed)
                         conn.Open();

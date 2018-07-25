@@ -45,10 +45,11 @@
                     SelectionChanged="keywordBox_SelectionChanged"/>
                 </StackPanel>
             </Grid>
-            <StackPanel x:Name="modificationPanel" Margin="0 20 0 0" Orientation="Vertical" Visibility="Hidden">
+            <StackPanel x:Name="modificationPanel" Margin="0 20 0 0" Orientation="Vertical" Visibility="Visible">
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Modifica la quantità desiderata" />
                     <TextBox x:Name="newValueTextBox" Width="120" Text="" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <Label x:Name="errorLabel" Margin="15 0 0 0" Content="" Foreground="Red"/>
                 </StackPanel>
                 <Button x:Name="apply" Width="120" Margin="0 10 0 0" HorizontalAlignment="Left" Content="Applica modifica" Click="apply_Click" />
             </StackPanel>

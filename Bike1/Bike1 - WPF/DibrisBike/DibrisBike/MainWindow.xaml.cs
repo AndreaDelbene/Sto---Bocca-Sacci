@@ -21,7 +21,7 @@ namespace DibrisBike
         static private readonly ConcurrentQueue<object> _queue = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signal = new AutoResetEvent(false);
         static private readonly AutoResetEvent _signalError = new AutoResetEvent(false);
-        static private readonly AutoResetEvent _singalErrorRM = new AutoResetEvent(false);
+        static private readonly AutoResetEvent _signalErrorRM = new AutoResetEvent(false);
         static private bool flagError = false;
         //queues and signals for Routing - WelmStorage
         static private readonly ConcurrentQueue<object> _queueLC1 = new ConcurrentQueue<object>();
@@ -145,7 +145,7 @@ namespace DibrisBike
         static void routingMagazzinoCaller()
         {
             Routing rm = new Routing();
-            rm.routingMagazzino(conn, _queue, _signal, _queueLC1, _queueLC2, _queueLC3, _signalLC1, _signalLC2, _signalLC3, _signalError, _singalErrorRM);
+            rm.routingMagazzino(conn, _queue, _signal, _queueLC1, _queueLC2, _queueLC3, _signalLC1, _signalLC2, _signalLC3, _signalError, _signalErrorRM);
         }
 
         private void MPSChooser_Click(object sender, RoutedEventArgs e)
@@ -302,7 +302,7 @@ namespace DibrisBike
                         }
                         ));
 
-                _singalErrorRM.WaitOne();
+                _signalErrorRM.WaitOne();
 
                 this.Dispatcher.BeginInvoke(
                     new Action(
@@ -313,6 +313,7 @@ namespace DibrisBike
                             RMAlertLabel.Content = "Raw material insufficienti";
                         }
                         ));
+                _signalError.WaitOne();
             }
         }
 

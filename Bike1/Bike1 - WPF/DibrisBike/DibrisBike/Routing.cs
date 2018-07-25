@@ -13,7 +13,7 @@ namespace DibrisBike
         {
         }
 
-        public void routingMagazzino(SqlConnection conn, ConcurrentQueue<object> _queue, AutoResetEvent _signal, ConcurrentQueue<object> _queueLC1, ConcurrentQueue<object> _queueLC2, 
+        public void routingMagazzino(SqlConnection conn, ConcurrentQueue<object> _queue, AutoResetEvent _signal, ConcurrentQueue<object> _queueLC1, ConcurrentQueue<object> _queueLC2,
             ConcurrentQueue<object> _queueLC3, AutoResetEvent _signalLC1, AutoResetEvent _signalLC2, AutoResetEvent _signalLC3, AutoResetEvent _signalError, AutoResetEvent _signalErrorRM)
         {
             while (true)
@@ -24,7 +24,7 @@ namespace DibrisBike
                 object idLottoTemp, quantitaTubiTemp, lineaTemp, quantitaOrdineTemp;
                 int[] idLotto, quantitaTubi, quantitaOrdine;
                 string[] linea;
-                while(_queue.TryDequeue(out idLottoTemp))
+                while (_queue.TryDequeue(out idLottoTemp))
                 {
                     //_queue.TryDequeue(out idLottoTemp);
                     _queue.TryDequeue(out quantitaTubiTemp);
@@ -355,24 +355,25 @@ namespace DibrisBike
                                     _signalLC3.Set();
                                 }
 
-                        }
-                        else
-                        {
-                            //launch exception on storage
-                            Console.WriteLine("NOT ENOUGH RAW MATERIALS");
-                            //and waiting for someone inserting some.
+                            }
+                            else
+                            {
+                                //launch exception on storage
+                                Console.WriteLine("NOT ENOUGH RAW MATERIALS");
+                                //and waiting for someone inserting some.
 
-                            // launch a signal to set an error in the UI
-                            _signalErrorRM.Set();
-                            // wait for new raw material
-                            _signalError.WaitOne();
+                                // launch a signal to set an error in the UI
+                                _signalErrorRM.Set();
+                                // wait for new raw material
+                                _signalError.WaitOne();
+                            }
+                            //conn.Close();
                         }
-                        //conn.Close();
+
                     }
-
+                    //sleeping the thread for 2 secs
+                    Thread.Sleep(2000);
                 }
-                //sleeping the thread for 2 secs
-                //Thread.Sleep(10000);
             }
         }
     }
