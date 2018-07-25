@@ -181,9 +181,9 @@ namespace DibrisBike
                             String temp = Convert.ToString(xlRange.Cells[i, j].Value2);
                             if (temp != null)
                             {
-                                double campo2 = double.Parse(temp);
-                                DateTime date2 = DateTime.FromOADate(campo2);
-                                comm.Parameters.AddWithValue("@dueDate", date2);
+                                double campo1 = double.Parse(temp);
+                                DateTime date1 = DateTime.FromOADate(campo1);
+                                comm.Parameters.AddWithValue("@dueDate", date1);
                             }
                             else
                             {

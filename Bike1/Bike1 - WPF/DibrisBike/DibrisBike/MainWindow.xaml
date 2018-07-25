@@ -33,7 +33,7 @@
                 <Label x:Name="RMPathLabel" Margin="0 0 10 10" Grid.Column="2" Grid.Row="1" Content="" />
 
                 <Label x:Name="statoordiniGridLabel" Grid.Row="2" Grid.ColumnSpan="3" Content="Stato ordini" Margin="0 20 0 0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" FontWeight="DemiBold" />
-                <DataGrid Margin="0 0 0 0" AutoGenerateColumns="True" x:Name="statoOrdiniGrid" Grid.Row="3" Grid.ColumnSpan="3" />
+                <DataGrid Margin="0 0 0 0" AutoGenerateColumns="True" x:Name="statoOrdiniGrid" Grid.Row="3" Grid.ColumnSpan="3" IsReadOnly="True"/>
 
                 <Button x:Name="ordiniModify" Margin="0 15 0 0"  Grid.Row="4" Grid.ColumnSpan="1" Content="Modifica un ordine" Click="ordiniModify_Click" />
 

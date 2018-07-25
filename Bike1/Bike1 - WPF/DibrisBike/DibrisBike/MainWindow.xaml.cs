@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Collections.Concurrent;
 using Microsoft.Win32;
 using System.Data;
+using System.Windows.Media;
 
 namespace DibrisBike
 {
@@ -281,6 +282,12 @@ namespace DibrisBike
             assemb.startAssembling(conn, _queueAssemb, _signalAssemb);
         }
 
+        static void checkFinishedCaller()
+        {
+            ProductionStorage ps = new ProductionStorage();
+            ps.updateProductionStorage(conn);
+        }
+
         private void signalErrorChangeListener()
         {
             while (true)
@@ -311,7 +318,8 @@ namespace DibrisBike
 
         private void seeFinishedProducts_Click(object sender, RoutedEventArgs e)
         {
-
+            FinishProductPage finishProductPage = new FinishProductPage();
+            finishProductPage.Show();
         }
     }
 }

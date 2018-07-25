@@ -332,6 +332,7 @@ namespace DibrisBike
 
                             // launch a signal to set an error in the UI
                             _signalErrorRM.Set();
+                            // wait for new raw material
                             _signalError.WaitOne();
                         }
                         //conn.Close();
