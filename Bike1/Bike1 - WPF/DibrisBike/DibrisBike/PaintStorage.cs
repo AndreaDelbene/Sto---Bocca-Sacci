@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Data;
 using System.Data.SqlClient;
 using System.Threading;
 
@@ -21,7 +20,6 @@ namespace DibrisBike
                 int idLotto;
                 while(_queueToPaint.TryDequeue(out idTelaio))
                 {
-                    //_queueToPaint.TryDequeue(out idTelaio);
                     _queueToPaint.TryDequeue(out idLotto);
                     // simulating the Furnace
                     Thread.Sleep(8000);
@@ -38,10 +36,6 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@endTimeForno", DateTime.Now.ToString());
                     comm.Parameters.AddWithValue("@startTimePaint", DateTime.Now.ToString());
 
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
                     comm.ExecuteNonQuery();
 
                     //updating the order state table
@@ -51,10 +45,6 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@stato", "painting");
                     comm.Parameters.AddWithValue("@idLotto", idLotto);
 
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
                     comm.ExecuteNonQuery();
 
                     //we get then the color and the mode of Printing that the customer selected
@@ -63,11 +53,7 @@ namespace DibrisBike
                     SqlDataReader reader;
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@idLotto", idLotto);
-
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
+                    
                     reader = comm.ExecuteReader();
 
                     reader.Read();
@@ -98,8 +84,6 @@ namespace DibrisBike
                     {
                         Console.WriteLine("NO MODE DEFINED?!");
                     }
-
-                    //conn.Close();
                 }
             }
         }

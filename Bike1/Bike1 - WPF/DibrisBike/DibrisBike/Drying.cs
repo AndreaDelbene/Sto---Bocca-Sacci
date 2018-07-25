@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Data;
 using System.Data.SqlClient;
 using System.Threading;
 
@@ -21,7 +20,6 @@ namespace DibrisBike
                 int idTelaio, idLotto;
                 while(_queueEssic.TryDequeue(out idTelaio))
                 {
-                    //_queueEssic.TryDequeue(out idTelaio);
                     _queueEssic.TryDequeue(out idLotto);
                     //simulating the drying
                     Thread.Sleep(6000);
@@ -36,11 +34,7 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@stato", "finisheddry");
                     comm.Parameters.AddWithValue("@idTelaio", idTelaio);
                     comm.Parameters.AddWithValue("@endTimeEssic", DateTime.Now);
-
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
+                   
                     comm.ExecuteNonQuery();
 
                     //and the state of orders.
@@ -50,10 +44,6 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@stato", "assembling");
                     comm.Parameters.AddWithValue("@idLotto", idLotto);
 
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
                     comm.ExecuteNonQuery();
                     //Getting the frame type from the order
                     query = "SELECT tipoTelaio FROM dbo.statoordini WHERE idLotto = @idLotto";
@@ -61,11 +51,7 @@ namespace DibrisBike
                     SqlDataReader reader;
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@idLotto", idLotto);
-
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
+                    
                     reader = comm.ExecuteReader();
                     reader.Read();
                     string tipoTelaio = (string)reader["tipoTelaio"];
@@ -76,11 +62,7 @@ namespace DibrisBike
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio);
-
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
+                   
                     reader = comm.ExecuteReader();
 
                     if (reader.HasRows)
@@ -98,10 +80,6 @@ namespace DibrisBike
                         comm.Parameters.AddWithValue("@idScatola", idScatola);
                         comm.Parameters.AddWithValue("@startTime", DateTime.Now);
 
-                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                        {
-                        }
-
                         comm.ExecuteNonQuery();
 
                         //getting the id of the row we just added
@@ -109,11 +87,7 @@ namespace DibrisBike
                         comm = new SqlCommand(query, conn);
                         comm.Parameters.Clear();
                         comm.Parameters.AddWithValue("@idTelaio", idTelaio);
-
-                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                        {
-                        }
-
+                        
                         reader = comm.ExecuteReader();
                         reader.Read();
                         int idAssemblaggio = (int)reader["id"];

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Data;
 using System.Data.SqlClient;
 using System.Threading;
 
@@ -24,7 +23,6 @@ namespace DibrisBike
                 //getting stuff from the queue
                 while(_queuePast.TryDequeue(out lineaTemp))
                 {
-                    //_queuePast.TryDequeue(out lineaTemp);
                     _queuePast.TryDequeue(out coloreTemp);
                     _queuePast.TryDequeue(out idTelaioTemp);
                     _queuePast.TryDequeue(out idLottoTemp);
@@ -50,11 +48,7 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@idTelaio", idTelaio);
                     comm.Parameters.AddWithValue("@endTimePaint", DateTime.Now);
                     comm.Parameters.AddWithValue("@startTimeEssic", DateTime.Now);
-
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
+                    
                     comm.ExecuteNonQuery();
 
                     //and the state of orders.
@@ -63,11 +57,7 @@ namespace DibrisBike
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@stato", "drying");
                     comm.Parameters.AddWithValue("@idLotto", idLotto);
-
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
+                    
                     comm.ExecuteNonQuery();
 
                     //filling the queue for the drying
@@ -75,8 +65,6 @@ namespace DibrisBike
                     _queueEssic.Enqueue(idLotto);
                     //signaling it
                     _signalEssic.Set();
-                    //and closing the connection
-                    //conn.Close();
                 }
             }
         }
@@ -93,7 +81,6 @@ namespace DibrisBike
                 object idLottoTemp, idTelaioTemp, coloreTemp, lineaTemp;
                 while (_queueMetal.TryDequeue(out lineaTemp))
                 {
-                    //_queueMetal.TryDequeue(out lineaTemp);
                     _queueMetal.TryDequeue(out coloreTemp);
                     _queueMetal.TryDequeue(out idTelaioTemp);
                     _queueMetal.TryDequeue(out idLottoTemp);
@@ -104,7 +91,7 @@ namespace DibrisBike
                     linea = (string)lineaTemp;
 
                     // simulating the Paint
-                    Thread.Sleep(5000);
+                    Thread.Sleep(7000);
 
                     //Let's Dry the frame now!
                     Console.WriteLine("DRYING");
@@ -119,10 +106,6 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@endTimePaint", DateTime.Now);
                     comm.Parameters.AddWithValue("@startTimeEssic", DateTime.Now);
 
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
                     comm.ExecuteNonQuery();
 
                     //updating 'statoordini'
@@ -132,17 +115,11 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@stato", "drying");
                     comm.Parameters.AddWithValue("@idLotto", idLotto);
 
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
                     comm.ExecuteNonQuery();
                     //and preparing the stuff for the next step.
                     _queueEssic.Enqueue(idTelaio);
                     _queueEssic.Enqueue(idLotto);
                     _signalEssic.Set();
-
-                    //conn.Close();
                 }
             }
         }

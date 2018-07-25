@@ -24,10 +24,6 @@ namespace DibrisBike
                 comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "finished");
 
-                while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                {
-                }
-
                 comm.ExecuteNonQuery();
 
                 DataTable table = new DataTable();
@@ -58,10 +54,6 @@ namespace DibrisBike
                         comm.Parameters.AddWithValue("@quantita", quantita[i]);
                         comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
 
-                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                        {
-                        }
-
                         comm.ExecuteNonQuery();
 
                         Console.WriteLine("STORED");
@@ -72,11 +64,7 @@ namespace DibrisBike
                         comm.Parameters.Clear();
                         comm.Parameters.AddWithValue("@stato", "stored");
                         comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
-
-                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                        {
-                        }
-
+                        
                         comm.ExecuteNonQuery();
 
                     }

@@ -26,13 +26,7 @@ namespace DibrisBike
                 SqlCommand comm = new SqlCommand(query, conn);
 
                 SqlDataAdapter adapter = new SqlDataAdapter(comm);
-
-                //problems with other threads trying to open a connection already opened
-
-                while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                {
-                }
-
+                
                 comm.ExecuteNonQuery();
 
                 DataTable table = new DataTable();
@@ -99,11 +93,7 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
                     comm.Parameters.AddWithValue("@stato", "running");
                     comm.Parameters.AddWithValue("@descrizione", "");
-
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
+                    
                     comm.ExecuteNonQuery();
 
                     //I set then the flag to 1 into the 'mps' table
@@ -112,10 +102,6 @@ namespace DibrisBike
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@idLotto", id[i]);
 
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
                     comm.ExecuteNonQuery();
 
                     //and I check how many stuff I need for that kind of bike
@@ -123,11 +109,7 @@ namespace DibrisBike
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
-
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
+                    
                     SqlDataReader reader = comm.ExecuteReader();
 
                     reader.Read();
@@ -148,7 +130,6 @@ namespace DibrisBike
                     //the stuff passes under the Quality Control Area
                     Console.WriteLine("ACQ");
                 }
-                //conn.Close();
                 Thread.Sleep(2000);
             }
         }
@@ -233,7 +214,6 @@ namespace DibrisBike
                     //Console.WriteLine(e.Errors);
                     Console.WriteLine(e.ToString());
                 }
-                //conn.Close();
             }
 
             //cleanup

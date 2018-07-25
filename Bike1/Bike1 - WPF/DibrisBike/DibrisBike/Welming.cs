@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Data;
 using System.Data.SqlClient;
 using System.Threading;
 
@@ -22,7 +21,6 @@ namespace DibrisBike
                 int idLotto;
                 while(_queueSald.TryDequeue(out codiceBarreTemp))
                 {
-                    //_queueSald.TryDequeue(out codiceBarreTemp);
                     _queueSald.TryDequeue(out idLottoTemp);
                     codiceBarre = (string[])codiceBarreTemp;
                     idLotto = (int)idLottoTemp;
@@ -32,10 +30,6 @@ namespace DibrisBike
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@stato", "storing for welming");
                     comm.Parameters.AddWithValue("@idLotto", idLotto);
-
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
 
                     comm.ExecuteNonQuery();
                     //transponting the tubes from the storage to the welder (saldatrice)
@@ -51,11 +45,7 @@ namespace DibrisBike
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@startTimeSald", DateTime.Now);
                     comm.Parameters.AddWithValue("@stato", "welming");
-
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
+                   
                     comm.ExecuteNonQuery();
                     //once we have a number for the frame, we get it
                     query = "SELECT TOP 1 idTelaio FROM dbo.saldessdp ORDER BY idTelaio DESC";
@@ -63,10 +53,6 @@ namespace DibrisBike
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.Clear();
                     SqlDataReader reader;
-
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
 
                     reader = comm.ExecuteReader();
                     reader.Read();
@@ -82,10 +68,6 @@ namespace DibrisBike
                         comm.Parameters.AddWithValue("@idTelaio", idTelaio);
                         comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
 
-                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                        {
-                        }
-
                         comm.ExecuteNonQuery();
                     }
 
@@ -94,11 +76,7 @@ namespace DibrisBike
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@stato", "welming");
                     comm.Parameters.AddWithValue("@idLotto", idLotto);
-
-                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
-                    {
-                    }
-
+                    
                     comm.ExecuteNonQuery();
 
                     //setting data into the queue for the Furnace
@@ -106,7 +84,6 @@ namespace DibrisBike
                     _queueForno.Enqueue(idLotto);
                     //and we signal it.
                     _signalForno.Set();
-                    //conn.Close();
                 }
             }
         }
