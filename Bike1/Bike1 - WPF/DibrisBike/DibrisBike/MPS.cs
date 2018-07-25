@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace DibrisBike
@@ -33,6 +30,8 @@ namespace DibrisBike
                 //problems with other threads trying to open a connection already opened
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();
+
+                comm.ExecuteNonQuery();
 
                 DataTable table = new DataTable();
                 adapter.Fill(table);
@@ -105,7 +104,7 @@ namespace DibrisBike
                     comm.ExecuteNonQuery();
                     //conn.Close();
 
-                    // i set then the flag to 1 into the 'mps' table
+                    //I set then the flag to 1 into the 'mps' table
                     query = "UPDATE stodb.dbo.mps SET running = 1 WHERE id = @idLotto";
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.Clear();
@@ -117,7 +116,7 @@ namespace DibrisBike
                     comm.ExecuteNonQuery();
                     //conn.Close();
 
-                    //and i check how many stuff i need for that kind of bike
+                    //and I check how many stuff I need for that kind of bike
                     query = "SELECT quantitaTubi FROM dbo.ricette WHERE tipoTelaio = @tipoTelaio";
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.Clear();
@@ -125,20 +124,18 @@ namespace DibrisBike
 
                     if (conn != null && conn.State == ConnectionState.Closed)
                         conn.Open();
-
-                    comm.ExecuteNonQuery();
-
+                    
                     SqlDataReader reader = comm.ExecuteReader();
-                    if (reader.HasRows)
-                        quantitaTubi[i] = (int)reader["quantitaTubi"];
-                    else
-                        quantitaTubi[i] = 3;    //Valore impostato finchè non si avrà la tabella ricette popolata
+
+                    reader.Read();
+
+                    quantitaTubi[i] = (int)reader["quantitaTubi"];
+                    
                     //conn.Close();
-                    Console.WriteLine(i);
                     reader.Close();
 
                 }
-                if (id.Length != 0)
+                if (id.Length > 0)
                 {
                     //queue=FIFO, i save in it the amount of ids, tubes and other stuff.
                     _queue.Enqueue(id);
@@ -195,15 +192,9 @@ namespace DibrisBike
                             break;
 
                         case 2:
-                            Object campo3 = xlRange.Cells[i, j].Value2;
-                            if (campo3 != null)
-                            {
-                                comm.Parameters.AddWithValue("@quantita", (int)(double)campo3);
-                            }
-                            else
-                            {
-                                flagError = true;
-                            }
+                            String campo2 = xlRange.Cells[i, j].Value2.ToString();
+                            DateTime date2 = DateTime.ParseExact(campo2, "MM/dd/yy HH:mm:ss", null);
+                            comm.Parameters.AddWithValue("@dueDate", date2);
                             break;
 
                         case 3:

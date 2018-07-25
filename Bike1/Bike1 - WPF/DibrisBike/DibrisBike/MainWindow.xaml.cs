@@ -1,22 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Collections.Concurrent;
-using System.IO;
 using Microsoft.Win32;
 using System.Data;
 
@@ -84,26 +71,34 @@ namespace DibrisBike
             Thread t1 = new Thread(new ThreadStart(getMPSCaller));
             Thread t2 = new Thread(new ThreadStart(routingMagazzinoCaller));
             Thread t3 = new Thread(new ThreadStart(printStatoOrdini));
-            Thread t4 = new Thread(new ThreadStart(accumuloSaldCaller));
+            Thread t41 = new Thread(new ThreadStart(accumuloSaldCaller1));
+            Thread t42 = new Thread(new ThreadStart(accumuloSaldCaller2));
+            Thread t43 = new Thread(new ThreadStart(accumuloSaldCaller3));
             Thread t5 = new Thread(new ThreadStart(saldCaller));
             Thread t6 = new Thread(new ThreadStart(furnaceCaller));
             Thread t7 = new Thread(new ThreadStart(accumuloPaintCaller));
-            Thread t8 = new Thread(new ThreadStart(paintCaller));
+            Thread t81 = new Thread(new ThreadStart(pastPaintCaller));
+            Thread t82 = new Thread(new ThreadStart(metalPaintCaller));
             Thread t9 = new Thread(new ThreadStart(dryCaller));
             Thread t10 = new Thread(new ThreadStart(assembCaller));
             Thread t11 = new Thread(new ThreadStart(signalErrorChangeListener));
+            Thread t12 = new Thread(new ThreadStart(checkFinishedCaller));
 
             t1.Start();
             t2.Start();
             t3.Start();
-            t4.Start();
+            t41.Start();
+            t42.Start();
+            t43.Start();
             t5.Start();
             t6.Start();
             t7.Start();
-            t8.Start();
+            t81.Start();
+            t82.Start();
             t9.Start();
             t10.Start();
             t11.Start();
+            t12.Start();
         }
 
         static void getMPSCaller()
@@ -214,11 +209,27 @@ namespace DibrisBike
             Dispatcher.Invoke(action);
         }
 
-        static void accumuloSaldCaller()
+        private void updateMPSLabel(string message)
+        {
+            Action action = () => MPSPathLabel.Content = message;
+            Dispatcher.Invoke(action);
+        }
+
+        static void accumuloSaldCaller1()
         {
             WelmStorage aS = new WelmStorage();
             aS.setAccumuloSald1(conn, _queueLC1, _signalLC1, _queueSald, _signalSald);
+        }
+
+        static void accumuloSaldCaller2()
+        {
+            WelmStorage aS = new WelmStorage();
             aS.setAccumuloSald2(conn, _queueLC2, _signalLC2, _queueSald, _signalSald);
+        }
+
+        static void accumuloSaldCaller3()
+        {
+            WelmStorage aS = new WelmStorage();
             aS.setAccumuloSald3(conn, _queueLC3, _signalLC3, _queueSald, _signalSald);
         }
 
@@ -246,10 +257,15 @@ namespace DibrisBike
             modifyOrdiniPage.Show();
         }
 
-        static void paintCaller()
+        static void pastPaintCaller()
         {
             Painting paint = new Painting();
             paint.startPaintingPast(conn, _queuePast, _signalPast, _queueEssic, _signalEssic);
+        }
+
+        static void metalPaintCaller()
+        {
+            Painting paint = new Painting();
             paint.startPaintingMetal(conn, _queueMetal, _signalMetal, _queueEssic, _signalEssic);
         }
 

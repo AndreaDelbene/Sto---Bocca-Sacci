@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace DibrisBike
 {
@@ -47,7 +44,7 @@ namespace DibrisBike
                         //and checking, for each request, whenever I have still tubes in the storage
                         string query = "SELECT TOP (@quantita) * FROM dbo.magazzinomateriali";
                         SqlCommand comm = new SqlCommand(query, conn);
-
+                        comm.Parameters.Clear();
                         comm.Parameters.AddWithValue("@quantita", quantitaTubi[i]);
 
                         SqlDataAdapter adapter = new SqlDataAdapter(comm);
@@ -67,10 +64,24 @@ namespace DibrisBike
                         if (table.Rows.Count == quantitaTubi[i])
                         {
                             //deleting every tube I get from the storage.
-                            for (int k = 0; k < quantitaTubi.Length; k++)
+                            for (int k = 0; k < quantitaTubi[i]; k++)
                             {
+                                //after i created the realation frame - tubes
+                                query = "INSERT INTO dbo.pezzotubo (idLotto, idPezzo, codiceTubo) VALUES (@idLotto, @idPezzo, @codiceTubo)";
                                 comm = new SqlCommand(query, conn);
+                                comm.Parameters.Clear();
+                                comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
+                                comm.Parameters.AddWithValue("@idPezzo",idLotto[i] + " - "+  (j + 1));
+                                comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[k]);
+                                
+                                if (conn != null && conn.State == ConnectionState.Closed)
+                                    conn.Open();
+
+                                comm.ExecuteNonQuery();
+
                                 query = "DELETE FROM dbo.magazzinomateriali WHERE codiceBarre = @codiceBarre";
+                                comm = new SqlCommand(query, conn);
+                                comm.Parameters.Clear();
                                 comm.Parameters.AddWithValue("@codiceBarre", codiceBarre[k]);
 
                                 if (conn != null && conn.State == ConnectionState.Closed)
@@ -81,10 +92,10 @@ namespace DibrisBike
                             
                             //selecting the frame (telaio) type
                             query = "SELECT tipoTelaio FROM dbo.mps WHERE id = @idLotto";
-
                             comm = new SqlCommand(query, conn);
                             SqlDataReader reader;
 
+                            comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
 
                             if (conn != null && conn.State == ConnectionState.Closed)
@@ -97,7 +108,6 @@ namespace DibrisBike
 
                             reader.Close();
 
-                            comm = new SqlCommand(query, conn);
                             //getting a random number to select in which Laser Cut send the set of tubes.
                             //alternatively it's possible to do a control on queue's dimensions and pick the lowest one.
                             Random r = new Random();
@@ -109,12 +119,15 @@ namespace DibrisBike
                             //preparing the insertion into the routing table
                             //Laser Cut step
                             query = "INSERT INTO dbo.routing (idLotto,idPezzo,step,durata,durataSetUp,opMacchina) VALUES (@idLotto,@idPezzo,@step,@durata,@durataSetUp,@opMacchina)";
+
+                            comm = new SqlCommand(query, conn);
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
-                            comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                            comm.Parameters.AddWithValue("@idPezzo", idLotto[i] + " - " + (j + 1));
                             comm.Parameters.AddWithValue("@step", 1);
                             comm.Parameters.AddWithValue("@durata", 9);
                             comm.Parameters.AddWithValue("@durataSetUp", 1);
+
 
 
                             switch (tipoTelaio[i])
@@ -152,7 +165,7 @@ namespace DibrisBike
                             //Welming step
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
-                            comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                            comm.Parameters.AddWithValue("@idPezzo", idLotto[i] + " - " + (j + 1));
                             comm.Parameters.AddWithValue("@step", 2);
                             comm.Parameters.AddWithValue("@durata", 8);
                             comm.Parameters.AddWithValue("@durataSetUp", 1);
@@ -163,7 +176,7 @@ namespace DibrisBike
                             //Furnace Step
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
-                            comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                            comm.Parameters.AddWithValue("@idPezzo", idLotto[i] + " - " + (j + 1));
                             comm.Parameters.AddWithValue("@step", 3);
                             comm.Parameters.AddWithValue("@durata", 8);
                             comm.Parameters.AddWithValue("@durataSetUp", 0);
@@ -174,7 +187,7 @@ namespace DibrisBike
                             //Painting Step
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
-                            comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                            comm.Parameters.AddWithValue("@idPezzo", idLotto[i] + " - " + (j + 1));
                             comm.Parameters.AddWithValue("@step", 4);
                             comm.Parameters.AddWithValue("@durata", 5);
                             comm.Parameters.AddWithValue("@durataSetUp", 2);
@@ -192,7 +205,7 @@ namespace DibrisBike
                             //Drying Step
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
-                            comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                            comm.Parameters.AddWithValue("@idPezzo", idLotto[i] + " - " + (j + 1));
                             comm.Parameters.AddWithValue("@step", 5);
                             comm.Parameters.AddWithValue("@durata", 6);
                             comm.Parameters.AddWithValue("@durataSetUp", 0);
@@ -203,7 +216,7 @@ namespace DibrisBike
                             //Assembling Step
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
-                            comm.Parameters.AddWithValue("@idPezzo", codiceBarre[i]);
+                            comm.Parameters.AddWithValue("@idPezzo", idLotto[i] + " - " + (j + 1));
                             comm.Parameters.AddWithValue("@step", 6);
                             comm.Parameters.AddWithValue("@durata", 4);
                             comm.Parameters.AddWithValue("@durataSetUp", 1);
@@ -222,14 +235,14 @@ namespace DibrisBike
                             string idVeicolo = "AGV" + idPercorso.ToString();
                             comm.Parameters.AddWithValue("@idPercorso", idPercorso);
                             comm.Parameters.AddWithValue("@idVeicolo", idVeicolo);
-                            comm.Parameters.AddWithValue("@tempoAssegnazione", DateTime.Now.ToString());
-                            comm.Parameters.AddWithValue("@tempoPartenza", DateTime.Now.ToString());
+                            comm.Parameters.AddWithValue("@tempoAssegnazione", DateTime.Now);
+                            comm.Parameters.AddWithValue("@tempoPartenza", DateTime.Now);
                             if (conn != null && conn.State == ConnectionState.Closed)
                                 conn.Open();
 
                             comm.ExecuteNonQuery();
                             //and getting the id of that assignment
-                            query = "SELECT TOP 1 id FROM dbo.perocorsiveicoli";
+                            query = "SELECT TOP 1 id FROM dbo.percorsiveicoli";
                             comm = new SqlCommand(query, conn);
                             comm.Parameters.Clear();
 
@@ -251,21 +264,22 @@ namespace DibrisBike
                             comm = new SqlCommand(query, conn);
                             comm.Parameters.Clear();
                             comm.Parameters.AddWithValue("@stato", "cutting");
-                            comm.Parameters.AddWithValue("@idLotto", idLotto);
+                            comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
                             if (conn != null && conn.State == ConnectionState.Closed)
                                 conn.Open();
 
                             comm.ExecuteNonQuery();
 
 
-                            for(int k=0;k<quantitaTubi.Length;k++)
+                            for(int k=0;k<quantitaTubi[i];k++)
                             {
                                 //updating the lasercut table for each tube
-                                comm = new SqlCommand(query, conn);
                                 query = "INSERT INTO dbo.lasercutdp (codiceTubo, idAssegnazione, startTime) VALUES (@codiceTubo, @idAssegnazione, @startTime)";
+                                comm = new SqlCommand(query, conn);
+                                comm.Parameters.Clear();
                                 comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[k]);
                                 comm.Parameters.AddWithValue("@idAssegnazione", idAssegnazione);
-                                comm.Parameters.AddWithValue("@startTime", DateTime.Now.ToString());
+                                comm.Parameters.AddWithValue("@startTime", DateTime.Now);
 
                                 if (conn != null && conn.State == ConnectionState.Closed)
                                     conn.Open();
@@ -278,21 +292,24 @@ namespace DibrisBike
                                 if (rInt == 1)
                                 {
                                     _queueLC1.Enqueue(codiceBarre);
-                                    _queueLC1.Enqueue(idLotto[0]);
+                                    _queueLC1.Enqueue(idLotto[i]);
+                                    _queueLC1.Enqueue(idAssegnazione);
                                     //signaling the service after the laser cut.
                                     _signalLC1.Set();
                                 }
                                 else if (rInt == 2)
                                 {
                                     _queueLC2.Enqueue(codiceBarre);
-                                    _queueLC2.Enqueue(idLotto[0]);
+                                    _queueLC2.Enqueue(idLotto[i]);
+                                    _queueLC2.Enqueue(idAssegnazione);
                                     _signalLC2.Set();
 
                                 }
                                 else
                                 {
                                     _queueLC3.Enqueue(codiceBarre);
-                                    _queueLC3.Enqueue(idLotto[0]);
+                                    _queueLC3.Enqueue(idLotto[i]);
+                                    _queueLC3.Enqueue(idAssegnazione);
                                     _signalLC3.Set();
                                 }
 
@@ -300,7 +317,8 @@ namespace DibrisBike
                             else
                             {
                                 _queueLC3.Enqueue(codiceBarre);
-                                _queueLC3.Enqueue(idLotto[0]);
+                                _queueLC3.Enqueue(idLotto[i]);
+                                _queueLC3.Enqueue(idAssegnazione);
                                 //signaling the service after the laser cut.
                                 _signalLC3.Set();
                             }
@@ -321,7 +339,7 @@ namespace DibrisBike
 
                 }
                 //sleeping the thread for 2 secs
-                Thread.Sleep(10000);
+                //Thread.Sleep(10000);
             }
         }
     }

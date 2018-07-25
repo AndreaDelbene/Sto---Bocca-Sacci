@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace DibrisBike
 {
@@ -34,6 +30,7 @@ namespace DibrisBike
                 comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "storing for welming");
                 comm.Parameters.AddWithValue("@idLotto", idLotto);
+
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();
 
@@ -49,7 +46,7 @@ namespace DibrisBike
                 comm = new SqlCommand(query, conn);
                 //state is "welding"
                 comm.Parameters.Clear();
-                comm.Parameters.AddWithValue("@startTimeSald", DateTime.Now.ToString());
+                comm.Parameters.AddWithValue("@startTimeSald", DateTime.Now);
                 comm.Parameters.AddWithValue("@stato", "welding");
                 
                 if (conn != null && conn.State == ConnectionState.Closed)
@@ -57,7 +54,7 @@ namespace DibrisBike
 
                 comm.ExecuteNonQuery();
                 //once we have a number for the frame, we get it
-                query = "SELECT TOP 1 idTelaio FROM dbo.saldess ORDER BY idTelaio DESC";
+                query = "SELECT TOP 1 idTelaio FROM dbo.saldessdp ORDER BY idTelaio DESC";
 
                 comm = new SqlCommand(query, conn);
                 comm.Parameters.Clear();
