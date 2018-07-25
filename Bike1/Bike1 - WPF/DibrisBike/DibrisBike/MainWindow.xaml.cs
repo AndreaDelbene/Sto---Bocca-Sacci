@@ -134,7 +134,7 @@ namespace DibrisBike
                         }
                     }
                 });
-                Thread.Sleep(2000);
+                Thread.Sleep(500);
             }
         }
 

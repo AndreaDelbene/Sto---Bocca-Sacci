@@ -19,113 +19,122 @@ namespace DibrisBike
                 //waiting for the signal
                 _signalEssic.WaitOne();
                 int idTelaio, idLotto;
-                _queueEssic.TryDequeue(out idTelaio);
-                _queueEssic.TryDequeue(out idLotto);
-                //simulating the drying
-                Thread.Sleep(6000);
-
-                Console.WriteLine("ASSEMBLING");
-
-                string query = "UPDATE dbo.saldessdp SET stato = @stato, endTimeEssic = @endTimeEssic WHERE idTelaio = @idTelaio";
-
-                SqlCommand comm = new SqlCommand(query, conn);
-                //state is "finisheddry"; from now on the data will be handled by another table
-                comm.Parameters.Clear();
-                comm.Parameters.AddWithValue("@stato", "finisheddry");
-                comm.Parameters.AddWithValue("@idTelaio", idTelaio);
-                comm.Parameters.AddWithValue("@endTimeEssic", DateTime.Now);
-
-                if (conn != null && conn.State == ConnectionState.Closed)
-                    conn.Open();
-
-                comm.ExecuteNonQuery();
-
-                //and the state of orders.
-                query = "UPDATE dbo.statoordini SET stato = @stato WHERE idLotto = @idLotto";
-                comm = new SqlCommand(query, conn);
-                comm.Parameters.Clear();
-                comm.Parameters.AddWithValue("@stato", "assembling");
-                comm.Parameters.AddWithValue("@idLotto", idLotto);
-                if (conn != null && conn.State == ConnectionState.Closed)
-                    conn.Open();
-
-                comm.ExecuteNonQuery();
-                //Getting the frame type from the order
-                query = "SELECT tipoTelaio FROM dbo.statoordini WHERE idLotto = @idLotto";
-                comm = new SqlCommand(query, conn);
-                SqlDataReader reader;
-                comm.Parameters.Clear();
-                comm.Parameters.AddWithValue("@idLotto", idLotto);
-
-                if (conn != null && conn.State == ConnectionState.Closed)
-                    conn.Open();
-                
-                reader = comm.ExecuteReader();
-                reader.Read();
-                string tipoTelaio = (string)reader["tipoTelaio"];
-                reader.Close();
-
-                //Getting now a box with the pieces for the assembling, filtering them by the frame type
-                query = "SELECT TOP 1 id FROM dbo.scatole WHERE tipo = @tipoTelaio";
-                comm = new SqlCommand(query, conn);
-                comm.Parameters.Clear();
-                comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio);
-
-                if (conn != null && conn.State == ConnectionState.Closed)
-                    conn.Open();
-                
-                reader = comm.ExecuteReader();
-
-                if (reader.HasRows)
+                while(_queueEssic.TryDequeue(out idTelaio))
                 {
-                    reader.Read();
-                    //---------------------------------------------generates exception - fill the table and do the check on another way
-                    string idScatola = (string)reader["id"];
-                    reader.Close();
-                    //if there are still avaiable boxes in the storage
-                    
-                    //I update the table
-                    query = "INSERT INTO dbo.assemblaggiodp (idTelaio, idScatola, startTime) VALUES (@idTelaio, @idScatola, @startTime)";
-                    comm = new SqlCommand(query, conn);
-                    comm.Parameters.Clear();
-                    comm.Parameters.AddWithValue("@idTelaio", idTelaio);
-                    comm.Parameters.AddWithValue("@idScatola", idScatola);
-                    comm.Parameters.AddWithValue("@startTime", DateTime.Now);
+                    //_queueEssic.TryDequeue(out idTelaio);
+                    _queueEssic.TryDequeue(out idLotto);
+                    //simulating the drying
+                    Thread.Sleep(6000);
 
-                    if (conn != null && conn.State == ConnectionState.Closed)
-                        conn.Open();
+                    Console.WriteLine("ASSEMBLING");
+
+                    string query = "UPDATE dbo.saldessdp SET stato = @stato, endTimeEssic = @endTimeEssic WHERE idTelaio = @idTelaio";
+
+                    SqlCommand comm = new SqlCommand(query, conn);
+                    //state is "finisheddry"; from now on the data will be handled by another table
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@stato", "finisheddry");
+                    comm.Parameters.AddWithValue("@idTelaio", idTelaio);
+                    comm.Parameters.AddWithValue("@endTimeEssic", DateTime.Now);
+
+                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                    {
+                    }
 
                     comm.ExecuteNonQuery();
-                    
-                    //getting the id of the row we just added
-                    query = "SELECT id FROM dbo.assemblaggiodp WHERE idTelaio = @idTelaio";
+
+                    //and the state of orders.
+                    query = "UPDATE dbo.statoordini SET stato = @stato WHERE idLotto = @idLotto";
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.Clear();
-                    comm.Parameters.AddWithValue("@idTelaio", idTelaio);
+                    comm.Parameters.AddWithValue("@stato", "assembling");
+                    comm.Parameters.AddWithValue("@idLotto", idLotto);
 
-                    if (conn != null && conn.State == ConnectionState.Closed)
-                        conn.Open();
+                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                    {
+                    }
+
+                    comm.ExecuteNonQuery();
+                    //Getting the frame type from the order
+                    query = "SELECT tipoTelaio FROM dbo.statoordini WHERE idLotto = @idLotto";
+                    comm = new SqlCommand(query, conn);
+                    SqlDataReader reader;
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@idLotto", idLotto);
+
+                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                    {
+                    }
 
                     reader = comm.ExecuteReader();
                     reader.Read();
-                    int idAssemblaggio = (int)reader["id"];
+                    string tipoTelaio = (string)reader["tipoTelaio"];
                     reader.Close();
 
-                    //I fill the queue for the assembling
-                    _queueAssemb.Enqueue(idAssemblaggio);
-                    _queueAssemb.Enqueue(idLotto);
-                    //and I signal it
-                    _signalAssemb.Set();
+                    //Getting now a box with the pieces for the assembling, filtering them by the frame type
+                    query = "SELECT TOP 1 id FROM dbo.scatole WHERE tipo = @tipoTelaio";
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio);
+
+                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                    {
+                    }
+
+                    reader = comm.ExecuteReader();
+
+                    if (reader.HasRows)
+                    {
+                        reader.Read();
+                        string idScatola = (string)reader["id"];
+                        reader.Close();
+                        //if there are still avaiable boxes in the storage
+
+                        //I update the table
+                        query = "INSERT INTO dbo.assemblaggiodp (idTelaio, idScatola, startTime) VALUES (@idTelaio, @idScatola, @startTime)";
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@idTelaio", idTelaio);
+                        comm.Parameters.AddWithValue("@idScatola", idScatola);
+                        comm.Parameters.AddWithValue("@startTime", DateTime.Now);
+
+                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                        {
+                        }
+
+                        comm.ExecuteNonQuery();
+
+                        //getting the id of the row we just added
+                        query = "SELECT id FROM dbo.assemblaggiodp WHERE idTelaio = @idTelaio";
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@idTelaio", idTelaio);
+
+                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                        {
+                        }
+
+                        reader = comm.ExecuteReader();
+                        reader.Read();
+                        int idAssemblaggio = (int)reader["id"];
+                        reader.Close();
+
+                        //I fill the queue for the assembling
+                        _queueAssemb.Enqueue(idAssemblaggio);
+                        _queueAssemb.Enqueue(idLotto);
+                        //and I signal it
+                        _signalAssemb.Set();
+                    }
+                    else
+                    {
+                        //else we launch an error and we wait 'til boxes are added again in the storage
+                        Console.WriteLine("NO BOXES AVAIABLE FOR ASSEMBLING");
+                        _signalError.WaitOne();
+                    }
+                    Thread.Sleep(3000);
+                    //closing the connection
+                    //conn.Close();
                 }
-                else
-                {
-                    //else we launch an error and we wait 'til boxes are added again in the storage
-                    Console.WriteLine("NO BOXES AVAIABLE FOR ASSEMBLING");
-                    _signalError.WaitOne();
-                }
-                
-                //closing the connection
-                //conn.Close();
             }
         }
     }

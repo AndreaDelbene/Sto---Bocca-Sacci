@@ -20,68 +20,73 @@ namespace DibrisBike
                 object codiceBarreTemp, idLottoTemp, idAssegnTemp;
                 string[] codiceBarre;
                 int idLotto, idAssegnazione;
-                _queueLC1.TryDequeue(out codiceBarreTemp);
-                _queueLC1.TryDequeue(out idLottoTemp);
-                _queueLC1.TryDequeue(out idAssegnTemp);
-
-                codiceBarre = (string[])codiceBarreTemp;
-                idLotto = (int)idLottoTemp;
-                idAssegnazione = (int)idAssegnTemp;
-
-                SqlCommand comm;
-                string query = "UPDATE dbo.percorsiveicoli SET tempoArrivo = @tempoArrivo WHERE id = @id";
-                comm = new SqlCommand(query, conn);
-                comm.Parameters.Clear();
-                comm.Parameters.AddWithValue("@tempoArrivo", DateTime.Now);
-                comm.Parameters.AddWithValue("@id", idAssegnazione);
-
-
-                if (conn != null && conn.State == ConnectionState.Closed)
-                    conn.Open();
-
-                comm.ExecuteNonQuery();
-                //sleep the Thread (simulating laser cut)
-                Thread.Sleep(10000);
-
-                //transponting the tubes from the storage to the welder (saldatrice)
-                Console.WriteLine("STORING FOR WELMING");
-                //updating the storage that contains the tubes to be welmed.
-                for (int i=0;i<codiceBarre.Length;i++)
+                while(_queueLC1.TryDequeue(out codiceBarreTemp))
                 {
-                    query = "INSERT INTO dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
+                    //_queueLC1.TryDequeue(out codiceBarreTemp);
+                    _queueLC1.TryDequeue(out idLottoTemp);
+                    _queueLC1.TryDequeue(out idAssegnTemp);
 
+                    codiceBarre = (string[])codiceBarreTemp;
+                    idLotto = (int)idLottoTemp;
+                    idAssegnazione = (int)idAssegnTemp;
+
+                    SqlCommand comm;
+                    string query = "UPDATE dbo.percorsiveicoli SET tempoArrivo = @tempoArrivo WHERE id = @id";
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.Clear();
-                    comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
-                    comm.Parameters.AddWithValue("@descrizione", "");
-                    comm.Parameters.AddWithValue("@diametro", 5.0);
-                    comm.Parameters.AddWithValue("@peso", 10.2);
-                    comm.Parameters.AddWithValue("@lunghezza", 1.7);
+                    comm.Parameters.AddWithValue("@tempoArrivo", DateTime.Now);
+                    comm.Parameters.AddWithValue("@id", idAssegnazione);
 
-                    if (conn != null && conn.State == ConnectionState.Closed)
-                        conn.Open();
+                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                    {
+                    }
 
                     comm.ExecuteNonQuery();
+                    //sleep the Thread (simulating laser cut)
+                    Thread.Sleep(10000);
 
-                    //updating the lasercut table for each tube
-                    query = "UPDATE dbo.lasercutdp SET endTime = @endTime WHERE codiceTubo = @codiceTubo";
-                    comm = new SqlCommand(query, conn);
-                    comm.Parameters.Clear();
-                    comm.Parameters.AddWithValue("@endTime", DateTime.Now);
-                    comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
+                    //transponting the tubes from the storage to the welder (saldatrice)
+                    Console.WriteLine("STORING FOR WELMING");
+                    //updating the storage that contains the tubes to be welmed.
+                    for (int i = 0; i < codiceBarre.Length; i++)
+                    {
+                        query = "INSERT INTO dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
 
-                    if (conn != null && conn.State == ConnectionState.Closed)
-                        conn.Open();
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
+                        comm.Parameters.AddWithValue("@descrizione", "");
+                        comm.Parameters.AddWithValue("@diametro", 5.0);
+                        comm.Parameters.AddWithValue("@peso", 10.2);
+                        comm.Parameters.AddWithValue("@lunghezza", 1.7);
 
-                    comm.ExecuteNonQuery();
+                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                        {
+                        }
+
+                        comm.ExecuteNonQuery();
+
+                        //updating the lasercut table for each tube
+                        query = "UPDATE dbo.lasercutdp SET endTime = @endTime WHERE codiceTubo = @codiceTubo";
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@endTime", DateTime.Now);
+                        comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
+
+                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                        {
+                        }
+
+                        comm.ExecuteNonQuery();
+                    }
+                    //insereting the bar codes into the queue for the next step
+                    _queueSald.Enqueue(codiceBarre);
+                    _queueSald.Enqueue(idLotto);
+                    //and signaling it to another thread
+                    _signalSald.Set();
+                    //conn.Close();
+                    //Thread.Sleep(2000);
                 }
-                //insereting the bar codes into the queue for the next step
-                _queueSald.Enqueue(codiceBarre);
-                _queueSald.Enqueue(idLotto);
-                //and signaling it to another thread
-                _signalSald.Set();
-                //conn.Close();
-                //Thread.Sleep(2000);
             }
         }
 
@@ -93,68 +98,73 @@ namespace DibrisBike
                 object codiceBarreTemp, idLottoTemp, idAssegnTemp;
                 string[] codiceBarre;
                 int idLotto, idAssegnazione;
-
-                _queueLC2.TryDequeue(out codiceBarreTemp);
-                _queueLC2.TryDequeue(out idLottoTemp);
-                _queueLC2.TryDequeue(out idAssegnTemp);
-
-                codiceBarre = (string[])codiceBarreTemp;
-                idLotto = (int)idLottoTemp;
-                idAssegnazione = (int)idAssegnTemp;
-
-                SqlCommand comm;
-                string query = "UPDATE dbo.percorsiveicoli SET tempoArrivo = @tempoArrivo WHERE id = @id";
-                comm = new SqlCommand(query, conn);
-                comm.Parameters.Clear();
-                comm.Parameters.AddWithValue("@tempoArrivo", DateTime.Now);
-                comm.Parameters.AddWithValue("@id", idAssegnazione);
-
-                if (conn != null && conn.State == ConnectionState.Closed)
-                    conn.Open();
-
-                comm.ExecuteNonQuery();
-                //sleep the Thread (simulating laser cut)
-                Thread.Sleep(10000);
-
-                //transponting the tubes from the storage to the welder (saldatrice)
-                Console.WriteLine("STORING FOR WELMING");
-                //updating the storage that contains the tubes to be welmed.
-                for (int i = 0; i < codiceBarre.Length; i++)
+                while(_queueLC2.TryDequeue(out codiceBarreTemp))
                 {
-                    query = "INSERT INTO dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
+                    //_queueLC2.TryDequeue(out codiceBarreTemp);
+                    _queueLC2.TryDequeue(out idLottoTemp);
+                    _queueLC2.TryDequeue(out idAssegnTemp);
 
+                    codiceBarre = (string[])codiceBarreTemp;
+                    idLotto = (int)idLottoTemp;
+                    idAssegnazione = (int)idAssegnTemp;
+
+                    SqlCommand comm;
+                    string query = "UPDATE dbo.percorsiveicoli SET tempoArrivo = @tempoArrivo WHERE id = @id";
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.Clear();
-                    comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
-                    comm.Parameters.AddWithValue("@descrizione", "");
-                    comm.Parameters.AddWithValue("@diametro", 5.0);
-                    comm.Parameters.AddWithValue("@peso", 10.2);
-                    comm.Parameters.AddWithValue("@lunghezza", 1.7);
+                    comm.Parameters.AddWithValue("@tempoArrivo", DateTime.Now);
+                    comm.Parameters.AddWithValue("@id", idAssegnazione);
 
-                    if (conn != null && conn.State == ConnectionState.Closed)
-                        conn.Open();
+                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                    {
+                    }
 
                     comm.ExecuteNonQuery();
+                    //sleep the Thread (simulating laser cut)
+                    Thread.Sleep(10000);
 
-                    query = "UPDATE dbo.lasercutdp SET endTime = @endTime WHERE codiceTubo = @codiceTubo";
-                    comm = new SqlCommand(query, conn);
-                    comm.Parameters.Clear();
-                    comm.Parameters.AddWithValue("@endTime", DateTime.Now);
-                    comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
+                    //transponting the tubes from the storage to the welder (saldatrice)
+                    Console.WriteLine("STORING FOR WELMING");
+                    //updating the storage that contains the tubes to be welmed.
+                    for (int i = 0; i < codiceBarre.Length; i++)
+                    {
+                        query = "INSERT INTO dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
 
-                    if (conn != null && conn.State == ConnectionState.Closed)
-                        conn.Open();
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
+                        comm.Parameters.AddWithValue("@descrizione", "");
+                        comm.Parameters.AddWithValue("@diametro", 5.0);
+                        comm.Parameters.AddWithValue("@peso", 10.2);
+                        comm.Parameters.AddWithValue("@lunghezza", 1.7);
 
-                    comm.ExecuteNonQuery();
+                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                        {
+                        }
+
+                        comm.ExecuteNonQuery();
+
+                        query = "UPDATE dbo.lasercutdp SET endTime = @endTime WHERE codiceTubo = @codiceTubo";
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@endTime", DateTime.Now);
+                        comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
+
+                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                        {
+                        }
+
+                        comm.ExecuteNonQuery();
+                    }
+                    //insereting the bar codes into the queue for the next step
+                    _queueSald.Enqueue(codiceBarre);
+                    _queueSald.Enqueue(idLotto);
+                    //and signaling it to another thread
+                    _signalSald.Set();
+                    //conn.Close();
+
+                    //Thread.Sleep(2000);
                 }
-                //insereting the bar codes into the queue for the next step
-                _queueSald.Enqueue(codiceBarre);
-                _queueSald.Enqueue(idLotto);
-                //and signaling it to another thread
-                _signalSald.Set();
-                //conn.Close();
-
-                //Thread.Sleep(2000);
             }
         }
 
@@ -166,69 +176,74 @@ namespace DibrisBike
                 object codiceBarreTemp, idLottoTemp, idAssegnTemp;
                 string[] codiceBarre;
                 int idLotto, idAssegnazione;
-
-                _queueLC3.TryDequeue(out codiceBarreTemp);
-                _queueLC3.TryDequeue(out idLottoTemp);
-                _queueLC3.TryDequeue(out idAssegnTemp);
-
-                codiceBarre = (string[])codiceBarreTemp;
-                idLotto = (int)idLottoTemp;
-                idAssegnazione = (int)idAssegnTemp;
-
-                SqlCommand comm;
-                string query = "UPDATE dbo.percorsiveicoli SET tempoArrivo = @tempoArrivo WHERE id = @id";
-                comm = new SqlCommand(query, conn);
-                comm.Parameters.Clear();
-                comm.Parameters.AddWithValue("@tempoArrivo", DateTime.Now);
-                comm.Parameters.AddWithValue("@id", idAssegnazione);
-
-                if (conn != null && conn.State == ConnectionState.Closed)
-                    conn.Open();
-
-                comm.ExecuteNonQuery();
-                //sleep the Thread (simulating laser cut)
-                Thread.Sleep(10000);
-
-                //transponting the tubes from the storage to the welder (saldatrice)
-                Console.WriteLine("STORING FOR WELMING");
-                //updating the storage that contains the tubes to be welmed.
-                for (int i = 0; i < codiceBarre.Length; i++)
+                while(_queueLC3.TryDequeue(out codiceBarreTemp))
                 {
-                    query = "INSERT INTO dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
+                    //_queueLC3.TryDequeue(out codiceBarreTemp);
+                    _queueLC3.TryDequeue(out idLottoTemp);
+                    _queueLC3.TryDequeue(out idAssegnTemp);
 
+                    codiceBarre = (string[])codiceBarreTemp;
+                    idLotto = (int)idLottoTemp;
+                    idAssegnazione = (int)idAssegnTemp;
+
+                    SqlCommand comm;
+                    string query = "UPDATE dbo.percorsiveicoli SET tempoArrivo = @tempoArrivo WHERE id = @id";
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.Clear();
-                    comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
-                    comm.Parameters.AddWithValue("@descrizione", "");
-                    comm.Parameters.AddWithValue("@diametro", 5.0);
-                    comm.Parameters.AddWithValue("@peso", 10.2);
-                    comm.Parameters.AddWithValue("@lunghezza", 1.7);
+                    comm.Parameters.AddWithValue("@tempoArrivo", DateTime.Now);
+                    comm.Parameters.AddWithValue("@id", idAssegnazione);
 
-                    if (conn != null && conn.State == ConnectionState.Closed)
-                        conn.Open();
+                    while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                    {
+                    }
 
                     comm.ExecuteNonQuery();
+                    //sleep the Thread (simulating laser cut)
+                    Thread.Sleep(10000);
 
-                    //updating the lasercut table for each tube
-                    query = "UPDATE dbo.lasercutdp SET endTime = @endTime WHERE codiceTubo = @codiceTubo";
-                    comm = new SqlCommand(query, conn);
-                    comm.Parameters.Clear();
-                    comm.Parameters.AddWithValue("@endTime", DateTime.Now);
-                    comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
+                    //transponting the tubes from the storage to the welder (saldatrice)
+                    Console.WriteLine("STORING FOR WELMING");
+                    //updating the storage that contains the tubes to be welmed.
+                    for (int i = 0; i < codiceBarre.Length; i++)
+                    {
+                        query = "INSERT INTO dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
 
-                    if (conn != null && conn.State == ConnectionState.Closed)
-                        conn.Open();
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
+                        comm.Parameters.AddWithValue("@descrizione", "");
+                        comm.Parameters.AddWithValue("@diametro", 5.0);
+                        comm.Parameters.AddWithValue("@peso", 10.2);
+                        comm.Parameters.AddWithValue("@lunghezza", 1.7);
 
-                    comm.ExecuteNonQuery();
+                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                        {
+                        }
+
+                        comm.ExecuteNonQuery();
+
+                        //updating the lasercut table for each tube
+                        query = "UPDATE dbo.lasercutdp SET endTime = @endTime WHERE codiceTubo = @codiceTubo";
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@endTime", DateTime.Now);
+                        comm.Parameters.AddWithValue("@codiceTubo", codiceBarre[i]);
+
+                        while (conn.State == ConnectionState.Executing || conn.State == ConnectionState.Fetching)
+                        {
+                        }
+
+                        comm.ExecuteNonQuery();
+                    }
+                    //insereting the bar codes into the queue for the next step
+                    _queueSald.Enqueue(codiceBarre);
+                    _queueSald.Enqueue(idLotto);
+                    //and signaling it to another thread
+                    _signalSald.Set();
+                    //conn.Close();
+
+                    //Thread.Sleep(2000);
                 }
-                //insereting the bar codes into the queue for the next step
-                _queueSald.Enqueue(codiceBarre);
-                _queueSald.Enqueue(idLotto);
-                //and signaling it to another thread
-                _signalSald.Set();
-                //conn.Close();
-
-                //Thread.Sleep(2000);
             }
         }
     }
