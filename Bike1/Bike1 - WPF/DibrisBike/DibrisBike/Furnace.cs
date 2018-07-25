@@ -59,7 +59,7 @@ namespace DibrisBike
                 _queueToPaint.Enqueue(idTelaio);
                 _queueToPaint.Enqueue(idLotto);
                 _signalToPaint.Set();
-                conn.Close();
+                //conn.Close();
             }
         }
     }

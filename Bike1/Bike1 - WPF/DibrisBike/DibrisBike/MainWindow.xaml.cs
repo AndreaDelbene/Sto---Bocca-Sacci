@@ -33,6 +33,7 @@ namespace DibrisBike
         static private readonly ConcurrentQueue<object> _queue = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signal = new AutoResetEvent(false);
         static private readonly AutoResetEvent _signalError = new AutoResetEvent(false);
+        static private readonly AutoResetEvent _singalErrorRM = new AutoResetEvent(false);
         static private bool flagError = false;
         //queues and signals for Routing - WelmStorage
         static private readonly ConcurrentQueue<object> _queueLC1 = new ConcurrentQueue<object>();
@@ -71,7 +72,7 @@ namespace DibrisBike
             //SIMONE - PC\\SQLEXPRESS
             //LAPTOP - DT8KB2TQ;
             con.ConnectionString =
-            "Server=LAPTOP-DT8KB2TQ;" +
+            "Server=SIMONE-PC\\SQLEXPRESS;" +
             "Database=stodb;" +
             "Integrated Security=True;" +
             "MultipleActiveResultSets=true;";
@@ -90,6 +91,7 @@ namespace DibrisBike
             Thread t8 = new Thread(new ThreadStart(paintCaller));
             Thread t9 = new Thread(new ThreadStart(dryCaller));
             Thread t10 = new Thread(new ThreadStart(assembCaller));
+            Thread t11 = new Thread(new ThreadStart(signalErrorChangeListener));
 
             t1.Start();
             t2.Start();
@@ -101,6 +103,7 @@ namespace DibrisBike
             t8.Start();
             t9.Start();
             t10.Start();
+            t11.Start();
         }
 
         static void getMPSCaller()
@@ -146,7 +149,7 @@ namespace DibrisBike
         static void routingMagazzinoCaller()
         {
             Routing rm = new Routing();
-            rm.routingMagazzino(conn, _queue, _signal, _queueLC1, _queueLC2, _queueLC3, _signalLC1, _signalLC2, _signalLC3, _signalError, flagError);
+            rm.routingMagazzino(conn, _queue, _signal, _queueLC1, _queueLC2, _queueLC3, _signalLC1, _signalLC2, _signalLC3, _signalError, _singalErrorRM);
         }
 
         private void MPSChooser_Click(object sender, RoutedEventArgs e)
@@ -200,7 +203,7 @@ namespace DibrisBike
 
         private void getRawMaterial(String path)
         {
-            RawMaterial rawMaterial = new RawMaterial(conn);
+            RawMaterial rawMaterial = new RawMaterial(conn, _signalError);
             rawMaterial.getRawFromFile(path);
             updateLabel(RMPathLabel, "Raw Material caricato con successo");
         }
@@ -208,12 +211,6 @@ namespace DibrisBike
         private void updateLabel(Label label, string message)
         {
             Action action = () => label.Content = message;
-            Dispatcher.Invoke(action);
-        }
-
-        private void updateMPSLabel(string message)
-        {
-            Action action = () => MPSPathLabel.Content = message;
             Dispatcher.Invoke(action);
         }
 
@@ -266,6 +263,39 @@ namespace DibrisBike
         {
             Assembling assemb = new Assembling();
             assemb.startAssembling(conn, _queueAssemb, _signalAssemb);
+        }
+
+        private void signalErrorChangeListener()
+        {
+            while (true)
+            {
+                this.Dispatcher.BeginInvoke(
+                    new Action(
+                        delegate ()
+                        {
+                            RMAlert.Fill = new SolidColorBrush(Colors.ForestGreen);
+                            RMAlert.Stroke = new SolidColorBrush(Colors.ForestGreen);
+                            RMAlertLabel.Content = "Raw material sufficienti";
+                        }
+                        ));
+
+                _singalErrorRM.WaitOne();
+
+                this.Dispatcher.BeginInvoke(
+                    new Action(
+                        delegate ()
+                        {
+                            RMAlert.Fill = new SolidColorBrush(Colors.OrangeRed);
+                            RMAlert.Stroke = new SolidColorBrush(Colors.OrangeRed);
+                            RMAlertLabel.Content = "Raw material insufficienti";
+                        }
+                        ));
+            }
+        }
+
+        private void seeFinishedProducts_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

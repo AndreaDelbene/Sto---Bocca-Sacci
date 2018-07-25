@@ -18,9 +18,11 @@ namespace DibrisBike
         private String query;
         private SqlCommand comm;
         List<String> columnName;
+        AutoResetEvent _signalError;
 
-        public RawMaterial(SqlConnection conn)
+        public RawMaterial(SqlConnection conn, AutoResetEvent _signalError)
         {
+            this._signalError = _signalError;
             this.conn = conn;
             query = "INSERT INTO dbo.magazzinomateriali (codiceBarre,descrizione,diametro,peso,lunghezza) VALUES (@codiceBarre,@descrizione,@diametro,@peso,@lunghezza)";
             comm = new SqlCommand(query, conn);
@@ -92,10 +94,8 @@ namespace DibrisBike
                 }
                 catch (SqlException e)
                 {
-                    //Console.WriteLine(e.Errors);
                     Console.WriteLine(e.ToString());
                 }
-                //conn.Close();
             }
 
             //cleanup
@@ -119,6 +119,7 @@ namespace DibrisBike
             Marshal.ReleaseComObject(xlApp);
 
             Console.WriteLine("Lettura e salvattagio raw material completata");
+            _signalError.Set();
         }
     }
 }

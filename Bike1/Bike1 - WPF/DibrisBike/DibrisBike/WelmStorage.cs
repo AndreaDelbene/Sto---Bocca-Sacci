@@ -89,6 +89,7 @@ namespace DibrisBike
 
                 codiceBarre = (string[])codiceBarreTemp;
                 idLotto = (int)idLottoTemp;
+                // TODO aggiungere thread 
                 //sleep the Thread (simulating laser cut)
                 Thread.Sleep(10000);
 

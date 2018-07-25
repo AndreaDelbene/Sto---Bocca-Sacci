@@ -101,7 +101,7 @@ namespace DibrisBike
                 _queueForno.Enqueue(idLotto);
                 //and we signal it.
                 _signalForno.Set();
-                conn.Close();
+                //conn.Close();
             }
         }
     }

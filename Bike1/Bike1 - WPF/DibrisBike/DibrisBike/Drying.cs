@@ -130,7 +130,7 @@ namespace DibrisBike
                 }
                 
                 //closing the connection
-                conn.Close();
+                //conn.Close();
             }
         }
     }

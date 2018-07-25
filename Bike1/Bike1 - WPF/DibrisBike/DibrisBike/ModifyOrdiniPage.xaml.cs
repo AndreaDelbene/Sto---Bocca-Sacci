@@ -65,7 +65,7 @@ namespace DibrisBike
             adapter.Fill(table);
             statoordiniGridModify.ItemsSource = table.DefaultView;
             GetStatoordiniColumnsNames(table);
-            conn.Close();
+            //conn.Close();
         }
 
         private void GetStatoordiniColumnsNames(DataTable table)
@@ -109,7 +109,18 @@ namespace DibrisBike
             SqlCommand comm = new SqlCommand(query, conn);
             comm.Parameters.AddWithValue("@newQuantita", Int32.Parse(newValueTextBox.Text));
             comm.Parameters.AddWithValue("@idLotto", idLotto);
-            conn.Open();
+
+            if (conn != null && conn.State == ConnectionState.Closed)
+                conn.Open();
+
+            comm.ExecuteNonQuery();
+
+            query = "UPDATE dbo.mps SET quantita=(@newQuantita) WHERE id=(@id)";
+            comm = new SqlCommand(query, conn);
+            comm.Parameters.AddWithValue("@newQuantita", Int32.Parse(newValueTextBox.Text));
+            comm.Parameters.AddWithValue("@id", idLotto);
+
+
             comm.ExecuteNonQuery();
             conn.Close();
             FillDataGrid(conn);
