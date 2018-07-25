@@ -16,17 +16,51 @@ namespace DibrisBike
         {
             while(true)
             {
-                //getting the orders that are finished
+                //first let's check which orders have been stored already
                 string query = "SELECT * FROM dbo.statoordini WHERE stato = @stato";
                 SqlCommand comm = new SqlCommand(query, conn);
                 SqlDataAdapter adapter = new SqlDataAdapter(comm);
+
+                comm.Parameters.Clear();
+                comm.Parameters.AddWithValue("@stato", "stored");
+
+                comm.ExecuteNonQuery();
+
+                DataTable table = new DataTable();
+                adapter.Fill(table);
+
+                int[] idDel = (from DataRow r in table.Rows select (int)r["idLotto"]).ToArray();
+                //and if there are any
+                for(int i=0;i<idDel.Length;i++)
+                {
+                    //let's delete them from the 'statoordini' table
+                    query = "DELETE FROM dbo.statoordini WHERE idLotto = @idLotto";
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@idLotto", idDel[i]);
+
+                    comm.ExecuteNonQuery();
+
+                    //and from 'mps' one
+                    /*query = "DELETE FROM dbo.mps WHERE id = @id";
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@id", idDel[i]);
+
+                    comm.ExecuteNonQuery();*/
+                }
+
+                //getting then the orders that are finished
+                query = "SELECT * FROM dbo.statoordini WHERE stato = @stato";
+                comm = new SqlCommand(query, conn);
+                adapter = new SqlDataAdapter(comm);
 
                 comm.Parameters.Clear();
                 comm.Parameters.AddWithValue("@stato", "finished");
 
                 comm.ExecuteNonQuery();
 
-                DataTable table = new DataTable();
+                table = new DataTable();
                 adapter.Fill(table);
 
                 int[] id = (from DataRow r in table.Rows select (int)r["id"]).ToArray();
@@ -69,6 +103,8 @@ namespace DibrisBike
 
                     }
                 }
+
+
                 //and sleeping for a given period
                 Thread.Sleep(60000);
             }
