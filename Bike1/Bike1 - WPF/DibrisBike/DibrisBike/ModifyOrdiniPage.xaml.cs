@@ -111,7 +111,7 @@ namespace DibrisBike
                 int newValue = Int32.Parse(newValueTextBox.Text);
                 if (newValue > 0)
                 {
-                    if (newValue + 5 < produced)  // check if the value is less then the produced item
+                    if (newValue + 5 < produced || newValue > produced)  // check if the value is less then the produced item
                     {
                         String query = "UPDATE dbo.statoordini SET quantitaDesiderata=(@newQuantita) WHERE idLotto=(@idLotto)";
                         SqlCommand comm = new SqlCommand(query, conn);
@@ -132,6 +132,8 @@ namespace DibrisBike
                         comm.ExecuteNonQuery();
                         conn.Close();
                         FillDataGrid(conn);
+
+                        modificationPanel.Visibility = Visibility.Hidden;
                     }
                     else
                     {
@@ -153,6 +155,11 @@ namespace DibrisBike
             {
                 errorLabel.Content = "Non è possibile inserire un numero non intero";
             }
+            /*
+             * in routing c'è idlotto e idpezzo
+             * select su idlotto orderby idpezzo desc e prendo l'ultimo
+             * leggo il numero e se è maggiore della quantità richiesta vieto la modifica
+             */
         }
     }
 }
