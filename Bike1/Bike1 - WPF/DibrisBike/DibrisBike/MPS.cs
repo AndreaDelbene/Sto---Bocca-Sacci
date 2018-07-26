@@ -26,7 +26,7 @@ namespace DibrisBike
                 SqlCommand comm = new SqlCommand(query, conn);
 
                 SqlDataAdapter adapter = new SqlDataAdapter(comm);
-                
+
                 comm.ExecuteNonQuery();
 
                 DataTable table = new DataTable();
@@ -39,7 +39,7 @@ namespace DibrisBike
 
                 //if we have more than one order, they may have different priorities
                 priorita = (from DataRow r in table.Rows select (int)r["priorita"]).ToArray();
-                
+
                 if (priorita.Length > 1)
                 {
                     //sorting the rows on the "priorita" column
@@ -72,7 +72,7 @@ namespace DibrisBike
 
                 int[] quantitaTubi = new int[id.Length];
 
-           
+
 
                 //conn.Close();
                 //for each element in the table we got back from the first request
@@ -93,7 +93,7 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
                     comm.Parameters.AddWithValue("@stato", "running");
                     comm.Parameters.AddWithValue("@descrizione", "");
-                    
+
                     comm.ExecuteNonQuery();
 
                     //I set then the flag to 1 into the 'mps' table
@@ -109,13 +109,13 @@ namespace DibrisBike
                     comm = new SqlCommand(query, conn);
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
-                    
+
                     SqlDataReader reader = comm.ExecuteReader();
 
                     reader.Read();
 
                     quantitaTubi[i] = (int)reader["quantitaTubi"];
-                    
+
                     reader.Close();
 
                 }
@@ -145,7 +145,7 @@ namespace DibrisBike
                 id = (from DataRow r in table.Rows select (int)r["id"]).ToArray();
                 quantita = (from DataRow r in table.Rows select (int)r["quantita"]).ToArray();
                 //and if there are edits, let's update the 'statoordini' table, so more/less bikes will get produced
-                for(int i = 0; i < id.Length; i++)
+                for (int i = 0; i < id.Length; i++)
                 {
                     query = "UPDATE dbo.statoordini SET quantitaDesiderata = @quantitaDesiderata WHERE idLotto = @idLotto";
                     comm = new SqlCommand(query, conn);
@@ -288,44 +288,45 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@startDate", DateTime.Now);
                     comm.Parameters.AddWithValue("@modified", 0);
 
-                if (conn != null && conn.State == ConnectionState.Closed)
-                    conn.Open();
-                try
-                {
-                    int result = comm.ExecuteNonQuery();
-                    if (result < 0)
+                    if (conn != null && conn.State == ConnectionState.Closed)
+                        conn.Open();
+                    try
                     {
-                        Console.WriteLine("Errore nell'inserimento dei raw material: result = " + result);
+                        int result = comm.ExecuteNonQuery();
+                        if (result < 0)
+                        {
+                            Console.WriteLine("Errore nell'inserimento dei raw material: result = " + result);
+                        }
+                    }
+                    catch (SqlException e)
+                    {
+                        //Console.WriteLine(e.Errors);
+                        Console.WriteLine(e.ToString());
                     }
                 }
-                catch (SqlException e)
-                {
-                    //Console.WriteLine(e.Errors);
-                    Console.WriteLine(e.ToString());
-                }
+
+                //cleanup
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
+                //rule of thumb for releasing com objects:
+                //  never use two dots, all COM objects must be referenced and released individually
+                //  ex: [somthing].[something].[something] is bad
+
+                //release com objects to fully kill excel process from running in the background
+                Marshal.ReleaseComObject(xlRange);
+                Marshal.ReleaseComObject(xlWorksheet);
+
+                //close and release
+                xlWorkbook.Close();
+                Marshal.ReleaseComObject(xlWorkbook);
+
+                //quit and release
+                xlApp.Quit();
+                Marshal.ReleaseComObject(xlApp);
+
+                Console.WriteLine("Lettura e salvataggio MPS completato");
             }
-
-            //cleanup
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-
-            //rule of thumb for releasing com objects:
-            //  never use two dots, all COM objects must be referenced and released individually
-            //  ex: [somthing].[something].[something] is bad
-
-            //release com objects to fully kill excel process from running in the background
-            Marshal.ReleaseComObject(xlRange);
-            Marshal.ReleaseComObject(xlWorksheet);
-
-            //close and release
-            xlWorkbook.Close();
-            Marshal.ReleaseComObject(xlWorkbook);
-
-            //quit and release
-            xlApp.Quit();
-            Marshal.ReleaseComObject(xlApp);
-
-            Console.WriteLine("Lettura e salvataggio MPS completato");
         }
     }
 }
