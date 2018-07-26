@@ -214,25 +214,25 @@ namespace DibrisBike
 
         static void accumuloSaldCaller1()
         {
-            WelmStorage aS = new WelmStorage();
+            WeldStorage aS = new WeldStorage();
             aS.setAccumuloSald1(conn, _queueLC1, _signalLC1, _queueSald, _signalSald);
         }
 
         static void accumuloSaldCaller2()
         {
-            WelmStorage aS = new WelmStorage();
+            WeldStorage aS = new WeldStorage();
             aS.setAccumuloSald2(conn, _queueLC2, _signalLC2, _queueSald, _signalSald);
         }
 
         static void accumuloSaldCaller3()
         {
-            WelmStorage aS = new WelmStorage();
+            WeldStorage aS = new WeldStorage();
             aS.setAccumuloSald3(conn, _queueLC3, _signalLC3, _queueSald, _signalSald);
         }
 
         static void saldCaller()
         {
-            Welming sald = new Welming();
+            Welding sald = new Welding();
             sald.startSaldatura(conn, _queueSald, _signalSald, _queueForno, _signalForno);
         }
 

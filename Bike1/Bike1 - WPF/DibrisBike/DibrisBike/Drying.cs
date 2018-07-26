@@ -21,14 +21,25 @@ namespace DibrisBike
                 while(_queueEssic.TryDequeue(out idTelaio))
                 {
                     _queueEssic.TryDequeue(out idLotto);
+
+                    //updating the process table
+                    string query = "INSERT INTO dbo.processirt (type, date, value) VALUES (@type, @date, @value)";
+                    SqlCommand comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@type", "ES001_P1");
+                    comm.Parameters.AddWithValue("@date", DateTime.Now);
+                    comm.Parameters.AddWithValue("@value", 0);
+
+                    comm.ExecuteNonQuery();
+
                     //simulating the drying
                     Thread.Sleep(6000);
 
-                    Console.WriteLine("ASSEMBLING");
+                    //Console.WriteLine("ASSEMBLING");
 
-                    string query = "UPDATE dbo.saldessdp SET stato = @stato, endTimeEssic = @endTimeEssic WHERE idTelaio = @idTelaio";
+                    query = "UPDATE dbo.saldessdp SET stato = @stato, endTimeEssic = @endTimeEssic WHERE idTelaio = @idTelaio";
 
-                    SqlCommand comm = new SqlCommand(query, conn);
+                    comm = new SqlCommand(query, conn);
                     //state is "finisheddry"; from now on the data will be handled by another table
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@stato", "finisheddry");
@@ -105,7 +116,7 @@ namespace DibrisBike
                         Console.WriteLine("NO BOXES AVAIABLE FOR ASSEMBLING");
                         _signalError.WaitOne();
                     }
-                    Thread.Sleep(3000);
+                    //Thread.Sleep(3000);
                     //closing the connection
                     //conn.Close();
                 }

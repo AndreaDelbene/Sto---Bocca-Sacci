@@ -38,6 +38,20 @@ namespace DibrisBike
 
                     string[] tipoTelaio = new string[idLotto.Length];
 
+                    for(int i = 1; i < 4; i++)
+                    {
+                        //heating the laser cuts
+                        string query = "INSERT INTO dbo.processirt (type, date, value) VALUES (@type, @date, @value)";
+                        SqlCommand comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@type", "LC00" + i + "_P1");
+                        comm.Parameters.AddWithValue("@date", DateTime.Now);
+                        comm.Parameters.AddWithValue("@value", 0);
+
+                        comm.ExecuteNonQuery();
+                    }
+                    
+
                     for (int i = 0; i < idLotto.Length; i++)
                     {
                         //we need to cycle on how many bikes the customer asked for
@@ -237,7 +251,7 @@ namespace DibrisBike
 
 
                                 //Going for the Laser Cut then
-                                Console.WriteLine("LASER CUT");
+                                //Console.WriteLine("LASER CUT");
 
                                 query = "UPDATE stodb.dbo.statoordini SET stato = @stato WHERE idLotto = @idLotto";
                                 comm = new SqlCommand(query, conn);

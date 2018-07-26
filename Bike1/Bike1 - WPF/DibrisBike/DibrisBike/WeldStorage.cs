@@ -5,9 +5,9 @@ using System.Threading;
 
 namespace DibrisBike
 {
-    class WelmStorage
+    class WeldStorage
     {
-        public WelmStorage()
+        public WeldStorage()
         {
         }
 
@@ -36,12 +36,36 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@id", idAssegnazione);
 
                     comm.ExecuteNonQuery();
+
+                    //first cut
+                    query = "INSERT INTO dbo.processirt (type, date, value) VALUES (@type, @date, @value)";
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@type", "LC00" + 1 + "_P2");
+                    comm.Parameters.AddWithValue("@date", DateTime.Now);
+                    comm.Parameters.AddWithValue("@value", 0);
+
+                    comm.ExecuteNonQuery();
+
                     //sleep the Thread (simulating laser cut)
-                    Thread.Sleep(10000);
+                    Thread.Sleep(5000);
+
+                    //second cut
+                    query = "INSERT INTO dbo.processirt (type, date, value) VALUES (@type, @date, @value)";
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@type", "LC00" + 1 + "_P3");
+                    comm.Parameters.AddWithValue("@date", DateTime.Now);
+                    comm.Parameters.AddWithValue("@value", 0);
+
+                    comm.ExecuteNonQuery();
+
+                    //sleep the Thread (simulating laser cut)
+                    Thread.Sleep(5000);
 
                     //transponting the tubes from the storage to the welder (saldatrice)
-                    Console.WriteLine("STORING FOR WELMING");
-                    //updating the storage that contains the tubes to be welmed.
+                    //Console.WriteLine("STORING FOR WELDING");
+                    //updating the storage that contains the tubes to be welded.
                     for (int i = 0; i < codiceBarre.Length; i++)
                     {
                         query = "INSERT INTO dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
@@ -98,13 +122,37 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@tempoArrivo", DateTime.Now);
                     comm.Parameters.AddWithValue("@id", idAssegnazione);
 
+                    comm.ExecuteNonQuery();                  
+                    
+                    //first cut
+                    query = "INSERT INTO dbo.processirt (type, date, value) VALUES (@type, @date, @value)";
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@type", "LC00" + 2 + "_P2");
+                    comm.Parameters.AddWithValue("@date", DateTime.Now);
+                    comm.Parameters.AddWithValue("@value", 0);
+
                     comm.ExecuteNonQuery();
+
                     //sleep the Thread (simulating laser cut)
-                    Thread.Sleep(10000);
+                    Thread.Sleep(5000);
+
+                    //second cut
+                    query = "INSERT INTO dbo.processirt (type, date, value) VALUES (@type, @date, @value)";
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@type", "LC00" + 2 + "_P3");
+                    comm.Parameters.AddWithValue("@date", DateTime.Now);
+                    comm.Parameters.AddWithValue("@value", 0);
+
+                    comm.ExecuteNonQuery();
+
+                    //sleep the Thread (simulating laser cut)
+                    Thread.Sleep(5000);
 
                     //transponting the tubes from the storage to the welder (saldatrice)
-                    Console.WriteLine("STORING FOR WELMING");
-                    //updating the storage that contains the tubes to be welmed.
+                    //Console.WriteLine("STORING FOR WELDING");
+                    //updating the storage that contains the tubes to be welded.
                     for (int i = 0; i < codiceBarre.Length; i++)
                     {
                         query = "INSERT INTO dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";
@@ -161,12 +209,35 @@ namespace DibrisBike
                     comm.Parameters.AddWithValue("@id", idAssegnazione);
                     
                     comm.ExecuteNonQuery();
-                    //sleep the Thread (simulating laser cut)
-                    Thread.Sleep(10000);
 
+                    //first cut
+                    query = "INSERT INTO dbo.processirt (type, date, value) VALUES (@type, @date, @value)";
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@type", "LC00" + 3 + "_P2");
+                    comm.Parameters.AddWithValue("@date", DateTime.Now);
+                    comm.Parameters.AddWithValue("@value", 0);
+
+                    comm.ExecuteNonQuery();
+
+                    //sleep the Thread (simulating laser cut)
+                    Thread.Sleep(5000);
+
+                    //second cut
+                    query = "INSERT INTO dbo.processirt (type, date, value) VALUES (@type, @date, @value)";
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@type", "LC00" + 3 + "_P3");
+                    comm.Parameters.AddWithValue("@date", DateTime.Now);
+                    comm.Parameters.AddWithValue("@value", 0);
+
+                    comm.ExecuteNonQuery();
+
+                    //sleep the Thread (simulating laser cut)
+                    Thread.Sleep(5000);
                     //transponting the tubes from the storage to the welder (saldatrice)
-                    Console.WriteLine("STORING FOR WELMING");
-                    //updating the storage that contains the tubes to be welmed.
+                    //Console.WriteLine("STORING FOR WELDING");
+                    //updating the storage that contains the tubes to be welded.
                     for (int i = 0; i < codiceBarre.Length; i++)
                     {
                         query = "INSERT INTO dbo.accumulosaldaturadp (codiceTubo, descrizione, diametro, peso, lunghezza) VALUES (@codiceTubo, @descrizione, @diametro, @peso, @lunghezza)";

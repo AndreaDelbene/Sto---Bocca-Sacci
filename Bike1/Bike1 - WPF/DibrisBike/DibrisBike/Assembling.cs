@@ -20,12 +20,23 @@ namespace DibrisBike
                 while(_queueAssemb.TryDequeue(out idAssemblaggio))
                 {
                     _queueAssemb.TryDequeue(out idLotto);
+
+                    //updating the process table
+                    string query = "INSERT INTO dbo.processirt (type, date, value) VALUES (@type, @date, @value)";
+                    SqlCommand comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@type", "AS001_P1");
+                    comm.Parameters.AddWithValue("@date", DateTime.Now);
+                    comm.Parameters.AddWithValue("@value", 0);
+
+                    comm.ExecuteNonQuery();
+
                     //Simulating the Assembling
                     Thread.Sleep(5000);
 
                     //updating the assembling table
-                    string query = "UPDATE dbo.assemblaggiodp SET endTime = @endTime";
-                    SqlCommand comm = new SqlCommand(query, conn);
+                    query = "UPDATE dbo.assemblaggiodp SET endTime = @endTime";
+                    comm = new SqlCommand(query, conn);
 
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@endTime", DateTime.Now);
@@ -69,7 +80,7 @@ namespace DibrisBike
 
                         comm.ExecuteNonQuery();
 
-                        Console.WriteLine("FINISHED");
+                        //Console.WriteLine("FINISHED");
                     }
                     else
                     {

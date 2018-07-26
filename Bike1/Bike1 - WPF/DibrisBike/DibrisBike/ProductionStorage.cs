@@ -90,7 +90,7 @@ namespace DibrisBike
 
                         comm.ExecuteNonQuery();
 
-                        Console.WriteLine("STORED");
+                        //Console.WriteLine("STORED");
 
                         //updating the state of the order.
                         query = "UPDATE dbo.statoordini SET stato = @stato WHERE idLotto = @idLotto";

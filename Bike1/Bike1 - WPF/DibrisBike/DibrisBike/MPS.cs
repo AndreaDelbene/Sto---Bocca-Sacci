@@ -128,7 +128,7 @@ namespace DibrisBike
                     _queue.Enqueue(quantita);
                     _signal.Set();
                     //the stuff passes under the Quality Control Area
-                    Console.WriteLine("ACQ");
+                    //Console.WriteLine("ACQ");
                 }
 
                 //checking whenever a new MPS has been updated

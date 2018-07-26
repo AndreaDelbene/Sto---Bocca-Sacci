@@ -21,14 +21,25 @@ namespace DibrisBike
                 while(_queueToPaint.TryDequeue(out idTelaio))
                 {
                     _queueToPaint.TryDequeue(out idLotto);
+
+                    //updating the process table
+                    string query = "INSERT INTO dbo.processirt (type, date, value) VALUES (@type, @date, @value)";
+                    SqlCommand comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@type", "F001_P1");
+                    comm.Parameters.AddWithValue("@date", DateTime.Now);
+                    comm.Parameters.AddWithValue("@value", 0);
+
+                    comm.ExecuteNonQuery();
+
                     // simulating the Furnace
                     Thread.Sleep(8000);
 
                     //Let's Paint the frame now!
-                    Console.WriteLine("PAINTING");
-                    string query = "UPDATE dbo.saldessdp SET stato = @stato, endTimeForno = @endTimeForno, startTimePaint = @startTimePaint WHERE idTelaio = @idTelaio";
+                    //Console.WriteLine("PAINTING");
+                    query = "UPDATE dbo.saldessdp SET stato = @stato, endTimeForno = @endTimeForno, startTimePaint = @startTimePaint WHERE idTelaio = @idTelaio";
 
-                    SqlCommand comm = new SqlCommand(query, conn);
+                    comm = new SqlCommand(query, conn);
                     //state is "painting"
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@stato", "painting");

@@ -64,7 +64,7 @@
     <Compile Include="Drying.cs" />
     <Compile Include="PaintStorage.cs" />
     <Compile Include="ProductionStorage.cs" />
-    <Compile Include="WelmStorage.cs" />
+    <Compile Include="WeldStorage.cs" />
     <Compile Include="Furnace.cs" />
     <Compile Include="ModifyOrdiniPage.xaml.cs">
       <DependentUpon>ModifyOrdiniPage.xaml</DependentUpon>
@@ -72,7 +72,7 @@
     <Compile Include="Painting.cs" />
     <Compile Include="RawMaterial.cs" />
     <Compile Include="Routing.cs" />
-    <Compile Include="Welming.cs" />
+    <Compile Include="Welding.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

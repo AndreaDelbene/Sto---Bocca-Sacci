@@ -22,14 +22,25 @@ namespace DibrisBike
                 while(_queueForno.TryDequeue(out idTelaio))
                 {
                     _queueForno.TryDequeue(out idLotto);
-                    // simulating the Welmer
+
+                    //inserting the process into the table
+                    string query = "INSERT INTO dbo.processirt (type, date, value) VALUES (@type, @date, @value)";
+                    SqlCommand comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@type", "S001_P2");
+                    comm.Parameters.AddWithValue("@date", DateTime.Now);
+                    comm.Parameters.AddWithValue("@value", 0);
+
+                    comm.ExecuteNonQuery();
+
+                    // simulating the Welder
                     Thread.Sleep(8000);
 
                     //Let's cook the frame now!
-                    Console.WriteLine("FURNACE");
-                    string query = "UPDATE dbo.saldessdp SET stato = @stato, endTimeSald = @endTimeSald, startTimeForno = @startTimeForno WHERE idTelaio = @idTelaio";
+                    //Console.WriteLine("FURNACE");
+                    query = "UPDATE dbo.saldessdp SET stato = @stato, endTimeSald = @endTimeSald, startTimeForno = @startTimeForno WHERE idTelaio = @idTelaio";
 
-                    SqlCommand comm = new SqlCommand(query, conn);
+                    comm = new SqlCommand(query, conn);
                     //state is "cooking"
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@stato", "cooking");

@@ -32,16 +32,26 @@ namespace DibrisBike
                     colore = (string)coloreTemp;
                     linea = (string)lineaTemp;
 
+                    //updating the process table
+                    string query = "INSERT INTO dbo.processirt (type, date, value) VALUES (@type, @date, @value)";
+                    SqlCommand comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@type", "NT001_P1");
+                    comm.Parameters.AddWithValue("@date", DateTime.Now);
+                    comm.Parameters.AddWithValue("@value", 0);
+
+                    comm.ExecuteNonQuery();
+
                     // simulating the Paint
                     Thread.Sleep(7000);
 
                     //Let's Dry the frame now!
-                    Console.WriteLine("DRYING");
+                    //Console.WriteLine("DRYING");
 
                     //updating then the table
-                    string query = "UPDATE dbo.saldessdp SET stato = @stato, endTimePaint = @endTimePaint, startTimeEssic = @startTimeEssic WHERE idTelaio = @idTelaio";
+                    query = "UPDATE dbo.saldessdp SET stato = @stato, endTimePaint = @endTimePaint, startTimeEssic = @startTimeEssic WHERE idTelaio = @idTelaio";
 
-                    SqlCommand comm = new SqlCommand(query, conn);
+                    comm = new SqlCommand(query, conn);
                     //state is "drying"
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@stato", "drying");
@@ -90,15 +100,25 @@ namespace DibrisBike
                     colore = (string)coloreTemp;
                     linea = (string)lineaTemp;
 
+                    //updating the process table
+                    string query = "INSERT INTO dbo.processirt (type, date, value) VALUES (@type, @date, @value)";
+                    SqlCommand comm = new SqlCommand(query, conn);
+                    comm.Parameters.Clear();
+                    comm.Parameters.AddWithValue("@type", "NT002_P1");
+                    comm.Parameters.AddWithValue("@date", DateTime.Now);
+                    comm.Parameters.AddWithValue("@value", 0);
+
+                    comm.ExecuteNonQuery();
+
                     // simulating the Paint
                     Thread.Sleep(7000);
 
                     //Let's Dry the frame now!
-                    Console.WriteLine("DRYING");
+                    //Console.WriteLine("DRYING");
 
-                    string query = "UPDATE dbo.saldessdp SET stato = @stato, endTimePaint = @endTimePaint, startTimeEssic = @startTimeEssic WHERE idTelaio = @idTelaio";
+                    query = "UPDATE dbo.saldessdp SET stato = @stato, endTimePaint = @endTimePaint, startTimeEssic = @startTimeEssic WHERE idTelaio = @idTelaio";
 
-                    SqlCommand comm = new SqlCommand(query, conn);
+                    comm = new SqlCommand(query, conn);
                     //state is "drying"
                     comm.Parameters.Clear();
                     comm.Parameters.AddWithValue("@stato", "drying");
