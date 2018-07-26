@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Collections.Concurrent;
 using Microsoft.Win32;
 using System.Data;
+using System.Windows.Media;
 
 namespace DibrisBike
 {
@@ -20,6 +21,7 @@ namespace DibrisBike
         static private readonly ConcurrentQueue<object> _queue = new ConcurrentQueue<object>();
         static private readonly AutoResetEvent _signal = new AutoResetEvent(false);
         static private readonly AutoResetEvent _signalError = new AutoResetEvent(false);
+        static private readonly AutoResetEvent _signalErrorRM = new AutoResetEvent(false);
         static private bool flagError = false;
         //queues and signals for Routing - WelmStorage
         static private readonly ConcurrentQueue<object> _queueLC1 = new ConcurrentQueue<object>();
@@ -58,7 +60,7 @@ namespace DibrisBike
             //SIMONE - PC\\SQLEXPRESS
             //LAPTOP - DT8KB2TQ;
             con.ConnectionString =
-            "Server=LAPTOP-DT8KB2TQ;" +
+            "Server=SIMONE-PC\\SQLEXPRESS;" +
             "Database=stodb;" +
             "Integrated Security=True;" +
             "MultipleActiveResultSets=true;";
@@ -80,7 +82,8 @@ namespace DibrisBike
             Thread t82 = new Thread(new ThreadStart(metalPaintCaller));
             Thread t9 = new Thread(new ThreadStart(dryCaller));
             Thread t10 = new Thread(new ThreadStart(assembCaller));
-            Thread t11 = new Thread(new ThreadStart(checkFinishedCaller));
+            Thread t11 = new Thread(new ThreadStart(signalErrorChangeListener));
+            Thread t12 = new Thread(new ThreadStart(checkFinishedCaller));
 
             t1.Start();
             t2.Start();
@@ -96,6 +99,7 @@ namespace DibrisBike
             t9.Start();
             t10.Start();
             t11.Start();
+            t12.Start();
         }
 
         static void getMPSCaller()
@@ -141,7 +145,7 @@ namespace DibrisBike
         static void routingMagazzinoCaller()
         {
             Routing rm = new Routing();
-            rm.routingMagazzino(conn, _queue, _signal, _queueLC1, _queueLC2, _queueLC3, _signalLC1, _signalLC2, _signalLC3, _signalError, flagError);
+            rm.routingMagazzino(conn, _queue, _signal, _queueLC1, _queueLC2, _queueLC3, _signalLC1, _signalLC2, _signalLC3, _signalError, _signalErrorRM);
         }
 
         private void MPSChooser_Click(object sender, RoutedEventArgs e)
@@ -195,7 +199,7 @@ namespace DibrisBike
 
         private void getRawMaterial(String path)
         {
-            RawMaterial rawMaterial = new RawMaterial(conn);
+            RawMaterial rawMaterial = new RawMaterial(conn, _signalError);
             rawMaterial.getRawFromFile(path);
             updateLabel(RMPathLabel, "Raw Material caricato con successo");
         }
@@ -282,6 +286,41 @@ namespace DibrisBike
         {
             ProductionStorage ps = new ProductionStorage();
             ps.updateProductionStorage(conn);
+        }
+
+        private void signalErrorChangeListener()
+        {
+            while (true)
+            {
+                this.Dispatcher.BeginInvoke(
+                    new Action(
+                        delegate ()
+                        {
+                            RMAlert.Fill = new SolidColorBrush(Colors.ForestGreen);
+                            RMAlert.Stroke = new SolidColorBrush(Colors.ForestGreen);
+                            RMAlertLabel.Content = "Raw material sufficienti";
+                        }
+                        ));
+
+                _signalErrorRM.WaitOne();
+
+                this.Dispatcher.BeginInvoke(
+                    new Action(
+                        delegate ()
+                        {
+                            RMAlert.Fill = new SolidColorBrush(Colors.OrangeRed);
+                            RMAlert.Stroke = new SolidColorBrush(Colors.OrangeRed);
+                            RMAlertLabel.Content = "Raw material insufficienti";
+                        }
+                        ));
+                _signalError.WaitOne();
+            }
+        }
+
+        private void seeFinishedProducts_Click(object sender, RoutedEventArgs e)
+        {
+            FinishProductPage finishProductPage = new FinishProductPage();
+            finishProductPage.Show();
         }
     }
 }

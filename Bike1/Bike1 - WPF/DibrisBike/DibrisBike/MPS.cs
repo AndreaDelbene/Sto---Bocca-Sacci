@@ -172,7 +172,7 @@ namespace DibrisBike
         internal void getMPSFromFile(string pathToFile, SqlConnection conn)
         {
             SqlCommand comm = new SqlCommand();
-            String query = "INSERT INTO dbo.mps (startDate,dueDate,quantita,tipoTelaio,colore,priorita,running) VALUES (@start,@dueDate,@quantita,@tipoTelaio,@colore,@priorita,@running)";
+            String query = "INSERT INTO dbo.mps (startDate,dueDate,quantita,tipoTelaio,colore,linea,priorita,running) VALUES (@startDate,@dueDate,@quantita,@tipoTelaio,@colore,@linea,@priorita,@running)";
             comm = new SqlCommand(query, conn);
 
             //Create COM Objects. Create a COM object for everything that is referenced
@@ -184,55 +184,109 @@ namespace DibrisBike
             int rowCount = xlRange.Rows.Count;
             int colCount = xlRange.Columns.Count;
 
-            //iterate over the rows and columns and print to the console as it appears in the file
+            //iterate over the rows and columns
             //excel is not zero based!!
+            bool flagError;
             for (int i = 2; i <= rowCount; i++)
             {
+                flagError = false;
                 comm.Parameters.Clear();
                 for (int j = 1; j <= colCount; j++)
                 {
                     switch (j)
                     {
                         case 1:
-                            String campo = xlRange.Cells[i, j].Value2.ToString();
-                            DateTime date = DateTime.ParseExact(campo, "MM/dd/yy HH:mm:ss", null);
-                            comm.Parameters.AddWithValue("@start", date); //START DATE could be set as DateTime.Now???
+                            String temp = Convert.ToString(xlRange.Cells[i, j].Value2);
+                            if (temp != null)
+                            {
+                                double campo1 = double.Parse(temp);
+                                DateTime date1 = DateTime.FromOADate(campo1);
+                                comm.Parameters.AddWithValue("@dueDate", date1);
+                            }
+                            else
+                            {
+                                flagError = true;
+                            }
                             break;
 
                         case 2:
-                            String campo2 = xlRange.Cells[i, j].Value2.ToString();
-                            DateTime date2 = DateTime.ParseExact(campo2, "MM/dd/yy HH:mm:ss", null);
-                            comm.Parameters.AddWithValue("@dueDate", date2);
+                            Object campo2 = xlRange.Cells[i, j].Value2;
+                            if (campo2 != null)
+                            {
+                                comm.Parameters.AddWithValue("@quantita", (int)(double)campo2);
+                            }
+                            else
+                            {
+                                flagError = true;
+                            }
                             break;
 
                         case 3:
-                            int campo3 = (int)xlRange.Cells[i, j].Value2;
-                            comm.Parameters.AddWithValue("@quantita", campo3);
+                            String campo4 = (String)xlRange.Cells[i, j].Value2;
+                            if (campo4 != null)
+                            {
+                                comm.Parameters.AddWithValue("@tipoTelaio", campo4);
+                            }
+                            else
+                            {
+                                flagError = true;
+                            }
                             break;
 
                         case 4:
-                            String campo4 = (String)xlRange.Cells[i, j].Value2;
-                            comm.Parameters.AddWithValue("@tipoTelaio", campo4);
+                            String campo5 = (String)xlRange.Cells[i, j].Value2;
+                            if (campo5 != null)
+                            {
+                                comm.Parameters.AddWithValue("@colore", campo5);
+                            }
+                            else
+                            {
+                                flagError = true;
+                            }
                             break;
 
                         case 5:
-                            String campo5 = (String)xlRange.Cells[i, j].Value2;
-                            comm.Parameters.AddWithValue("@colore", campo5);
+                            String linea = (String)xlRange.Cells[i, j].Value2;
+                            if (linea != null)
+                            {
+                                comm.Parameters.AddWithValue("@linea", linea);
+                            }
+                            else
+                            {
+                                flagError = true;
+                            }
                             break;
-
                         case 6:
-                            int campo6 = (int)xlRange.Cells[i, j].Value2;
-                            comm.Parameters.AddWithValue("@priorita", campo6);
+                            Object campo6 = xlRange.Cells[i, j].Value2;
+                            if (campo6 != null)
+                            {
+                                comm.Parameters.AddWithValue("@priorita", (int)(double)campo6);
+                            }
+                            else
+                            {
+                                flagError = true;
+                            }
                             break;
 
                         case 7:
-                            String campodef = xlRange.Cells[i, j].Value2.ToString();
-                            int campodefInt = Int32.Parse(campodef);
-                            comm.Parameters.AddWithValue("@running", campodefInt);
+                            Object campodef = xlRange.Cells[i, j].Value2;
+                            if (campodef != null)
+                            {
+                                int campodefInt = Int32.Parse(Convert.ToString(campodef));
+                                comm.Parameters.AddWithValue("@running", campodefInt);
+                            }
+                            else
+                            {
+                                flagError = true;
+                            }
                             break;
                     }
-
                 }
+
+                if (!flagError)
+                {
+                    comm.Parameters.AddWithValue("@startDate", DateTime.Now);
+                    comm.Parameters.AddWithValue("@modified", 0);
 
                 if (conn != null && conn.State == ConnectionState.Closed)
                     conn.Open();

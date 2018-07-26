@@ -9,7 +9,7 @@
         Title="Dibris Bike" Height="450" Width="704">
     <Border Padding="10">
         <StackPanel>
-            <Grid>
+            <Grid x:Name="mainGrid">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="3*" />
                     <ColumnDefinition Width="*" />
@@ -33,10 +33,25 @@
                 <Label x:Name="RMPathLabel" Margin="0 0 10 10" Grid.Column="2" Grid.Row="1" Content="" />
 
                 <Label x:Name="statoordiniGridLabel" Grid.Row="2" Grid.ColumnSpan="3" Content="Stato ordini" Margin="0 20 0 0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" FontWeight="DemiBold" />
-                <DataGrid Margin="0 0 0 0" AutoGenerateColumns="True" x:Name="statoOrdiniGrid" Grid.Row="3" Grid.ColumnSpan="3" />
+                <DataGrid Margin="0 0 0 0" AutoGenerateColumns="True" x:Name="statoOrdiniGrid" Grid.Row="3" Grid.ColumnSpan="3" IsReadOnly="True"/>
 
                 <Button x:Name="ordiniModify" Margin="0 15 0 0"  Grid.Row="4" Grid.ColumnSpan="1" Content="Modifica un ordine" Click="ordiniModify_Click" />
+
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Grid.Row="0" Grid.Column="3">
+                    <Label x:Name="RMAlertLabel" FontSize="15" Content="Raw Material Sufficienti" VerticalAlignment="Center"/>
+                    <Ellipse x:Name="RMAlert"
+                            VerticalAlignment="Center" 
+                            Canvas.Top="50"
+                            Canvas.Left="50"
+                            Fill="ForestGreen"
+                            Height="20"
+                            Width="20"
+                            StrokeThickness="5"
+                            Stroke="ForestGreen"/>
+
+                </StackPanel>
             </Grid>
+            <Button x:Name="seeFinishedProducts" Content="Visualizza ordini conclusi" Width="150" Height="40" HorizontalAlignment="Center" VerticalAlignment="Bottom" Click="seeFinishedProducts_Click"/>
         </StackPanel>
     </Border>
 </Window>

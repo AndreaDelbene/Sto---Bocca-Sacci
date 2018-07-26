@@ -1,11 +1,11 @@
-﻿<Window x:Class="DibrisBike.ModifyOrdiniPage"
+﻿<Window x:Class="DibrisBike.FinishProductPage"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DibrisBike"
         mc:Ignorable="d"
-        Title="Modifica un ordine" Height="450" Width="800">
+        Title="Visualizza ordini finiti" Height="450" Width="800">
     <Border Padding="10">
         <StackPanel Orientation="Vertical">
             <Grid>
@@ -18,13 +18,12 @@
                     <RowDefinition />
                     <RowDefinition />
                     <RowDefinition />
-                    <RowDefinition />
                 </Grid.RowDefinitions>
 
                 <Button x:Name="closeWindow" Grid.Row="0" Grid.Column="2" Content="Go to Mordor" Click="closeWindow_Click" />
                 <StackPanel Orientation="Vertical" Grid.Row="3" Grid.ColumnSpan="3">
-                    <Label Margin="0 20 0 0" Content="Doppio click sull'ordine da modificare"/>
-                    <DataGrid x:Name="statoordiniGridModify" AutoGenerateColumns="True" MouseDoubleClick="DataGridRow_MouseDoubleClick" IsReadOnly="True" />
+                    <Label Content="Doppio click sull'ordine per i dettagli" Margin="0 20 0 0"/>
+                    <DataGrid x:Name="finishedProductsGrid" AutoGenerateColumns="True" IsReadOnly="True" />
                 </StackPanel>
                 <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
                     <Label Content="Ricerca per"/>
@@ -45,14 +44,6 @@
                     SelectionChanged="keywordBox_SelectionChanged"/>
                 </StackPanel>
             </Grid>
-            <StackPanel x:Name="modificationPanel" Margin="0 20 0 0" Orientation="Vertical" Visibility="Visible">
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Modifica la quantità desiderata" />
-                    <TextBox x:Name="newValueTextBox" Width="120" Text="" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                    <Label x:Name="errorLabel" Margin="15 0 0 0" Content="" Foreground="Red"/>
-                </StackPanel>
-                <Button x:Name="apply" Width="120" Margin="0 10 0 0" HorizontalAlignment="Left" Content="Applica modifica" Click="apply_Click" />
-            </StackPanel>
         </StackPanel>
     </Border>
 </Window>

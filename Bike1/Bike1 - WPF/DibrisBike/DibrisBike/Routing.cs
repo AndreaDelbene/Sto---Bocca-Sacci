@@ -13,8 +13,8 @@ namespace DibrisBike
         {
         }
 
-        public void routingMagazzino(SqlConnection conn, ConcurrentQueue<object> _queue, AutoResetEvent _signal, ConcurrentQueue<object> _queueLC1, ConcurrentQueue<object> _queueLC2, 
-            ConcurrentQueue<object> _queueLC3, AutoResetEvent _signalLC1, AutoResetEvent _signalLC2, AutoResetEvent _signalLC3, AutoResetEvent _signalError, bool flagError)
+        public void routingMagazzino(SqlConnection conn, ConcurrentQueue<object> _queue, AutoResetEvent _signal, ConcurrentQueue<object> _queueLC1, ConcurrentQueue<object> _queueLC2,
+            ConcurrentQueue<object> _queueLC3, AutoResetEvent _signalLC1, AutoResetEvent _signalLC2, AutoResetEvent _signalLC3, AutoResetEvent _signalError, AutoResetEvent _signalErrorRM)
         {
             while (true)
             {
@@ -317,14 +317,16 @@ namespace DibrisBike
                                 //launch exception on storage
                                 Console.WriteLine("NOT ENOUGH RAW MATERIALS");
                                 //and waiting for someone inserting some.
-                                flagError = true;
+
+                                // launch a signal to set an error in the UI
+                                _signalErrorRM.Set();
+                                // wait for new raw material
                                 _signalError.WaitOne();
-                                flagError = false;
                             }
                         }
                     }
                     //sleeping the thread for 2 secs
-                    //Thread.Sleep(10000);
+                    Thread.Sleep(2000);
                 }
             }
         }

@@ -28,6 +28,7 @@ namespace DibrisBike
         private DataTable table;
         private SqlConnection conn;
         private int idLotto;
+        private int produced, max;
 
         public ModifyOrdiniPage()
         {
@@ -54,7 +55,7 @@ namespace DibrisBike
 
         private void FillDataGrid(SqlConnection conn)
         {
-            String query = "SELECT * FROM dbo.statoordini";
+            String query = "SELECT * FROM dbo.statoordini WHERE stato!='finished' AND stato!='stored'";
             SqlCommand comm = new SqlCommand(query, conn);
 
             comm.ExecuteNonQuery();
@@ -93,6 +94,8 @@ namespace DibrisBike
             DataRowView dr = statoordiniGridModify.SelectedItem as DataRowView;
             DataRow dr1 = dr.Row;
             idLotto = (int)dr1["idLotto"];
+            produced = (int)dr1["quantitaProdotta"];
+            max = (int)dr1["quantitaDesiderata"];
             newValueTextBox.Text = Convert.ToString(dr1["quantitaDesiderata"]);
         }
 
@@ -103,14 +106,52 @@ namespace DibrisBike
 
         private void apply_Click(object sender, RoutedEventArgs e)
         {
-            String query = "UPDATE dbo.statoordini SET quantitaDesiderata=(@newQuantita) WHERE idLotto=(@idLotto)";
-            SqlCommand comm = new SqlCommand(query, conn);
-            comm.Parameters.AddWithValue("@newQuantita", Int32.Parse(newValueTextBox.Text));
-            comm.Parameters.AddWithValue("@idLotto", idLotto);
-            
-            comm.ExecuteNonQuery();
+            if (!newValueTextBox.Text.Contains(",") && !newValueTextBox.Text.Contains(".")) {    // check if the value is integer
+                int newValue = Int32.Parse(newValueTextBox.Text);
+                if (newValue > 0)
+                {
+                    if (newValue + 5 < produced)  // check if the value is less then the produced item
+                    {
+                        String query = "UPDATE dbo.statoordini SET quantitaDesiderata=(@newQuantita) WHERE idLotto=(@idLotto)";
+                        SqlCommand comm = new SqlCommand(query, conn);
+                        comm.Parameters.AddWithValue("@newQuantita", Int32.Parse(newValueTextBox.Text));
+                        comm.Parameters.AddWithValue("@idLotto", idLotto);
 
-            FillDataGrid(conn);
+                        if (conn != null && conn.State == ConnectionState.Closed)
+                            conn.Open();
+
+                        comm.ExecuteNonQuery();
+
+                        query = "UPDATE dbo.mps SET quantita=(@newQuantita), modified=1 WHERE id=(@id)";
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.AddWithValue("@newQuantita", Int32.Parse(newValueTextBox.Text));
+                        comm.Parameters.AddWithValue("@id", idLotto);
+
+
+                        comm.ExecuteNonQuery();
+                        conn.Close();
+                        FillDataGrid(conn);
+                    }
+                    else
+                    {
+                        int possibleValue;
+                        if (newValue + 5 >= max)
+                            possibleValue = max;
+                        else
+                            possibleValue = newValue + 5;
+                        errorLabel.Content = "Il valore inserito è superiore alla quantità di elementi già prodotti o che sono in produzione\n" +
+                            "Il limite massimo impostabile è " + possibleValue;
+                    }
+                }
+                else
+                {
+                    errorLabel.Content = "Non è possibile inserire un valore null o minore di zero";
+                }
+            }
+            else
+            {
+                errorLabel.Content = "Non è possibile inserire un numero non intero";
+            }
         }
     }
 }
