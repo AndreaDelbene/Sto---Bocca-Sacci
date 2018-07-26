@@ -113,7 +113,7 @@ namespace DibrisBike
                 {
                     if (newValue + 5 < produced || newValue > produced)  // check if the value is less then the produced item
                     {
-                        String query = "UPDATE dbo.statoordini SET quantitaDesiderata=(@newQuantita) WHERE idLotto=(@idLotto)";
+                        /*String query = "UPDATE dbo.statoordini SET quantitaDesiderata=(@newQuantita) WHERE idLotto=(@idLotto)";
                         SqlCommand comm = new SqlCommand(query, conn);
                         comm.Parameters.AddWithValue("@newQuantita", Int32.Parse(newValueTextBox.Text));
                         comm.Parameters.AddWithValue("@idLotto", idLotto);
@@ -121,10 +121,10 @@ namespace DibrisBike
                         if (conn != null && conn.State == ConnectionState.Closed)
                             conn.Open();
 
-                        comm.ExecuteNonQuery();
+                        comm.ExecuteNonQuery();*/
 
-                        query = "UPDATE dbo.mps SET quantita=(@newQuantita), modified=1 WHERE id=(@id)";
-                        comm = new SqlCommand(query, conn);
+                        string query = "UPDATE dbo.mps SET quantita=(@newQuantita), modified=1 WHERE id=(@id)";
+                        SqlCommand comm = new SqlCommand(query, conn);
                         comm.Parameters.AddWithValue("@newQuantita", Int32.Parse(newValueTextBox.Text));
                         comm.Parameters.AddWithValue("@id", idLotto);
 

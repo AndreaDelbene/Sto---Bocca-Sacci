@@ -12,6 +12,7 @@ namespace DibrisBike
 
     class MPS
     {
+        private bool flagModif = false;
 
         public MPS()
         {
@@ -22,7 +23,7 @@ namespace DibrisBike
             while (true)
             {
                 //checking whenever a new MPS has been uploaded
-                string query = "SELECT * FROM dbo.mps WHERE running = 0";
+                string query = "SELECT * FROM dbo.mps WHERE running = 0 OR modified = 1";
                 SqlCommand comm = new SqlCommand(query, conn);
 
                 SqlDataAdapter adapter = new SqlDataAdapter(comm);
@@ -35,7 +36,7 @@ namespace DibrisBike
                 int[] id, quantita, priorita;
                 string[] tipoTelaio, colore, linea;
                 DateTime[] startDate, dueDate;
-                Byte[] running;
+                Byte[] running, modified;
 
                 //if we have more than one order, they may have different priorities
                 priorita = (from DataRow r in table.Rows select (int)r["priorita"]).ToArray();
@@ -56,6 +57,7 @@ namespace DibrisBike
                     linea = (from DataRow r in sortedTable.Rows select (string)r["linea"]).ToArray();
                     priorita = (from DataRow r in sortedTable.Rows select (int)r["priorita"]).ToArray();
                     running = (from DataRow r in sortedTable.Rows select (Byte)r["running"]).ToArray();
+                    modified = (from DataRow r in sortedTable.Rows select (Byte)r["modified"]).ToArray();
                 }
                 else
                 {
@@ -68,58 +70,112 @@ namespace DibrisBike
                     colore = (from DataRow r in table.Rows select (string)r["colore"]).ToArray();
                     linea = (from DataRow r in table.Rows select (string)r["linea"]).ToArray();
                     running = (from DataRow r in table.Rows select (Byte)r["running"]).ToArray();
+                    modified = (from DataRow r in table.Rows select (Byte)r["modified"]).ToArray();
                 }
 
                 int[] quantitaTubi = new int[id.Length];
-
-
-
-                //conn.Close();
+                
                 //for each element in the table we got back from the first request
                 for (int i = 0; i < id.Length; i++)
                 {
-                    //I update the 'statoordini' table in the DB
-                    query = "INSERT INTO dbo.statoordini (idLotto, startPianificata, startEffettiva, dueDatePianificata, quantitaDesiderata, quantitaProdotta, tipoTelaio, stato, descrizione) " +
-                        "VALUES(@idLotto, @startPianificata, @startEffettiva, @dueDatePianificata, @quantitaDesiderata, @quantitaProdotta, @tipoTelaio, @stato, @descrizione)";
+                    if(modified[i]==1)
+                    {
+                        //getting the old quantity
+                        query = "SELECT quantitaDesiderata FROM dbo.statoordini WHERE idLotto = @idLotto";
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@idLotto", id[i]);
 
-                    comm = new SqlCommand(query, conn);
-                    comm.Parameters.Clear();
-                    comm.Parameters.AddWithValue("@idLotto", id[i]);
-                    comm.Parameters.AddWithValue("@startPianificata", startDate[i]);
-                    comm.Parameters.AddWithValue("@startEffettiva", startDate[i]);
-                    comm.Parameters.AddWithValue("@dueDatePianificata", dueDate[i]);
-                    comm.Parameters.AddWithValue("@quantitaDesiderata", quantita[i]);
-                    comm.Parameters.AddWithValue("@quantitaProdotta", 0);
-                    comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
-                    comm.Parameters.AddWithValue("@stato", "running");
-                    comm.Parameters.AddWithValue("@descrizione", "");
+                        SqlDataReader reader = comm.ExecuteReader();
 
-                    comm.ExecuteNonQuery();
+                        reader.Read();
 
-                    //I set then the flag to 1 into the 'mps' table
-                    query = "UPDATE stodb.dbo.mps SET running = 1 WHERE id = @idLotto";
-                    comm = new SqlCommand(query, conn);
-                    comm.Parameters.Clear();
-                    comm.Parameters.AddWithValue("@idLotto", id[i]);
+                        int quantitaOld= (int)reader["quantitaDesiderata"];
 
-                    comm.ExecuteNonQuery();
+                        reader.Close();
 
-                    //and I check how many stuff I need for that kind of bike
-                    query = "SELECT quantitaTubi FROM dbo.ricette WHERE tipoTelaio = @tipoTelaio";
-                    comm = new SqlCommand(query, conn);
-                    comm.Parameters.Clear();
-                    comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
+                        //updating the order's state
+                        query = "UPDATE dbo.statoordini SET quantitaDesiderata = @quantitaDesiderata WHERE idLotto = @idLotto";
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@quantitaDesiderata", quantita[i]);
+                        comm.Parameters.AddWithValue("@idLotto", id[i]);
 
-                    SqlDataReader reader = comm.ExecuteReader();
+                        comm.ExecuteNonQuery();
 
-                    reader.Read();
+                        //and setting the quantity to produce = new - old
+                        quantita[i] = quantita[i] - quantitaOld;
+                        //if we decided to decrement the quantity, then we should not send any infos to steps that come next
+                        if (quantita[i] < 0)
+                            flagModif = true;
 
-                    quantitaTubi[i] = (int)reader["quantitaTubi"];
+                        //and let's update the 'mps' table too
+                        query = "UPDATE dbo.mps SET modified = 0 WHERE id = @idLotto";
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@idLotto", id[i]);
 
-                    reader.Close();
+                        comm.ExecuteNonQuery();
 
+                        //and I check how many stuff I need for that kind of bike
+                        query = "SELECT quantitaTubi FROM dbo.ricette WHERE tipoTelaio = @tipoTelaio";
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
+
+                        reader = comm.ExecuteReader();
+
+                        reader.Read();
+
+                        quantitaTubi[i] = (int)reader["quantitaTubi"];
+
+                        reader.Close();
+
+                    }
+                    else
+                    {
+                        //I update the 'statoordini' table in the DB
+                        query = "INSERT INTO dbo.statoordini (idLotto, startPianificata, startEffettiva, dueDatePianificata, quantitaDesiderata, quantitaProdotta, tipoTelaio, stato, descrizione) " +
+                            "VALUES(@idLotto, @startPianificata, @startEffettiva, @dueDatePianificata, @quantitaDesiderata, @quantitaProdotta, @tipoTelaio, @stato, @descrizione)";
+
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@idLotto", id[i]);
+                        comm.Parameters.AddWithValue("@startPianificata", startDate[i]);
+                        comm.Parameters.AddWithValue("@startEffettiva", startDate[i]);
+                        comm.Parameters.AddWithValue("@dueDatePianificata", dueDate[i]);
+                        comm.Parameters.AddWithValue("@quantitaDesiderata", quantita[i]);
+                        comm.Parameters.AddWithValue("@quantitaProdotta", 0);
+                        comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
+                        comm.Parameters.AddWithValue("@stato", "running");
+                        comm.Parameters.AddWithValue("@descrizione", "");
+
+                        comm.ExecuteNonQuery();
+
+                        //I set then the flag to 1 into the 'mps' table
+                        query = "UPDATE stodb.dbo.mps SET running = 1 WHERE id = @idLotto";
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@idLotto", id[i]);
+
+                        comm.ExecuteNonQuery();
+
+                        //and I check how many stuff I need for that kind of bike
+                        query = "SELECT quantitaTubi FROM dbo.ricette WHERE tipoTelaio = @tipoTelaio";
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@tipoTelaio", tipoTelaio[i]);
+
+                        SqlDataReader reader = comm.ExecuteReader();
+
+                        reader.Read();
+
+                        quantitaTubi[i] = (int)reader["quantitaTubi"];
+
+                        reader.Close();
+                    }
                 }
-                if (id.Length > 0)
+                if (id.Length > 0 && !flagModif)
                 {
                     //queue=FIFO, i save in it the amount of ids, tubes and other stuff.
                     _queue.Enqueue(id);
@@ -130,41 +186,7 @@ namespace DibrisBike
                     //the stuff passes under the Quality Control Area
                     //Console.WriteLine("ACQ");
                 }
-
-                //checking whenever a new MPS has been updated
-                query = "SELECT * FROM dbo.mps WHERE modified = 1";
-                comm = new SqlCommand(query, conn);
-
-                adapter = new SqlDataAdapter(comm);
-
-                comm.ExecuteNonQuery();
-
-                table = new DataTable();
-                adapter.Fill(table);
-
-                id = (from DataRow r in table.Rows select (int)r["id"]).ToArray();
-                quantita = (from DataRow r in table.Rows select (int)r["quantita"]).ToArray();
-                //and if there are edits, let's update the 'statoordini' table, so more/less bikes will get produced
-                for (int i = 0; i < id.Length; i++)
-                {
-                    query = "UPDATE dbo.statoordini SET quantitaDesiderata = @quantitaDesiderata WHERE idLotto = @idLotto";
-                    comm = new SqlCommand(query, conn);
-                    comm.Parameters.Clear();
-                    comm.Parameters.AddWithValue("@quantitaDesiderata", quantita[i]);
-                    comm.Parameters.AddWithValue("@idLotto", id[i]);
-
-                    comm.ExecuteNonQuery();
-
-                    //and let's update the 'mps' table too
-                    query = "UPDATE dbo.mps SET modified = 0 WHERE id = @idLotto";
-                    comm = new SqlCommand(query, conn);
-                    comm.Parameters.Clear();
-                    comm.Parameters.AddWithValue("@idLotto", id[i]);
-
-                    comm.ExecuteNonQuery();
-                }
-
-
+               
                 Thread.Sleep(2000);
             }
         }
