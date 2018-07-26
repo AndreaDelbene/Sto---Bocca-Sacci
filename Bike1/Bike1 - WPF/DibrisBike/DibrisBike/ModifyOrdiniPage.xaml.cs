@@ -38,7 +38,7 @@ namespace DibrisBike
 
             //LAPTOP - DT8KB2TQ;
             conn.ConnectionString =
-            "Server=SIMONE-PC\\SQLEXPRESS;" +
+            "Server=LAPTOP-DT8KB2TQ;" +
             "Database=stodb;" +
             "Integrated Security=True;" +
             "MultipleActiveResultSets=true;";
@@ -55,6 +55,7 @@ namespace DibrisBike
 
         private void FillDataGrid(SqlConnection conn)
         {
+            conn.Open();
             String query = "SELECT * FROM dbo.statoordini WHERE stato!='finished' AND stato!='stored'";
             SqlCommand comm = new SqlCommand(query, conn);
 
