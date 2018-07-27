@@ -134,6 +134,7 @@ namespace DibrisBike
                         FillDataGrid(conn);
 
                         modificationPanel.Visibility = Visibility.Hidden;
+                        this.Close();
                     }
                     else
                     {
