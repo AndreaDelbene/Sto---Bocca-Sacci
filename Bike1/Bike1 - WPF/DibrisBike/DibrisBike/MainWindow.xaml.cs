@@ -57,10 +57,10 @@ namespace DibrisBike
             InitializeComponent();
 
             SqlConnection con = new SqlConnection();
-            //SIMONE - PC\\SQLEXPRESS;
-            //LAPTOP - DT8KB2TQ;
+            //SIMONE-PC\\SQLEXPRESS;
+            //LAPTOP-DT8KB2TQ;
             con.ConnectionString =
-            "Server=LAPTOP-DT8KB2TQ;" +
+            "Server=SIMONE-PC\\SQLEXPRESS;" +
             "Database=stodb;" +
             "Integrated Security=True;" +
             "MultipleActiveResultSets=true;";
@@ -152,8 +152,8 @@ namespace DibrisBike
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Multiselect = false;
-            fileDialog.Filter = "Excel File|*.xlsx";
-            fileDialog.DefaultExt = ".xlsx";
+            fileDialog.Filter = "Excel File|*.xls";
+            fileDialog.DefaultExt = ".xls";
             Nullable<bool> dialogOk = fileDialog.ShowDialog();
 
             String MPSFilePath = string.Empty;
@@ -180,8 +180,8 @@ namespace DibrisBike
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Multiselect = false;
-            fileDialog.Filter = "Excel File|*.xlsx";
-            fileDialog.DefaultExt = ".xlsx";
+            fileDialog.Filter = "Excel File|*.xls";
+            fileDialog.DefaultExt = ".xls";
             Nullable<bool> dialogOk = fileDialog.ShowDialog();
 
             String rawMaterialFilePath = string.Empty;

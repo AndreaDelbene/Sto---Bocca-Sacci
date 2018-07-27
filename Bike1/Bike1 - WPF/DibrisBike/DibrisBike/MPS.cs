@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Data;
+using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -13,6 +14,8 @@ namespace DibrisBike
     class MPS
     {
         private bool flagModif = false;
+        private DataTable dtSchema;
+        private string Sheet1;
 
         public MPS()
         {
@@ -194,121 +197,45 @@ namespace DibrisBike
         internal void getMPSFromFile(string pathToFile, SqlConnection conn)
         {
             SqlCommand comm = new SqlCommand();
-            String query = "INSERT INTO dbo.mps (startDate,dueDate,quantita,tipoTelaio,colore,linea,priorita,running) VALUES (@startDate,@dueDate,@quantita,@tipoTelaio,@colore,@linea,@priorita,@running)";
+            String query = "INSERT INTO dbo.mps (startDate,dueDate,quantita,tipoTelaio,colore,linea,priorita,running,modified) VALUES (@startDate,@dueDate,@quantita,@tipoTelaio,@colore,@linea,@priorita,@running,@modified)";
             comm = new SqlCommand(query, conn);
 
-            //Create COM Objects. Create a COM object for everything that is referenced
-            Excel.Application xlApp = new Excel.Application();
-            Excel.Workbook xlWorkbook = xlApp.Workbooks.Open(pathToFile);
-            Excel._Worksheet xlWorksheet = xlWorkbook.Sheets[1];
-            Excel.Range xlRange = xlWorksheet.UsedRange;
+            string excelConnection =
+                @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source="+pathToFile+";" +
+                @"Extended Properties='Excel 8.0;HDR=Yes;'";
 
-            int rowCount = xlRange.Rows.Count;
-            int colCount = xlRange.Columns.Count;
-
-            //iterate over the rows and columns
-            //excel is not zero based!!
-            bool flagError;
-            for (int i = 2; i <= rowCount; i++)
+            using(OleDbConnection connection = new OleDbConnection(excelConnection))
             {
-                flagError = false;
-                comm.Parameters.Clear();
-                for (int j = 1; j <= colCount; j++)
-                {
-                    switch (j)
+                connection.Open();
+                dtSchema = connection.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, new object[] { null, null, null, "TABLE" });
+                Sheet1 = dtSchema.Rows[0].Field<string>("TABLE_NAME");
+                DataTable dt = new DataTable();
+                //OleDbCommand command = new OleDbCommand("select * from ["+Sheet1+"]", connection);
+                    using (OleDbCommand cmd = new OleDbCommand("select * from [" + Sheet1 + "]", connection))
                     {
-                        case 1:
-                            String temp = Convert.ToString(xlRange.Cells[i, j].Value2);
-                            if (temp != null)
-                            {
-                                double campo1 = double.Parse(temp);
-                                DateTime date1 = DateTime.FromOADate(campo1);
-                                comm.Parameters.AddWithValue("@dueDate", date1);
-                            }
-                            else
-                            {
-                                flagError = true;
-                            }
-                            break;
-
-                        case 2:
-                            Object campo2 = xlRange.Cells[i, j].Value2;
-                            if (campo2 != null)
-                            {
-                                comm.Parameters.AddWithValue("@quantita", (int)(double)campo2);
-                            }
-                            else
-                            {
-                                flagError = true;
-                            }
-                            break;
-
-                        case 3:
-                            String campo4 = (String)xlRange.Cells[i, j].Value2;
-                            if (campo4 != null)
-                            {
-                                comm.Parameters.AddWithValue("@tipoTelaio", campo4);
-                            }
-                            else
-                            {
-                                flagError = true;
-                            }
-                            break;
-
-                        case 4:
-                            String campo5 = (String)xlRange.Cells[i, j].Value2;
-                            if (campo5 != null)
-                            {
-                                comm.Parameters.AddWithValue("@colore", campo5);
-                            }
-                            else
-                            {
-                                flagError = true;
-                            }
-                            break;
-
-                        case 5:
-                            String linea = (String)xlRange.Cells[i, j].Value2;
-                            if (linea != null)
-                            {
-                                comm.Parameters.AddWithValue("@linea", linea);
-                            }
-                            else
-                            {
-                                flagError = true;
-                            }
-                            break;
-                        case 6:
-                            Object campo6 = xlRange.Cells[i, j].Value2;
-                            if (campo6 != null)
-                            {
-                                comm.Parameters.AddWithValue("@priorita", (int)(double)campo6);
-                            }
-                            else
-                            {
-                                flagError = true;
-                            }
-                            break;
-
-                        case 7:
-                            Object campodef = xlRange.Cells[i, j].Value2;
-                            if (campodef != null)
-                            {
-                                int campodefInt = Int32.Parse(Convert.ToString(campodef));
-                                comm.Parameters.AddWithValue("@running", campodefInt);
-                            }
-                            else
-                            {
-                                flagError = true;
-                            }
-                            break;
+                        using (OleDbDataReader rdr = cmd.ExecuteReader())
+                        {
+                            dt.Load(rdr);
+                        }
                     }
-                }
-
-                if (!flagError)
+                foreach (DataRow dr in dt.Rows)
                 {
+                    comm.Parameters.Clear();
+                    Console.WriteLine();
+                    foreach (var item in dr.ItemArray)
+                    {
+                        Console.Write(item + "\t");
+                    }
+                    comm.Parameters.AddWithValue("@dueDate", dr[0]);
+                    comm.Parameters.AddWithValue("@quantita", dr[1]);
+                    comm.Parameters.AddWithValue("@tipoTelaio", dr[2]);
+                    comm.Parameters.AddWithValue("@colore", dr[3]);
+                    comm.Parameters.AddWithValue("@linea", dr[4]);
+                    comm.Parameters.AddWithValue("@priorita", dr[5]);
+                    comm.Parameters.AddWithValue("@running", dr[6]);
+
                     comm.Parameters.AddWithValue("@startDate", DateTime.Now);
-                    comm.Parameters.AddWithValue("@modified", 0);
+                    comm.Parameters.AddWithValue("@modified", Int32.Parse("0"));
 
                     if (conn != null && conn.State == ConnectionState.Closed)
                         conn.Open();
@@ -322,32 +249,9 @@ namespace DibrisBike
                     }
                     catch (SqlException e)
                     {
-                        //Console.WriteLine(e.Errors);
-                        Console.WriteLine(e.ToString());
+                        Console.WriteLine("Riga nell'MPS vuota o non valida");
                     }
                 }
-
-                //cleanup
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-
-                //rule of thumb for releasing com objects:
-                //  never use two dots, all COM objects must be referenced and released individually
-                //  ex: [somthing].[something].[something] is bad
-
-                //release com objects to fully kill excel process from running in the background
-                Marshal.ReleaseComObject(xlRange);
-                Marshal.ReleaseComObject(xlWorksheet);
-
-                //close and release
-                xlWorkbook.Close();
-                Marshal.ReleaseComObject(xlWorkbook);
-
-                //quit and release
-                xlApp.Quit();
-                Marshal.ReleaseComObject(xlApp);
-
-                Console.WriteLine("Lettura e salvataggio MPS completato");
             }
         }
     }
