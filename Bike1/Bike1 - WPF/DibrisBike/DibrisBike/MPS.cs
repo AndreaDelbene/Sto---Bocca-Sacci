@@ -4,9 +4,7 @@ using System.Data;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
-using Excel = Microsoft.Office.Interop.Excel;
 
 namespace DibrisBike
 {
@@ -119,7 +117,7 @@ namespace DibrisBike
                         comm.Parameters.AddWithValue("@idLotto", id[i]);
 
                         comm.ExecuteNonQuery();
-
+                        
                         //and I check how many stuff I need for that kind of bike
                         query = "SELECT quantitaTubi FROM dbo.ricette WHERE tipoTelaio = @tipoTelaio";
                         comm = new SqlCommand(query, conn);
@@ -133,11 +131,12 @@ namespace DibrisBike
                         quantitaTubi[i] = (int)reader["quantitaTubi"];
 
                         reader.Close();
-
                     }
                     else
                     {
-                        //I update the 'statoordini' table in the DB
+                        //if the order is new, let's set the start date to now
+                        startDate[i] = DateTime.Now;
+                        //I update the 'statoordini' table in the DB then
                         query = "INSERT INTO dbo.statoordini (idLotto, startPianificata, startEffettiva, dueDatePianificata, quantitaDesiderata, quantitaProdotta, tipoTelaio, stato, descrizione) " +
                             "VALUES(@idLotto, @startPianificata, @startEffettiva, @dueDatePianificata, @quantitaDesiderata, @quantitaProdotta, @tipoTelaio, @stato, @descrizione)";
 
@@ -155,10 +154,11 @@ namespace DibrisBike
 
                         comm.ExecuteNonQuery();
 
-                        //I set then the flag to 1 into the 'mps' table
-                        query = "UPDATE stodb.dbo.mps SET running = 1 WHERE id = @idLotto";
+                        //I set then the flag to 1 into the 'mps' table, I set the start time
+                        query = "UPDATE stodb.dbo.mps SET running = 1, startDate = @startDate  WHERE id = @idLotto";
                         comm = new SqlCommand(query, conn);
                         comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@startDate", startDate[i]);
                         comm.Parameters.AddWithValue("@idLotto", id[i]);
 
                         comm.ExecuteNonQuery();

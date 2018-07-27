@@ -34,10 +34,10 @@ namespace DibrisBike
             InitializeComponent();
 
             conn = new SqlConnection();
-
-            //LAPTOP - DT8KB2TQ;
+            //SIMONE-PC\\SQLEXPRESS;
+            //LAPTOP-DT8KB2TQ;
             conn.ConnectionString =
-            "Server=SIMONE-PC\\SQLEXPRESS;" +
+            "Server=LAPTOP-DT8KB2TQ;" +
             "Database=stodb;" +
             "Integrated Security=True;" +
             "MultipleActiveResultSets=true;";
