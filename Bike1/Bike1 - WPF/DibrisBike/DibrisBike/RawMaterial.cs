@@ -147,7 +147,7 @@ namespace DibrisBike
                                 comm2.Parameters.Clear();
                                 comm2.Parameters.AddWithValue("@x", val);
                                 comm2.Parameters.AddWithValue("@y", val);
-                                comm2.Parameters.AddWithValue("@z", val.ToString());
+                                comm2.Parameters.AddWithValue("@z", "A");
                                 comm2.Parameters.AddWithValue("@idScatola", dr["id"]);
 
                                 comm2.ExecuteNonQuery();
