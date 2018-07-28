@@ -39,7 +39,7 @@ namespace DibrisBike
             comm = new SqlCommand(query, conn);
             query1 = "INSERT INTO dbo.scatole (id, tipo, idCambio, idRuote, idFiniture, idSellino, idCatena) VALUES (@id, @tipo, @idCambio, @idRuote, @idFiniture, @idSellino, @idCatena)";
             comm1 = new SqlCommand(query1, conn);
-            query1 = "INSERT INTO dbo.posizioni (x, y, z, idScatola) VALUES (@x, @y, @z, @idScatola)";
+            query2 = "INSERT INTO dbo.posizioni (x, y, z, idScatola) VALUES (@x, @y, @z, @idScatola)";
             comm2 = new SqlCommand(query2, conn);
         }
 
