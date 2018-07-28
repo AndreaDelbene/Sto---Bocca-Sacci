@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using Microsoft.Win32;
 using System.Data;
 using System.Windows.Media;
+using System.Windows.Controls.Primitives;
 
 namespace DibrisBike
 {
@@ -22,6 +23,7 @@ namespace DibrisBike
         static private readonly AutoResetEvent _signal = new AutoResetEvent(false);
         static private readonly AutoResetEvent _signalError = new AutoResetEvent(false);
         static private readonly AutoResetEvent _signalErrorRM = new AutoResetEvent(false);
+        static private readonly AutoResetEvent _signalErrorRM2 = new AutoResetEvent(false);
         static private bool flagError = false;
         //queues and signals for Routing - WelmStorage
         static private readonly ConcurrentQueue<object> _queueLC1 = new ConcurrentQueue<object>();
@@ -55,7 +57,7 @@ namespace DibrisBike
         static private readonly AutoResetEvent _signalErrorLC1 = new AutoResetEvent(false);    // signal of error
         static private readonly AutoResetEvent _signalWaitErrorLC1 = new AutoResetEvent(false);  // signal it waits for an error
         static private readonly AutoResetEvent _signalFixLC1 = new AutoResetEvent(false);  // signal that fix the error
-        static private readonly ConcurrentQueue<Boolean> _queueBlockLC1 = new ConcurrentQueue<Boolean>();
+        static private readonly ConcurrentQueue<Boolean> _queueBlockLC1 = new ConcurrentQueue<Boolean>();  //queue for blocking errors
 
         public MainWindow()
         {
@@ -65,7 +67,7 @@ namespace DibrisBike
             //SIMONE-PC\\SQLEXPRESS;
             //LAPTOP-DT8KB2TQ;
             con.ConnectionString =
-            "Server=LAPTOP-DT8KB2TQ;" +
+            "Server=SIMONE-PC\\SQLEXPRESS;" +
             "Database=stodb;" +
             "Integrated Security=True;" +
             "MultipleActiveResultSets=true;";
@@ -186,10 +188,10 @@ namespace DibrisBike
                 {
                     updateLabel(MPSPathLabel, "Il file selezionato non presenta una formattazione corretta");
                 }
-                else
-                {
-                    updateLabel(MPSPathLabel, "MPS caricato con successo");
-                }
+            }
+            else
+            {
+                updateLabel(MPSPathLabel, "MPS caricato con successo");
             }
         }
 
@@ -216,7 +218,7 @@ namespace DibrisBike
 
         private void getRawMaterial(String path)
         {
-            RawMaterial rawMaterial = new RawMaterial(conn, _signalError);
+            RawMaterial rawMaterial = new RawMaterial(conn, _signalError, _signalErrorRM2);
             rawMaterial.GetRawFromFile(path);
             if(rawMaterial.GetErrorString() != null)
             {
@@ -224,10 +226,10 @@ namespace DibrisBike
                 {
                     updateLabel(RMPathLabel, "Il file selezionato non presenta una formattazione corretta");
                 }
-                else
-                {
-                    updateLabel(RMPathLabel, "Raw Material caricato con successo");
-                }
+            }
+            else
+            {
+                updateLabel(RMPathLabel, "Raw Material caricato con successo");
             }
         }
 
@@ -324,7 +326,7 @@ namespace DibrisBike
                 Console.WriteLine("Ricevuto signal");
                 int n = rnd.Next(0,100);
                 Console.WriteLine("Random number " + n);
-                if(n < 40)
+                if(n < 5)
                 {
                     _signalErrorLC1.Set();
                     int n2 = rnd.Next(1,5);
@@ -357,19 +359,9 @@ namespace DibrisBike
         }
 
         private void signalErrorChangeListener()
-        {
+        {           
             while (true)
             {
-                this.Dispatcher.BeginInvoke(
-                    new Action(
-                        delegate ()
-                        {
-                            RMAlert.Fill = new SolidColorBrush(Colors.ForestGreen);
-                            RMAlert.Stroke = new SolidColorBrush(Colors.ForestGreen);
-                            RMAlertLabel.Content = "Raw material sufficienti";
-                        }
-                        ));
-
                 _signalErrorRM.WaitOne();
 
                 this.Dispatcher.BeginInvoke(
@@ -380,8 +372,19 @@ namespace DibrisBike
                             RMAlert.Stroke = new SolidColorBrush(Colors.OrangeRed);
                             RMAlertLabel.Content = "Raw material insufficienti";
                         }
-                        ));
-                _signalError.WaitOne();
+                    ));
+
+                _signalErrorRM2.WaitOne();
+
+                this.Dispatcher.BeginInvoke(
+                    new Action(
+                        delegate ()
+                        {
+                            RMAlert.Fill = new SolidColorBrush(Colors.ForestGreen);
+                            RMAlert.Stroke = new SolidColorBrush(Colors.ForestGreen);
+                            RMAlertLabel.Content = "Raw material sufficienti";
+                        }
+                    ));
             }
         }
 

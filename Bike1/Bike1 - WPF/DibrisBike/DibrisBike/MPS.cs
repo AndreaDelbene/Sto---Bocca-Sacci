@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
-using Excel = Microsoft.Office.Interop.Excel;
 
 namespace DibrisBike
 {

@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Excel = Microsoft.Office.Interop.Excel;
 
 namespace DibrisBike
 {
@@ -22,14 +21,16 @@ namespace DibrisBike
         SqlConnection conn;
         private String query;
         private SqlCommand comm;
-        AutoResetEvent _signalError;
+        private AutoResetEvent _signalError;
+        AutoResetEvent _signalErrorRM2;
         private DataTable dtSchema;
         private string Sheet1;
         private string errorString = null;
 
-        public RawMaterial(SqlConnection conn, AutoResetEvent _signalError)
+        public RawMaterial(SqlConnection conn, AutoResetEvent _signalError, AutoResetEvent _signalErrorRM2)
         {
             this._signalError = _signalError;
+            this._signalErrorRM2 = _signalErrorRM2;
             this.conn = conn;
             query = "INSERT INTO dbo.magazzinomateriali (codiceBarre,descrizione,diametro,peso,lunghezza) VALUES (@codiceBarre,@descrizione,@diametro,@peso,@lunghezza)";
             comm = new SqlCommand(query, conn);
@@ -73,6 +74,14 @@ namespace DibrisBike
                             if (result < 0)
                             {
                                 Console.WriteLine("Errore nell'inserimento dei raw material: result = " + result);
+                            }
+                            else
+                            {
+                                // notify new material
+                                // to the routing thread
+                                _signalError.Set();
+                                // and to the alert UI
+                                _signalErrorRM2.Set();
                             }
                         }
                         catch (SqlException e)

@@ -322,6 +322,7 @@ namespace DibrisBike
                                 _signalErrorRM.Set();
                                 // wait for new raw material
                                 _signalError.WaitOne();
+                                Console.WriteLine("NEW RAW MATERIAL RECEIVED");
                             }
                         }
                     }
