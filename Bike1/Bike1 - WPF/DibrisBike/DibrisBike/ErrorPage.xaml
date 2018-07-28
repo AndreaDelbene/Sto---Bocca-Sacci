@@ -1,0 +1,51 @@
+﻿<Window x:Class="DibrisBike.ErrorPage"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DibrisBike"
+        mc:Ignorable="d"
+        Title="ErrorPage" Height="450" Width="800">
+    <Border Padding="10">
+        <StackPanel Orientation="Vertical">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <Button x:Name="closeWindow" Grid.Row="0" Grid.Column="2" Content="Go to Mordor" Click="closeWindow_Click" />
+                <StackPanel Orientation="Vertical" Grid.Row="3" Grid.ColumnSpan="3">
+                    <Label Margin="0 20 0 0" Content="Doppio click sull'ordine da modificare"/>
+                    <DataGrid x:Name="errorGrid" AutoGenerateColumns="True" IsReadOnly="True" MouseDoubleClick="errorGrid_MouseDoubleClick" />
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+                    <Label Content="Ricerca per"/>
+                    <ComboBox
+                    x:Name="fields"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Width="120"
+                    SelectionChanged="fields_SelectionChanged"/>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
+                    <Label Content="Inserisci valore ricerca"/>
+                    <TextBox
+                    x:Name="keywordBox"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Width="120"
+                    SelectionChanged="keywordBox_SelectionChanged"/>
+                </StackPanel>
+            </Grid>
+            <Button x:Name="fixError" Content="Risolvi errore" Click="fixError_Click" Visibility="Hidden"/>
+        </StackPanel>
+    </Border>
+</Window>

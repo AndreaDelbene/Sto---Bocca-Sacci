@@ -51,6 +51,11 @@ namespace DibrisBike
         static private readonly ConcurrentQueue<int> _queueAssemb = new ConcurrentQueue<int>();
         static private readonly AutoResetEvent _signalAssemb = new AutoResetEvent(false);
         static private readonly AutoResetEvent _signalErrorEssic = new AutoResetEvent(false);
+        //signal for LC1 Errors
+        static private readonly AutoResetEvent _signalErrorLC1 = new AutoResetEvent(false);    // signal of error
+        static private readonly AutoResetEvent _signalWaitErrorLC1 = new AutoResetEvent(false);  // signal it waits for an error
+        static private readonly AutoResetEvent _signalFixLC1 = new AutoResetEvent(false);  // signal that fix the error
+        static private readonly ConcurrentQueue<Boolean> _queueBlockLC1 = new ConcurrentQueue<Boolean>();
 
         public MainWindow()
         {
@@ -84,6 +89,7 @@ namespace DibrisBike
             Thread t10 = new Thread(new ThreadStart(assembCaller));
             Thread t11 = new Thread(new ThreadStart(signalErrorChangeListener));
             Thread t12 = new Thread(new ThreadStart(checkFinishedCaller));
+            Thread t13 = new Thread(new ThreadStart(errorGeneratorLC1));
 
             t1.Start();
             t2.Start();
@@ -100,6 +106,7 @@ namespace DibrisBike
             t10.Start();
             t11.Start();
             t12.Start();
+            t13.Start();
         }
 
         static void getMPSCaller()
@@ -173,7 +180,17 @@ namespace DibrisBike
         {
             MPS mps = new MPS();
             mps.getMPSFromFile(mpsFilePath, conn);
-            updateLabel(MPSPathLabel, "MPS caricato con successo");
+            if(mps.GetErrorString() != null)
+            {
+                if (mps.GetErrorString().Equals("formattazione"))
+                {
+                    updateLabel(MPSPathLabel, "Il file selezionato non presenta una formattazione corretta");
+                }
+                else
+                {
+                    updateLabel(MPSPathLabel, "MPS caricato con successo");
+                }
+            }
         }
 
         private void RMChooser_Click(object sender, RoutedEventArgs e)
@@ -200,8 +217,18 @@ namespace DibrisBike
         private void getRawMaterial(String path)
         {
             RawMaterial rawMaterial = new RawMaterial(conn, _signalError);
-            rawMaterial.getRawFromFile(path);
-            updateLabel(RMPathLabel, "Raw Material caricato con successo");
+            rawMaterial.GetRawFromFile(path);
+            if(rawMaterial.GetErrorString() != null)
+            {
+                if (rawMaterial.GetErrorString().Equals("formattazione"))
+                {
+                    updateLabel(RMPathLabel, "Il file selezionato non presenta una formattazione corretta");
+                }
+                else
+                {
+                    updateLabel(RMPathLabel, "Raw Material caricato con successo");
+                }
+            }
         }
 
         private void updateLabel(Label label, string message)
@@ -219,7 +246,7 @@ namespace DibrisBike
         static void accumuloSaldCaller1()
         {
             WeldStorage aS = new WeldStorage();
-            aS.setAccumuloSald1(conn, _queueLC1, _signalLC1, _queueSald, _signalSald);
+            aS.setAccumuloSald1(conn, _queueLC1, _signalLC1, _queueSald, _signalSald, _signalErrorLC1, _signalWaitErrorLC1, _signalFixLC1, _queueBlockLC1);
         }
 
         static void accumuloSaldCaller2()
@@ -288,6 +315,47 @@ namespace DibrisBike
             ps.updateProductionStorage(conn);
         }
 
+        private void errorGeneratorLC1()
+        {
+            Random rnd = new Random();
+            while (true)
+            {
+                _signalWaitErrorLC1.WaitOne();
+                Console.WriteLine("Ricevuto signal");
+                int n = rnd.Next(0,100);
+                Console.WriteLine("Random number " + n);
+                if(n < 40)
+                {
+                    _signalErrorLC1.Set();
+                    int n2 = rnd.Next(1,5);
+                    String query = "SELECT * FROM dbo.listaallarmi WHERE idAllarme = (@idAllarme)";
+                    SqlCommand comm = new SqlCommand(query, conn);
+                    comm.Parameters.AddWithValue("@idAllarme", "LC001_AL" + n2);
+                    comm.ExecuteNonQuery();
+
+                    DataTable table = new DataTable();
+                    SqlDataAdapter adapter = new SqlDataAdapter(comm);
+                    table = new DataTable();
+                    adapter.Fill(table);
+                    DataRow dr = table.Rows[0];
+                    byte blockingSystem = (byte)dr["blocksystem"];
+                    if (blockingSystem == 1)
+                    {
+                        _queueBlockLC1.Enqueue(true);
+                    }
+                    else
+                    {
+                        _queueBlockLC1.Enqueue(false);
+                    }
+                    query = "INSERT INTO dbo.allarmirt (type, data, solved) VALUES (@type, @data, 0)";
+                    comm = new SqlCommand(query, conn);
+                    comm.Parameters.AddWithValue("@type", dr["idAllarme"]);
+                    comm.Parameters.AddWithValue("@data", DateTime.Now);
+                    comm.ExecuteNonQuery();
+                }
+            }
+        }
+
         private void signalErrorChangeListener()
         {
             while (true)
@@ -321,6 +389,12 @@ namespace DibrisBike
         {
             FinishProductPage finishProductPage = new FinishProductPage();
             finishProductPage.Show();
+        }
+
+        private void seeError_Click(object sender, RoutedEventArgs e)
+        {
+            ErrorPage errorPage = new ErrorPage(_signalFixLC1);
+            errorPage.Show();
         }
     }
 }

@@ -38,10 +38,12 @@ namespace DibrisBike
 
             //LAPTOP - DT8KB2TQ;
             conn.ConnectionString =
-            "Server=LAPTOP-DT8KB2TQ;" +
+            "Server=SIMONE-PC\\SQLEXPRESS;" +
             "Database=stodb;" +
             "Integrated Security=True;" +
             "MultipleActiveResultSets=true;";
+
+            conn.Open();
 
             FillDataGrid(conn);
             SetFieldsComboBox();
@@ -55,7 +57,8 @@ namespace DibrisBike
 
         private void FillDataGrid(SqlConnection conn)
         {
-            conn.Open();
+            if (conn != null && conn.State == ConnectionState.Closed)
+                conn.Open();
             String query = "SELECT * FROM dbo.statoordini WHERE stato!='finished' AND stato!='stored'";
             SqlCommand comm = new SqlCommand(query, conn);
 
@@ -111,7 +114,31 @@ namespace DibrisBike
                 int newValue = Int32.Parse(newValueTextBox.Text);
                 if (newValue > 0)
                 {
-                    if (newValue + 5 < produced || newValue > produced)  // check if the value is less then the produced item
+
+                    // Calculating how many items are currently in the queue
+                    string queryNumberOfProduct = "SELECT idPezzo FROM dbo.routing WHERE idLotto=(@idLotto) ORDER BY idPezzo ASC";
+                    SqlCommand comm = new SqlCommand(queryNumberOfProduct, conn);
+                    comm.Parameters.AddWithValue("@idLotto", idLotto);
+                    comm.ExecuteNonQuery();
+
+                    SqlDataAdapter adapter = new SqlDataAdapter(comm);
+                    table = new DataTable();
+                    adapter.Fill(table);
+
+                    List<String> numList = new List<string>();
+                    foreach (DataRow dr in table.Rows)
+                    {
+                        String number = (String)dr["idPezzo"];
+                        number = number.Substring(number.LastIndexOf("-") + 1);
+                        number.Trim(' ');
+                        numList.Add(number);
+                    }
+                    List<int> idPezziList = numList.Select(int.Parse).ToList();
+                    int producing = idPezziList.Max();
+                    Console.WriteLine("Telai in produzione del lotto " + idLotto + ": " + producing);
+
+
+                    if (newValue > producing)  // check if the value is less then the produced item
                     {
                         /*String query = "UPDATE dbo.statoordini SET quantitaDesiderata=(@newQuantita) WHERE idLotto=(@idLotto)";
                         SqlCommand comm = new SqlCommand(query, conn);
@@ -124,12 +151,12 @@ namespace DibrisBike
                         comm.ExecuteNonQuery();*/
 
                         string query = "UPDATE dbo.mps SET quantita=(@newQuantita), modified=1 WHERE id=(@id)";
-                        SqlCommand comm = new SqlCommand(query, conn);
-                        comm.Parameters.AddWithValue("@newQuantita", Int32.Parse(newValueTextBox.Text));
-                        comm.Parameters.AddWithValue("@id", idLotto);
+                        SqlCommand comm2 = new SqlCommand(query, conn);
+                        comm2.Parameters.AddWithValue("@newQuantita", Int32.Parse(newValueTextBox.Text));
+                        comm2.Parameters.AddWithValue("@id", idLotto);
 
 
-                        comm.ExecuteNonQuery();
+                        comm2.ExecuteNonQuery();
                         conn.Close();
                         FillDataGrid(conn);
 
@@ -139,12 +166,14 @@ namespace DibrisBike
                     else
                     {
                         int possibleValue;
-                        if (newValue + 5 >= max)
+                        if (producing >= max)
                             possibleValue = max;
                         else
-                            possibleValue = newValue + 5;
+                            possibleValue = producing;
                         errorLabel.Content = "Il valore inserito è superiore alla quantità di elementi già prodotti o che sono in produzione\n" +
                             "Il limite massimo impostabile è " + possibleValue;
+
+                        FillDataGrid(conn);
                     }
                 }
                 else
@@ -156,11 +185,6 @@ namespace DibrisBike
             {
                 errorLabel.Content = "Non è possibile inserire un numero non intero";
             }
-            /*
-             * in routing c'è idlotto e idpezzo
-             * select su idlotto orderby idpezzo desc e prendo l'ultimo
-             * leggo il numero e se è maggiore della quantità richiesta vieto la modifica
-             */
         }
     }
 }

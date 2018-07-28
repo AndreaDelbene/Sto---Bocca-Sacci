@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Threading;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace DibrisBike
@@ -18,8 +22,10 @@ namespace DibrisBike
         SqlConnection conn;
         private String query;
         private SqlCommand comm;
-        List<String> columnName;
         AutoResetEvent _signalError;
+        private DataTable dtSchema;
+        private string Sheet1;
+        private string errorString = null;
 
         public RawMaterial(SqlConnection conn, AutoResetEvent _signalError)
         {
@@ -29,98 +35,63 @@ namespace DibrisBike
             comm = new SqlCommand(query, conn);
         }
 
-        public void getRawFromFile(String pathToFile)
+        public void GetRawFromFile(String pathToFile)
         {
-            //Create COM Objects. Create a COM object for everything that is referenced
-            Excel.Application xlApp = new Excel.Application();
-            Excel.Workbook xlWorkbook = xlApp.Workbooks.Open(pathToFile);
-            Excel._Worksheet xlWorksheet = xlWorkbook.Sheets[1];
-            Excel.Range xlRange = xlWorksheet.UsedRange;
-
-            int rowCount = xlRange.Rows.Count;
-            int colCount = xlRange.Columns.Count;
-
-            //iterate over the rows and columns and print to the console as it appears in the file
-            //excel is not zero based!!
-            for (int i = 2; i <= rowCount; i++)
+            string excelConnection =
+                @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + pathToFile + ";" +
+                @"Extended Properties='Excel 8.0;HDR=Yes;'";
+            // The file excel is handled as a database
+            using (OleDbConnection connection = new OleDbConnection(excelConnection))
             {
-                comm.Parameters.Clear();
-                for (int j = 1; j <= colCount; j++)
+                connection.Open();
+                dtSchema = connection.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, new object[] { null, null, null, "TABLE" });
+                Sheet1 = dtSchema.Rows[0].Field<string>("TABLE_NAME");
+                DataTable dt = new DataTable();
+                using (OleDbCommand cmd = new OleDbCommand("select * from [" + Sheet1 + "]", connection))
                 {
-                    if (j == 1)
-                        Console.Write("\r\n");
-                    if (xlRange.Cells[i, j] != null && xlRange.Cells[i, j].Value2 != null)
+                    using (OleDbDataReader rdr = cmd.ExecuteReader())
                     {
-                        if (j == 1)
-                        {
-                            String campo = xlRange.Cells[i, j].Value2.ToString();
-                            comm.Parameters.Add("@codiceBarre", campo);
-                            Console.Write(campo + "\t");
-                        }
-                        else if (j == 2)
-                        {
-                            String campo = xlRange.Cells[i, j].Value2.ToString();
-                            comm.Parameters.Add("@descrizione", campo);
-                            Console.Write(campo + "\t");
-                        }
-                        else if (j == 3)
-                        {
-                            float campo = (float)xlRange.Cells[i, j].Value2;
-                            comm.Parameters.Add("@diametro", campo);
-                            Console.Write(campo.ToString() + "\t");
-                        }
-                        else if (j == 4)
-                        {
-                            float campo = (float)xlRange.Cells[i, j].Value2;
-                            comm.Parameters.Add("@peso", campo);
-                            Console.Write(campo.ToString() + "\t");
-                        }
-                        else
-                        {
-                            float campo = (float)xlRange.Cells[i, j].Value2;
-                            comm.Parameters.Add("@lunghezza", campo);
-                            Console.Write(campo.ToString() + "\t");
-                        }
+                        dt.Load(rdr);
                     }
                 }
-                if (conn != null && conn.State == ConnectionState.Closed)
-                    conn.Open();
-                try
+                foreach (DataRow dr in dt.Rows)
                 {
-                    int result = comm.ExecuteNonQuery();
-                    if (result < 0)
+                    comm.Parameters.Clear();                    
+                    try
                     {
-                        Console.WriteLine("Errore nell'inserimento dei raw material: result = " + result);
+                        comm.Parameters.AddWithValue("@codiceBarre", dr["codiceBarre"]);
+                        comm.Parameters.AddWithValue("@descrizione", dr["descrizione"]);
+                        comm.Parameters.AddWithValue("@diametro", dr["diametro"]);
+                        comm.Parameters.AddWithValue("@peso", dr["peso"]);
+                        comm.Parameters.AddWithValue("@lunghezza", dr["lunghezza"]);
+
+                        if (conn != null && conn.State == ConnectionState.Closed)
+                            conn.Open();
+                        try
+                        {
+                            int result = comm.ExecuteNonQuery();
+                            if (result < 0)
+                            {
+                                Console.WriteLine("Errore nell'inserimento dei raw material: result = " + result);
+                            }
+                        }
+                        catch (SqlException e)
+                        {
+                            Console.WriteLine(e.ToString());
+                            Console.WriteLine("Riga nel file dei raw material vuota o non valida");
+                        }
                     }
-                }
-                catch (SqlException e)
-                {
-                    Console.WriteLine(e.ToString());
+                    catch (ArgumentException e)
+                    {
+                        errorString = "formattazione";
+                    }
                 }
             }
+        }
 
-            //cleanup
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-
-            //rule of thumb for releasing com objects:
-            //  never use two dots, all COM objects must be referenced and released individually
-            //  ex: [somthing].[something].[something] is bad
-
-            //release com objects to fully kill excel process from running in the background
-            Marshal.ReleaseComObject(xlRange);
-            Marshal.ReleaseComObject(xlWorksheet);
-
-            //close and release
-            xlWorkbook.Close();
-            Marshal.ReleaseComObject(xlWorkbook);
-
-            //quit and release
-            xlApp.Quit();
-            Marshal.ReleaseComObject(xlApp);
-
-            Console.WriteLine("Lettura e salvattagio raw material completata");
-            _signalError.Set();
+        public String GetErrorString()
+        {
+            return errorString;
         }
     }
 }

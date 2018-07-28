@@ -52,6 +52,7 @@
                 </StackPanel>
             </Grid>
             <Button x:Name="seeFinishedProducts" Content="Visualizza ordini conclusi" Width="150" Height="40" HorizontalAlignment="Center" VerticalAlignment="Bottom" Click="seeFinishedProducts_Click"/>
+            <Button x:Name="seeError" Content="Ci sono degli errori su alcune macchine" Width="250" HorizontalAlignment="left" Margin="0 15 0 0" Click="seeError_Click" />
         </StackPanel>
     </Border>
 </Window>

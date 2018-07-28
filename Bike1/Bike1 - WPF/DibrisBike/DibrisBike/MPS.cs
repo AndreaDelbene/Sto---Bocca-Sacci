@@ -6,6 +6,8 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows;
+using System.Windows.Media;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace DibrisBike
@@ -16,6 +18,7 @@ namespace DibrisBike
         private bool flagModif = false;
         private DataTable dtSchema;
         private string Sheet1;
+        private string errorString = null;
 
         public MPS()
         {
@@ -203,14 +206,13 @@ namespace DibrisBike
             string excelConnection =
                 @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source="+pathToFile+";" +
                 @"Extended Properties='Excel 8.0;HDR=Yes;'";
-
+            // The file excel is handled as a database
             using(OleDbConnection connection = new OleDbConnection(excelConnection))
             {
                 connection.Open();
                 dtSchema = connection.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, new object[] { null, null, null, "TABLE" });
                 Sheet1 = dtSchema.Rows[0].Field<string>("TABLE_NAME");
                 DataTable dt = new DataTable();
-                //OleDbCommand command = new OleDbCommand("select * from ["+Sheet1+"]", connection);
                     using (OleDbCommand cmd = new OleDbCommand("select * from [" + Sheet1 + "]", connection))
                     {
                         using (OleDbDataReader rdr = cmd.ExecuteReader())
@@ -221,38 +223,46 @@ namespace DibrisBike
                 foreach (DataRow dr in dt.Rows)
                 {
                     comm.Parameters.Clear();
-                    Console.WriteLine();
-                    foreach (var item in dr.ItemArray)
-                    {
-                        Console.Write(item + "\t");
-                    }
-                    comm.Parameters.AddWithValue("@dueDate", dr[0]);
-                    comm.Parameters.AddWithValue("@quantita", dr[1]);
-                    comm.Parameters.AddWithValue("@tipoTelaio", dr[2]);
-                    comm.Parameters.AddWithValue("@colore", dr[3]);
-                    comm.Parameters.AddWithValue("@linea", dr[4]);
-                    comm.Parameters.AddWithValue("@priorita", dr[5]);
-                    comm.Parameters.AddWithValue("@running", dr[6]);
-
-                    comm.Parameters.AddWithValue("@startDate", DateTime.Now);
-                    comm.Parameters.AddWithValue("@modified", Int32.Parse("0"));
-
-                    if (conn != null && conn.State == ConnectionState.Closed)
-                        conn.Open();
                     try
                     {
-                        int result = comm.ExecuteNonQuery();
-                        if (result < 0)
+                        comm.Parameters.AddWithValue("@dueDate", dr["dueDate"]);
+                        comm.Parameters.AddWithValue("@quantita", dr["quantita"]);
+                        comm.Parameters.AddWithValue("@tipoTelaio", dr["tipoTelaio"]);
+                        comm.Parameters.AddWithValue("@colore", dr["colore"]);
+                        comm.Parameters.AddWithValue("@linea", dr["linea"]);
+                        comm.Parameters.AddWithValue("@priorita", dr["priorita"]);
+                        comm.Parameters.AddWithValue("@running", dr["running"]);
+
+                        comm.Parameters.AddWithValue("@startDate", DateTime.Now);
+                        comm.Parameters.AddWithValue("@modified", Int32.Parse("0"));
+
+                        if (conn != null && conn.State == ConnectionState.Closed)
+                            conn.Open();
+                        try
                         {
-                            Console.WriteLine("Errore nell'inserimento dei raw material: result = " + result);
+                            int result = comm.ExecuteNonQuery();
+                            if (result < 0)
+                            {
+                                Console.WriteLine("\nErrore nell'inserimento dei raw material: result = " + result);
+                            }
+                        }
+                        catch (SqlException e)
+                        {
+                            Console.WriteLine("\nRiga nell'MPS vuota o non valida");
                         }
                     }
-                    catch (SqlException e)
+                    catch (ArgumentException e)
                     {
-                        Console.WriteLine("Riga nell'MPS vuota o non valida");
+                        errorString = "formattazione";
+                        break;
                     }
                 }
             }
+        }
+
+        public String GetErrorString()
+        {
+            return errorString;
         }
     }
 }

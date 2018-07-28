@@ -62,6 +62,9 @@
     </ApplicationDefinition>
     <Compile Include="Assembling.cs" />
     <Compile Include="Drying.cs" />
+    <Compile Include="ErrorPage.xaml.cs">
+      <DependentUpon>ErrorPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FinishProductPage.xaml.cs">
       <DependentUpon>FinishProductPage.xaml</DependentUpon>
     </Compile>
@@ -76,6 +79,10 @@
     <Compile Include="RawMaterial.cs" />
     <Compile Include="Routing.cs" />
     <Compile Include="Welding.cs" />
+    <Page Include="ErrorPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

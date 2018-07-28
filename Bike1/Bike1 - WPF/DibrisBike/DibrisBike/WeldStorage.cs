@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Data;
 using System.Data.SqlClient;
 using System.Threading;
 
@@ -11,7 +12,7 @@ namespace DibrisBike
         {
         }
 
-        public void setAccumuloSald1(SqlConnection conn, ConcurrentQueue<object> _queueLC1, AutoResetEvent _signalLC1, ConcurrentQueue<object> _queueSald, AutoResetEvent _signalSald)
+        public void setAccumuloSald1(SqlConnection conn, ConcurrentQueue<object> _queueLC1, AutoResetEvent _signalLC1, ConcurrentQueue<object> _queueSald, AutoResetEvent _signalSald, AutoResetEvent _signalErrorLC1, AutoResetEvent _signalWaitErrorLC1, AutoResetEvent _signalFixLC1, ConcurrentQueue<Boolean> _queueBlockLC1)
         {
             while(true)
             {
@@ -48,7 +49,21 @@ namespace DibrisBike
                     comm.ExecuteNonQuery();
 
                     //sleep the Thread (simulating laser cut)
-                    Thread.Sleep(5000);
+                    // Simulating probability of error
+                    // signal to the thread that generate the error
+                    _signalWaitErrorLC1.Set();
+                    bool result = _signalErrorLC1.WaitOne(5000);
+                    if (result)
+                    {
+                        Boolean block;
+                        _queueBlockLC1.TryDequeue(out block);
+                        if (block)
+                        {
+                            // if the error blocks the system then wait until repair
+                            _signalFixLC1.WaitOne();
+                        }
+                    }
+                    Console.WriteLine(result);
 
                     //second cut
                     query = "INSERT INTO dbo.processirt (type, date, value) VALUES (@type, @date, @value)";
@@ -61,7 +76,9 @@ namespace DibrisBike
                     comm.ExecuteNonQuery();
 
                     //sleep the Thread (simulating laser cut)
-                    Thread.Sleep(5000);
+                    _signalWaitErrorLC1.Set();
+                    result = _signalErrorLC1.WaitOne(5000);
+                    Console.WriteLine(result);
 
                     //transponting the tubes from the storage to the welder (saldatrice)
                     //Console.WriteLine("STORING FOR WELDING");
