@@ -52,10 +52,13 @@ namespace DibrisBike
                     //sleep the Thread (simulating laser cut)
                     // Simulating probability of error
                     // signal to the thread that generates the error
+                    //generating a timer
                     Stopwatch stopWatch = new Stopwatch();
+                    //and starting it
                     stopWatch.Start();
                     _signalWaitErrorLC1.Set();
                     bool result = _signalErrorLC1.WaitOne(5000);
+                    //let's stop it now.
                     stopWatch.Stop();
                     if (result)
                     {
@@ -67,8 +70,10 @@ namespace DibrisBike
                             _signalFixLC1.WaitOne();
                         }
                     }
+                    //if the elapsed time is less than the laser cut working time
                     if (stopWatch.Elapsed.TotalMilliseconds <= 5000.0)
                     {
+                        //let's wait until it finish to work
                         Thread.Sleep(Convert.ToInt32(stopWatch.Elapsed.TotalMilliseconds));
                     }
 
