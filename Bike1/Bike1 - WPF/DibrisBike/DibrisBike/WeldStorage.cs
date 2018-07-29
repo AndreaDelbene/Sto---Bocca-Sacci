@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Threading;
 
 namespace DibrisBike
@@ -51,8 +52,11 @@ namespace DibrisBike
                     //sleep the Thread (simulating laser cut)
                     // Simulating probability of error
                     // signal to the thread that generates the error
+                    Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();
                     _signalWaitErrorLC1.Set();
                     bool result = _signalErrorLC1.WaitOne(5000);
+                    stopWatch.Stop();
                     if (result)
                     {
                         Boolean block;
@@ -62,6 +66,10 @@ namespace DibrisBike
                             // if the error blocks the system then wait until repair
                             _signalFixLC1.WaitOne();
                         }
+                    }
+                    if (stopWatch.Elapsed.TotalMilliseconds <= 5000.0)
+                    {
+                        Thread.Sleep(Convert.ToInt32(stopWatch.Elapsed.TotalMilliseconds));
                     }
 
                     //second cut
@@ -76,7 +84,10 @@ namespace DibrisBike
 
                     //sleep the Thread (simulating laser cut)
                     _signalWaitErrorLC1.Set();
+                    stopWatch = new Stopwatch();
+                    stopWatch.Start();
                     result = _signalErrorLC1.WaitOne(5000);
+                    stopWatch.Stop();
                     if (result)
                     {
                         Boolean block;
@@ -87,7 +98,10 @@ namespace DibrisBike
                             _signalFixLC1.WaitOne();
                         }
                     }
-                    Console.WriteLine(result);
+                    if(stopWatch.Elapsed.TotalMilliseconds <= 5000.0)
+                    {
+                        Thread.Sleep(Convert.ToInt32(stopWatch.Elapsed.TotalMilliseconds));
+                    }
 
                     //transponting the tubes from the storage to the welder (saldatrice)
                     //Console.WriteLine("STORING FOR WELDING");
