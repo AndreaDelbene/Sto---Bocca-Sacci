@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
-using System.Windows;
-using System.Windows.Media;
 
 namespace DibrisBike
 {
 
     class MPS
     {
-        private bool flagModif = false;
         private DataTable dtSchema;
         private string Sheet1;
         private string errorString = null;
@@ -41,6 +39,10 @@ namespace DibrisBike
                 string[] tipoTelaio, colore, linea;
                 DateTime[] startDate, dueDate;
                 Byte[] running, modified;
+                List<int> idToPass = new List<int>();
+                List<int> quantitaTubiToPass = new List<int>();
+                List<string> lineaToPass = new List<string>();
+                List<int> quantitaToPass = new List<int>();
 
                 //if we have more than one order, they may have different priorities
                 priorita = (from DataRow r in table.Rows select (int)r["priorita"]).ToArray();
@@ -94,7 +96,7 @@ namespace DibrisBike
 
                         reader.Read();
 
-                        int quantitaOld= (int)reader["quantitaDesiderata"];
+                        int quantitaOld = (int)reader["quantitaDesiderata"];
 
                         reader.Close();
 
@@ -106,20 +108,7 @@ namespace DibrisBike
                         comm.Parameters.AddWithValue("@idLotto", id[i]);
 
                         comm.ExecuteNonQuery();
-
-                        //and setting the quantity to produce = new - old
-                        quantita[i] = quantita[i] - quantitaOld;
-                        //if we decided to decrement the quantity, then we should not send any infos to steps that come next
-                        if (quantita[i] < 0)
-                            flagModif = true;
-
-                        //and let's update the 'mps' table too
-                        query = "UPDATE dbo.mps SET modified = 0 WHERE id = @idLotto";
-                        comm = new SqlCommand(query, conn);
-                        comm.Parameters.Clear();
-                        comm.Parameters.AddWithValue("@idLotto", id[i]);
-
-                        comm.ExecuteNonQuery();
+                        
                         
                         //and I check how many stuff I need for that kind of bike
                         query = "SELECT quantitaTubi FROM dbo.ricette WHERE tipoTelaio = @tipoTelaio";
@@ -134,6 +123,29 @@ namespace DibrisBike
                         quantitaTubi[i] = (int)reader["quantitaTubi"];
 
                         reader.Close();
+
+                        //and setting the quantity to produce = new - old
+                        int quantitaTemp = quantita[i] - quantitaOld;
+                        //if we decided to increment the quantity, then we should send infos to steps that come next, otherwhise we don't
+                        if (quantitaTemp > 0)
+                        {
+                            //let's update the new quantity
+                            quantita[i] = quantita[i] - quantitaOld;
+                            //and add everything to the lists that will be passed
+                            quantitaToPass.Add(quantita[i]);
+                            idToPass.Add(id[i]);
+                            quantitaTubiToPass.Add(quantitaTubi[i]);
+                            lineaToPass.Add(linea[i]);
+                        }
+
+                        //and let's update the 'mps' table too
+                        query = "UPDATE dbo.mps SET modified = 0, quantita = @quantita WHERE id = @idLotto";
+                        comm = new SqlCommand(query, conn);
+                        comm.Parameters.Clear();
+                        comm.Parameters.AddWithValue("@idLotto", id[i]);
+                        comm.Parameters.AddWithValue("@quantita", quantita[i]);
+
+                        comm.ExecuteNonQuery();
                     }
                     else
                     {
@@ -179,15 +191,20 @@ namespace DibrisBike
                         quantitaTubi[i] = (int)reader["quantitaTubi"];
 
                         reader.Close();
+                        //inserting the stuff into the lists to send after
+                        quantitaToPass.Add(quantita[i]);
+                        idToPass.Add(id[i]);
+                        quantitaTubiToPass.Add(quantitaTubi[i]);
+                        lineaToPass.Add(linea[i]);
                     }
                 }
-                if (id.Length > 0 && !flagModif)
+                if (idToPass.Count > 0)
                 {
                     //queue=FIFO, i save in it the amount of ids, tubes and other stuff.
-                    _queue.Enqueue(id);
-                    _queue.Enqueue(quantitaTubi);
-                    _queue.Enqueue(linea);
-                    _queue.Enqueue(quantita);
+                    _queue.Enqueue(idToPass.ToArray());
+                    _queue.Enqueue(quantitaTubiToPass.ToArray());
+                    _queue.Enqueue(lineaToPass.ToArray());
+                    _queue.Enqueue(quantitaToPass.ToArray());
                     _signal.Set();
                     //the stuff passes under the Quality Control Area
                     //Console.WriteLine("ACQ");
@@ -248,7 +265,7 @@ namespace DibrisBike
                         }
                         catch (SqlException e)
                         {
-                            Console.WriteLine("\nRiga nell'MPS vuota o non valida");
+                            //Console.WriteLine("\nRiga nell'MPS vuota o non valida");
                         }
                     }
                     catch (ArgumentException e)
