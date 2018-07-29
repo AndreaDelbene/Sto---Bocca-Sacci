@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Threading;
 
 namespace DibrisBike
@@ -52,7 +53,15 @@ namespace DibrisBike
                     // Simulating probability of error
                     // signal to the thread that generates the error
                     _signalWaitErrorLC1.Set();
+                    Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();
                     bool result = _signalErrorLC1.WaitOne(5000);
+                    stopWatch.Stop();
+                    if(stopWatch.Elapsed.TotalMilliseconds <= 5000)
+                    {
+                        int sleepTime = 5000 - (int)stopWatch.Elapsed.TotalMilliseconds;
+                        Thread.Sleep(sleepTime);
+                    }
                     if (result)
                     {
                         Boolean block;
