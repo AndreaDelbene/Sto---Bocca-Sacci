@@ -21,6 +21,10 @@ namespace DibrisBike
         SqlConnection conn;
         private String query;
         private SqlCommand comm;
+        private String query1;
+        private SqlCommand comm1;
+        private String query2;
+        private SqlCommand comm2;
         private AutoResetEvent _signalError;
         AutoResetEvent _signalErrorRM2;
         private DataTable dtSchema;
