@@ -50,7 +50,7 @@ namespace DibrisBike
 
                     //sleep the Thread (simulating laser cut)
                     // Simulating probability of error
-                    // signal to the thread that generate the error
+                    // signal to the thread that generates the error
                     _signalWaitErrorLC1.Set();
                     bool result = _signalErrorLC1.WaitOne(5000);
                     if (result)
@@ -77,6 +77,16 @@ namespace DibrisBike
                     //sleep the Thread (simulating laser cut)
                     _signalWaitErrorLC1.Set();
                     result = _signalErrorLC1.WaitOne(5000);
+                    if (result)
+                    {
+                        Boolean block;
+                        _queueBlockLC1.TryDequeue(out block);
+                        if (block)
+                        {
+                            // if the error blocks the system then wait until repair
+                            _signalFixLC1.WaitOne();
+                        }
+                    }
                     Console.WriteLine(result);
 
                     //transponting the tubes from the storage to the welder (saldatrice)
