@@ -54,9 +54,8 @@ namespace DibrisBike
                     // signal to the thread that generates the error
                     Stopwatch stopWatch = new Stopwatch();
                     stopWatch.Start();
+
                     _signalWaitErrorLC1.Set();
-                    Stopwatch stopWatch = new Stopwatch();
-                    stopWatch.Start();
                     bool result = _signalErrorLC1.WaitOne(5000);
                     stopWatch.Stop();
                     if (result)

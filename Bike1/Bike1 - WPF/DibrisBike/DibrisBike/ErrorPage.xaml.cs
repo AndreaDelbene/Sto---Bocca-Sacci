@@ -27,8 +27,6 @@ namespace DibrisBike
         private string index;
         private DataTable table;
         private SqlConnection conn;
-        private int idLotto;
-        private int produced, max;
         private int id;
         private string machineType;
         private AutoResetEvent _signalFixLC1;
@@ -41,46 +39,61 @@ namespace DibrisBike
             //SIMONE-PC\\SQLEXPRESS;
             //LAPTOP-DT8KB2TQ;
             conn.ConnectionString =
-            "Server=LAPTOP-DT8KB2TQ;" +
+            "Server=SIMONE-PC\\SQLEXPRESS;" +
             "Database=stodb;" +
             "Integrated Security=True;" +
             "MultipleActiveResultSets=true;";
 
             conn.Open();
 
-            FillDataGrid(conn);
             SetFieldsComboBox();
 
+            Thread thread = new Thread(new ThreadStart(FillDataGrid));
+
             this._signalFixLC1 = _signalFixLC1;
+
+            thread.Start();
         }
 
         private void SetFieldsComboBox()
         {
-            this.fields.ItemsSource = list;
-            this.fields.SelectedIndex = 0;
+            String query = "SELECT * FROM dbo.allarmirt";
+            SqlCommand comm = new SqlCommand(query, conn);
+            comm.ExecuteNonQuery();
+
+            SqlDataAdapter adapter = new SqlDataAdapter(comm);
+            table = new DataTable();
+            adapter.Fill(table);
+
+            // Get columns name
+            for (int i = 0; i < table.Columns.Count; i++)
+            {
+                list.Add(table.Columns[i].ColumnName.ToString());
+            }
+
+            fields.ItemsSource = list;
+            fields.SelectedIndex = 0;
         }
 
-        private void FillDataGrid(SqlConnection conn)
+        private void FillDataGrid()
         {
             if (conn != null && conn.State == ConnectionState.Closed)
                 conn.Open();
             String query = "SELECT * FROM dbo.allarmirt WHERE solved = 0";
             SqlCommand comm = new SqlCommand(query, conn);
 
-            comm.ExecuteNonQuery();
-
-            SqlDataAdapter adapter = new SqlDataAdapter(comm);
-            table = new DataTable();
-            adapter.Fill(table);
-            errorGrid.ItemsSource = table.DefaultView;
-            GetStatoordiniColumnsNames(table);
-        }
-
-        private void GetStatoordiniColumnsNames(DataTable table)
-        {
-            for (int i = 0; i < table.Columns.Count; i++)
+            while (true)
             {
-                list.Add(table.Columns[i].ColumnName.ToString());
+                this.Dispatcher.Invoke(() =>
+                {
+                    comm.ExecuteNonQuery();
+
+                    SqlDataAdapter adapter = new SqlDataAdapter(comm);
+                    table = new DataTable();
+                    adapter.Fill(table);
+                    errorGrid.ItemsSource = table.DefaultView;
+                });
+                Thread.Sleep(500);
             }
         }
 
