@@ -233,6 +233,44 @@ namespace DibrisBike
             }
         }
 
+        private void boxesChooser_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.Multiselect = false;
+            fileDialog.Filter = "Excel File|*.xls";
+            fileDialog.DefaultExt = ".xls";
+            Nullable<bool> dialogOk = fileDialog.ShowDialog();
+
+            String boxesFilePath = string.Empty;
+            if (dialogOk == true)
+            {
+                boxesFilePath = fileDialog.FileName;
+                boxesPathLabel.Content = boxesFilePath;
+                Thread thread = new Thread(new ThreadStart(() =>
+                {
+                    getBoxes(boxesFilePath);
+                }));
+                thread.Start();
+            }
+        }
+
+        private void getBoxes(String path)
+        {
+            RawMaterial rawMaterial = new RawMaterial(conn, _signalError, _signalErrorRM2);
+            rawMaterial.GetBoxesFromFile(path);
+            if (rawMaterial.GetErrorString() != null)
+            {
+                if (rawMaterial.GetErrorString().Equals("formattazione"))
+                {
+                    updateLabel(boxesPathLabel, "Il file selezionato non presenta una formattazione corretta");
+                }
+            }
+            else
+            {
+                updateLabel(boxesPathLabel, "Scatole caricate con successo");
+            }
+        }
+
         private void updateLabel(Label label, string message)
         {
             Action action = () => label.Content = message;
@@ -323,9 +361,7 @@ namespace DibrisBike
             while (true)
             {
                 _signalWaitErrorLC1.WaitOne();
-                Console.WriteLine("Ricevuto signal");
                 int n = rnd.Next(0,100);
-                Console.WriteLine("Random number " + n);
                 if(n < 5)
                 {
                     _signalErrorLC1.Set();

@@ -21,6 +21,10 @@ namespace DibrisBike
         SqlConnection conn;
         private String query;
         private SqlCommand comm;
+        private string query1;
+        private SqlCommand comm1;
+        private string query2;
+        private SqlCommand comm2;
         private AutoResetEvent _signalError;
         AutoResetEvent _signalErrorRM2;
         private DataTable dtSchema;
@@ -125,7 +129,7 @@ namespace DibrisBike
                     }
                 }
                 Random r = new Random();
-                int val;
+                int val, val2;
                 foreach (DataRow dr in dt.Rows)
                 {
                     comm1.Parameters.Clear();
@@ -149,9 +153,10 @@ namespace DibrisBike
                             else
                             {
                                 val = r.Next();
+                                val2 = r.Next();
                                 comm2.Parameters.Clear();
                                 comm2.Parameters.AddWithValue("@x", val);
-                                comm2.Parameters.AddWithValue("@y", val);
+                                comm2.Parameters.AddWithValue("@y", val2);
                                 comm2.Parameters.AddWithValue("@z", "A");
                                 comm2.Parameters.AddWithValue("@idScatola", dr["id"]);
 

@@ -63,7 +63,6 @@ namespace DibrisBike
                             _signalFixLC1.WaitOne();
                         }
                     }
-                    Console.WriteLine(result);
 
                     //second cut
                     query = "INSERT INTO dbo.processirt (type, date, value) VALUES (@type, @date, @value)";
