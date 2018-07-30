@@ -54,6 +54,7 @@ namespace DibrisBike
         static private readonly AutoResetEvent _signalAssemb = new AutoResetEvent(false);
         static private readonly AutoResetEvent _signalErrorEssic = new AutoResetEvent(false);
         //signal for LC1 Errors
+        // TODO build the same variable for each machine 
         static private readonly AutoResetEvent _signalErrorLC1 = new AutoResetEvent(false);    // signal of error
         static private readonly AutoResetEvent _signalWaitErrorLC1 = new AutoResetEvent(false);  // signal it waits for an error
         static private readonly AutoResetEvent _signalFixLC1 = new AutoResetEvent(false);  // signal that fix the error
