@@ -29,6 +29,7 @@ namespace DibrisBike
         private SqlConnection conn;
         private int idLotto;
         private int produced, max;
+        private bool flag;
 
         public ModifyOrdiniPage()
         {
@@ -47,6 +48,7 @@ namespace DibrisBike
 
             FillDataGrid(conn);
             SetFieldsComboBox();
+            flag = false;
     }
 
         private void SetFieldsComboBox()
@@ -114,7 +116,7 @@ namespace DibrisBike
                 int newValue = Int32.Parse(newValueTextBox.Text);
                 if (newValue > 0)
                 {
-
+                    flag = false;
                     // Calculating how many items are currently in the queue
                     string queryNumberOfProduct = "SELECT idPezzo FROM dbo.routing WHERE idLotto=(@idLotto) ORDER BY idPezzo ASC";
                     SqlCommand comm = new SqlCommand(queryNumberOfProduct, conn);
@@ -133,12 +135,20 @@ namespace DibrisBike
                         number.Trim(' ');
                         numList.Add(number);
                     }
-                    List<int> idPezziList = numList.Select(int.Parse).ToList();
-                    int producing = idPezziList.Max();
-                    Console.WriteLine("Telai in produzione del lotto " + idLotto + ": " + producing);
-
-
-                    if (newValue > producing)  // check if the value is less then the produced item
+                    int producing = 0;
+                    //if we modify the order before the routing table will be updated, that will generate exception
+                    try
+                    {
+                        List<int> idPezziList = numList.Select(int.Parse).ToList();
+                        producing = idPezziList.Max();
+                        //Console.WriteLine("Telai in produzione del lotto " + idLotto + ": " + producing);
+                    }
+                    catch
+                    {
+                        flag = true;
+                    }
+                    //and if it does, let's sest the new value.
+                    if (flag || newValue > producing)  // check if the value is less then the produced item
                     {
                         /*String query = "UPDATE dbo.statoordini SET quantitaDesiderata=(@newQuantita) WHERE idLotto=(@idLotto)";
                         SqlCommand comm = new SqlCommand(query, conn);

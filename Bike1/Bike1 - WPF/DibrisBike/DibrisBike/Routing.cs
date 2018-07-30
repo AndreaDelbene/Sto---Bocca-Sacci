@@ -50,7 +50,7 @@ namespace DibrisBike
 
                         comm.ExecuteNonQuery();
                     }
-                    
+
 
                     for (int i = 0; i < idLotto.Length; i++)
                     {
@@ -101,7 +101,6 @@ namespace DibrisBike
                                 query = "SELECT tipoTelaio FROM dbo.mps WHERE id = @idLotto";
                                 comm = new SqlCommand(query, conn);
                                 SqlDataReader reader;
-
                                 comm.Parameters.Clear();
                                 comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
 
@@ -322,8 +321,24 @@ namespace DibrisBike
                                 _signalErrorRM.Set();
                                 // wait for new raw material
                                 _signalError.WaitOne();
-                                Console.WriteLine("NEW RAW MATERIAL RECEIVED");
+                                Console.WriteLine("NEW RAW MATERIALS RECEIVED");
                             }
+                            //at the end of the routing for this frame, we check whenever the quantity has decreased or not
+                            query = "SELECT quantitaDesiderata FROM dbo.statoordini WHERE idLotto = @idLotto";
+                            comm = new SqlCommand(query, conn);
+                            SqlDataReader reader1;
+                            comm.Parameters.Clear();
+                            comm.Parameters.AddWithValue("@idLotto", idLotto[i]);
+
+                            reader1 = comm.ExecuteReader();
+                            reader1.Read();
+                            int quantNew = (int)reader1["quantitaDesiderata"];
+                            //and if it is, then let's set the new quantity;
+                            if (quantNew < quantitaOrdine[i])
+                            {
+                                quantitaOrdine[i] = quantNew;
+                            }
+                            reader1.Close();
                         }
                     }
                     //sleeping the thread for 2 secs
